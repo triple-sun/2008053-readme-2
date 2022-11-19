@@ -1,16 +1,18 @@
+import { fillEntity } from '@readme/core';
 import {User} from '@readme/shared-types';
 import {genSalt, hash, compare} from 'bcrypt';
 import {SALT_ROUNDS} from './user.const';
 
 export class UserEntity implements User {
   public _id: string;
-  public avatar: string;
+  public avatar?: string;
   public email: string;
   public name: string;
+  public subscriptions: string[];
   public passwordHash: string;
 
   constructor(user: User) {
-     this.fillEntity(user);
+     fillEntity<User, UserEntity>(user, this);
   }
 
   public async setPassword(password: string): Promise<UserEntity> {
@@ -23,16 +25,7 @@ export class UserEntity implements User {
     return compare(password, this.passwordHash);
   }
 
-
   public toObject() {
     return {...this};
-  }
-
-  public fillEntity(user: User) {
-    this._id = user._id;
-    this.avatar = user.avatar;
-    this.email = user.email;
-    this.name = user.name;
-    this.passwordHash = user.passwordHash;
   }
 }

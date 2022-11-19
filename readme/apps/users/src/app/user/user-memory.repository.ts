@@ -14,7 +14,7 @@ export class UserMemoryRepository implements CRUDRepo<UserEntity, string, User> 
     return {...entry};
   }
 
-  public async findById(id: string): Promise<User> {
+  public async findByID(id: string): Promise<User> {
     if (this.repository[id]) {
       return {...this.repository[id]};
     }
@@ -33,12 +33,18 @@ export class UserMemoryRepository implements CRUDRepo<UserEntity, string, User> 
     return { ...existUser};
   }
 
+  public async subscribe(id, update): Promise<string[]> {
+    this.repository[id].subscriptions = update
+
+    return this.repository[id].subscriptions;
+  }
+
   public async destroy(id: string): Promise<void> {
     delete this.repository[id];
   }
 
   public async update(id: string, item: UserEntity): Promise<User> {
     this.repository[id] = {...item.toObject(), _id: id};
-    return this.findById(id);
+    return this.findByID(id);
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Field } from '@readme/core';
+import { ParamName } from '@readme/core';
 import {Expose} from 'class-transformer';
 import { APIDesc, APIExample } from '../auth.enum';
 
@@ -8,7 +8,7 @@ export class UserRDO {
     description: APIDesc.ID,
     example: APIExample.ID
   })
-  @Expose({ name: Field.ObjectID})
+  @Expose({ name: ParamName.ObjectID})
   public id: string;
 
   @ApiProperty({

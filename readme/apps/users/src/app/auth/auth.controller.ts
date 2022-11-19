@@ -1,12 +1,14 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { fillObject, Path, Prefix, Field } from '@readme/core';
+import { fillObject, Path, Prefix, ParamName, User } from '@readme/core';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserRDO } from './rdo/user.rdo';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserLoggedRDO } from './rdo/user-logged.rdo';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthError, AuthInfo } from './auth.enum';
+import { UserUpdateDTO } from './dto/user-update.dto';
+import { UserSubRDO } from './rdo/user-subs.rdo';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -15,7 +17,7 @@ export class AuthController {
     private readonly authService: AuthService
   ) {}
 
-  @Post(Path.Regster)
+  @Post(Path.Register)
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: AuthInfo.Register
@@ -38,7 +40,7 @@ export class AuthController {
     description: AuthError.Login,
   })
   async login(@Body() dto: UserLoginDTO) {
-  const user = await this.authService.verifyUser(dto);
+  const user = await this.authService.login(dto);
 
   return fillObject(UserLoggedRDO, user);
 }
@@ -49,9 +51,23 @@ export class AuthController {
    status: HttpStatus.OK,
    description: AuthInfo.Found
   })
-  async show(@Param(Field.ID) id: string) {
+  async show(@Param(Param.ID) id: string) {
     const user = await this.authService.getUser(id);
 
     return fillObject(UserRDO, user);
   }
+
+  @Post(Path.ID)
+  @ApiResponse({
+   type: UserSubRDO,
+   status: HttpStatus.OK,
+   description: AuthInfo.Found
+  })
+  async toggleSub(@Param(Param.ID) targetID: string, @User(Param.ID) userID: string) {
+    const user = await this.authService.toggleSub(userID, targetID);
+
+    return fillObject(UserRDO, user);
+  }
+
+
 }

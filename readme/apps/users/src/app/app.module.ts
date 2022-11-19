@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Path, PrivateRouteMiddleware } from '@readme/core';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
@@ -6,5 +7,12 @@ import { UserModule } from './user/user.module';
   imports: [AuthModule, UserModule],
   controllers: [],
   providers: [],
+  exports: [UserModule, AuthModule]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(PrivateRouteMiddleware)
+      .forRoutes(Path.Upload, Path.Subscribe);
+  }
+}
