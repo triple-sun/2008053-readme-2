@@ -5,17 +5,30 @@
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Desc, Info, Path, Prefix, Title, Version } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
+  const globalPrefix = Prefix.API;
+
+  const config = new DocumentBuilder()
+    .setTitle(Title.Users)
+    .setDescription(Desc.Users)
+    .setVersion(Version.Users)
+    .build();
+
   app.setGlobalPrefix(globalPrefix);
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(Path.Spec, app, document)
+
   const port = process.env.PORT || 3333;
   await app.listen(port);
+
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `${Info.AppRun}${port}/${globalPrefix}`
   );
 }
 
