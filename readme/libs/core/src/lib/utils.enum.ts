@@ -1,8 +1,8 @@
 export enum Prefix {
   API = 'api',
   Auth = 'auth',
-  Comment = 'comment',
-  Post = 'post',
+  Comments = 'comments',
+  Posts = 'posts',
   User = 'user'
 }
 

@@ -10,15 +10,15 @@ import { PostFeedRDO } from './rdo/post-feed.rdo';
 import { PostUpdateDTO } from './dto/post-update.dto';
 import { CommentService } from '../comment/comment.service';
 
-@ApiTags(Prefix.Post)
-@Controller(Prefix.Post)
+@ApiTags(Prefix.Posts)
+@Controller(Prefix.Posts)
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly commentService: CommentService,
   ) {}
 
-  @Post(Path.Posts)
+  @Post()
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: PostInfo.Created
@@ -29,7 +29,7 @@ export class PostController {
     return fillObject(PostRDO, post);
   }
 
-  @Get(Path.Posts)
+  @Get()
   @ApiResponse({
     type: PostFeedRDO,
     status: HttpStatus.OK,

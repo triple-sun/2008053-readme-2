@@ -8,14 +8,14 @@ import { CommentCreateDTO } from './dto/comment-create.dto';
 import { CommentFeedRDO } from './rdo/comment-feed.rdo';
 import { CommentRDO } from './rdo/comment.rdo';
 
-@ApiTags(Prefix.Comment)
-@Controller(Prefix.Comment)
+@ApiTags(Prefix.Comments)
+@Controller(Prefix.Comments)
 export class CommentController {
   constructor(
     private readonly commentService: CommentService,
   ) {}
 
-  @Post(`${Path.ID}/${Path.Comments}`)
+  @Post(`${Path.ID}`)
   @ApiResponse({
     type: CommentRDO,
     status: HttpStatus.CREATED,
@@ -27,7 +27,7 @@ export class CommentController {
     return fillObject(CommentRDO, comment);
   }
 
-  @Get(`${Path.ID}/${Path.Comments}`)
+  @Get(`${Path.ID}`)
   @ApiResponse({
     type: CommentFeedRDO,
     status: HttpStatus.OK,
@@ -37,12 +37,12 @@ export class CommentController {
   return this.commentService.findAllByPostID(postID)
 }
 
-  @Delete(`${Path.ID}/${Path.Comments}`)
+  @Delete(`${Path.ID}`)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(ParamName.ID) commentID: string, @User(ParamName.ID) userID: string) {
+  async delete(@Body() commentID: string, @User(ParamName.ID) userID: string) {
     return this.commentService.delete(commentID, userID);
   }
 }

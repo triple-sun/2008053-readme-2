@@ -22,7 +22,7 @@
    app.setGlobalPrefix(globalPrefix);
 
    const document = SwaggerModule.createDocument(app, config);
-   SwaggerModule.setup(Path.Blog, app, document)
+   SwaggerModule.setup(Path.Spec, app, document)
 
    const port = process.env.PORT || 3333;
    await app.listen(port);
