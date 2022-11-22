@@ -7,7 +7,6 @@ import { UserLoginDTO } from './dto/user-login.dto';
 import { UserLoggedRDO } from './rdo/user-logged.rdo';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthError, AuthInfo } from './auth.enum';
-import { UserUpdateDTO } from './dto/user-update.dto';
 import { UserSubRDO } from './rdo/user-subs.rdo';
 
 @ApiTags(Prefix.Auth)
@@ -51,7 +50,7 @@ export class AuthController {
    status: HttpStatus.OK,
    description: AuthInfo.Found
   })
-  async show(@Param(Param.ID) id: string) {
+  async show(@Param(ParamName.ID) id: string) {
     const user = await this.authService.getUser(id);
 
     return fillObject(UserRDO, user);
@@ -63,7 +62,7 @@ export class AuthController {
    status: HttpStatus.OK,
    description: AuthInfo.Found
   })
-  async toggleSub(@Param(Param.ID) targetID: string, @User(Param.ID) userID: string) {
+  async toggleSub(@Param(ParamName.ID) targetID: string, @User(ParamName.ID) userID: string) {
     const user = await this.authService.toggleSub(userID, targetID);
 
     return fillObject(UserRDO, user);
