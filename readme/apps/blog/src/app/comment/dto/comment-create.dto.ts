@@ -3,12 +3,6 @@ import { APIDesc, APIExample } from "../comment.enum";
 
 export class CommentCreateDTO {
   @ApiProperty({
-    description: APIDesc.CommentID,
-    example: APIExample.ID
-  })
-  public _id: string;
-
-  @ApiProperty({
     description: APIDesc.Text,
     example: APIExample.Text
   })

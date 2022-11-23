@@ -65,6 +65,21 @@ export class PostController {
     return fillObject(PostRDO, post);
   }
 
+  @Delete(Path.ID)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: PostInfo.Deleted
+  })
+  async delete(@Param(ParamName.ID) postID: string, @User(ParamName.ID) userID: string) {
+    await this.postService.delete(postID, userID)
+    await this.commentService.deleteAllByPostID(postID)
+
+    const updatedFeed = this.show(postID);
+
+    return fillObject(PostFeedRDO, updatedFeed)
+
+  }
+
   @Post(`${Path.ID}/${Path.Repost}`)
   @ApiResponse({
    type: PostRDO,
@@ -75,15 +90,5 @@ export class PostController {
     const post = await this.postService.repost(userID, postID);
 
     return fillObject(PostRDO, post);
-  }
-
-  @Delete(Path.ID)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: PostInfo.Deleted
-  })
-  async delete(@Param(ParamName.ID) postID: string, @User(ParamName.ID) userID: string) {
-    await this.postService.delete(postID, userID)
-    await this.commentService.deleteAllByPostID(postID)
   }
 }

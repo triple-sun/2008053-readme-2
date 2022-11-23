@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { APIDesc, APIExample } from "../auth.enum";
+import { APIDesc, APIExample } from "../../auth/auth.enum";
 
 export class UserLoginDTO {
   @ApiProperty({

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {CRUDRepo} from '@readme/core';
+import * as crypto from 'crypto';
 import {User} from '@readme/shared-types';
 import {UserEntity} from './user.entity';
 
@@ -31,12 +32,6 @@ export class UserMemoryRepository implements CRUDRepo<UserEntity, string, User> 
     }
 
     return { ...existUser};
-  }
-
-  public async subscribe(id, update): Promise<string[]> {
-    this.repository[id].subscriptions = update
-
-    return this.repository[id].subscriptions;
   }
 
   public async destroy(id: string): Promise<void> {

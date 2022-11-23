@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {CRUDRepo} from '@readme/core';
 import { Comment } from '@readme/shared-types';
 import { CommentEntity } from './comment.entity';
+import * as crypto from 'crypto';
+
 
 @Injectable()
 export class CommentMemoryRepository implements CRUDRepo<CommentEntity, string, Comment> {

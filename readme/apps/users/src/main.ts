@@ -22,7 +22,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(Path.Spec, app, document)
+  SwaggerModule.setup(Path.SpecAuth, app, document)
 
   const port = process.env.PORT || 3333;
   await app.listen(port);

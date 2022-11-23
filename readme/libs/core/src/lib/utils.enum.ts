@@ -11,11 +11,13 @@ export enum Path {
   Posts = 'posts',
   Comments = 'comments',
   Register = 'register',
-  Spec = 'spec',
+  SpecAuth = 'spec-auth',
+  SpecBlog = 'spec-blog',
   Login = 'login',
   ID = ':id',
   Upload = 'upload',
   Subscribe = 'sub',
+  Subscriptions = 'subs',
   Users = 'users',
   Repost = 'repost'
 }

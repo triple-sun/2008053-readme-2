@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import {CRUDRepo} from '@readme/core';
 import { Post } from '@readme/shared-types';
 import { PostEntity } from './post.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class PostMemoryRepository implements CRUDRepo<PostEntity, string, Post> {
   private repository: {[key: string]: Post} = {};
 
   public async index(): Promise<Post[]> {
+    console.log(Object.values(this.repository));
     return Object.values(this.repository);
   }
 
@@ -17,9 +19,9 @@ export class PostMemoryRepository implements CRUDRepo<PostEntity, string, Post> 
 
     entry._id = id
 
-    if (!entry.isRepost) {
+    if (!entry.isRepost || !entry.originID) {
       entry.authorID = entry.userID;
-      entry.originID = id;
+      entry.originID = id
     }
 
     this.repository[entry._id] = entry

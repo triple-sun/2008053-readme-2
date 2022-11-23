@@ -20,7 +20,7 @@ export class PostService {
   }
 
   async create(dto: PostCreateDTO) {
-    const post = await new PostEntity(dto)
+    const post = new PostEntity(dto)
 
     return this.postRepository.create(post);
   }
@@ -32,7 +32,11 @@ export class PostService {
       throw new Error(PostError.NotFound)
     }
 
-    const repost = await new PostEntity({...post, userID})
+    if (post.originID === userID) {
+      throw new Error(PostError.SelfRepost)
+    }
+
+    const repost = new PostEntity({...post, userID, isRepost: true})
 
     return this.postRepository.create(repost);
   }
@@ -48,7 +52,7 @@ export class PostService {
       throw new Error(PostError.Permission)
     }
 
-    const update = await new PostEntity({...post, ...dto})
+    const update = new PostEntity({...post, ...dto})
 
     return this.postRepository.update(postID, update)
   }

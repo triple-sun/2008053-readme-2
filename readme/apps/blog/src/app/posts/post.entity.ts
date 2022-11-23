@@ -5,9 +5,9 @@ export class PostEntity implements Post {
   public _id: string;
   public type: ContentType;
   public content: Content
-  public tags: string[];
-  public likes: string[];
-  public comments: string[];
+  public tags: string[]
+  public likes: string[]
+  public comments: string[]
   public isDraft: boolean;
   public isRepost: boolean;
   public authorID: string;

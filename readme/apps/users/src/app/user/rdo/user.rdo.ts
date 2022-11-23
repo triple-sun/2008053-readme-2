@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ParamName } from '@readme/core';
 import {Expose} from 'class-transformer';
-import { APIDesc, APIExample } from '../auth.enum';
+import { APIDesc, APIExample } from '../../auth/auth.enum';
 
 export class UserRDO {
   @ApiProperty({
@@ -31,4 +31,11 @@ export class UserRDO {
   })
   @Expose()
   public name: string;
+
+  @ApiProperty({
+    description: APIDesc.Subs,
+    example: APIExample.Subs
+  })
+  @Expose()
+  public subscriptions: string[];
 }

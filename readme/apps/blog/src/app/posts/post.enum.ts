@@ -1,6 +1,8 @@
 export enum PostError {
-  Permission = 'You can only edit and delete your own posts',
-  NotFound = 'Post not found'
+  Auth = 'You are not authorized',
+  Permission = 'You can only edit and delete your own posts.',
+  NotFound = 'Post not found.',
+  SelfRepost = 'You cannot repost your own posts.'
 }
 
 export enum PostInfo {
@@ -29,11 +31,8 @@ export enum APIExample {
   Bool = 'true',
   Feed = '[{post}, {post, {post}]',
   Type = 'video',
-  ID = '123',
+  ID = '496d3bcd-078a-4ade-94c7-7725921a813d',
   Tags = `['tag', 'another tag', 'one more tag', '8 tags max']`,
   Link = 'link@domain.domain',
   Desc = 'really cool link',
-  Author = '213553',
-  Origin = '562346',
-  User = '2l3rgrg2436237fwjkshd'
 }

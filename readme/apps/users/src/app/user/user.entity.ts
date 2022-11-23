@@ -10,6 +10,7 @@ export class UserEntity implements User {
   public name: string;
   public subscriptions: string[];
   public passwordHash: string;
+  public accessToken: string;
 
   constructor(user: User) {
      fillEntity<User, UserEntity>(user, this);

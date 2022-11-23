@@ -1,13 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { APIDesc, APIExample } from "../auth.enum";
+import { APIDesc, APIExample } from "../../auth/auth.enum";
 
 export class UserUpdateDTO {
-  @ApiProperty({
-    description: APIDesc.ID,
-    example: APIExample.ID
-  })
-  public id: string;
-
   @ApiProperty({
     description: APIDesc.Avatar,
     example: APIExample.Avatar
@@ -19,4 +13,10 @@ export class UserUpdateDTO {
     example: APIExample.Pass
   })
   public password?: string;
+
+  @ApiProperty({
+    description: APIDesc.Subs,
+    example: APIExample.Subs
+  })
+  public subscriptions?: string[];
 }

@@ -1,13 +1,13 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { fillObject, Path, Prefix, ParamName, User } from '@readme/core';
-import { UserCreateDTO } from './dto/user-create.dto';
-import { UserRDO } from './rdo/user.rdo';
-import { UserLoginDTO } from './dto/user-login.dto';
-import { UserLoggedRDO } from './rdo/user-logged.rdo';
+import { fillObject, Path, Prefix, ParamName } from '@readme/core';
+import { UserCreateDTO } from '../user/dto/user-create.dto';
+import { UserRDO } from '../user/rdo/user.rdo';
+import { UserLoginDTO } from '../user/dto/user-login.dto';
+import { UserLoggedRDO } from '../user/rdo/user-logged.rdo';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthError, AuthInfo } from './auth.enum';
-import { UserSubRDO } from './rdo/user-subs.rdo';
+import { UserUpdateDTO } from '../user/dto/user-update.dto';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -56,17 +56,15 @@ export class AuthController {
     return fillObject(UserRDO, user);
   }
 
-  @Post(Path.ID)
+  @Patch(Path.ID)
   @ApiResponse({
-   type: UserSubRDO,
+   type: UserRDO,
    status: HttpStatus.OK,
-   description: AuthInfo.Found
+   description: AuthInfo.Updated
   })
-  async toggleSub(@Param(ParamName.ID) targetID: string, @User(ParamName.ID) userID: string) {
-    const user = await this.authService.toggleSub(userID, targetID);
+  async update(@Param(ParamName.ID) id: string, @Body() dto: UserUpdateDTO) {
+    const post = await this.authService.update(id, dto);
 
-    return fillObject(UserRDO, user);
+    return fillObject(UserRDO, post);
   }
-
-
 }

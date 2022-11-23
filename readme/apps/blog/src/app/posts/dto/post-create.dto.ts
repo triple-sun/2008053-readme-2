@@ -4,13 +4,6 @@ import { APIDesc, APIExample } from "../post.enum";
 
 export class PostCreateDTO {
   @ApiProperty({
-    description: APIDesc.ID,
-    example: APIExample.ID,
-    required: true
-  })
-  public _id: string;
-
-  @ApiProperty({
     description: APIDesc.Type,
     example: ContentType.Link,
     enum: ContentType,
@@ -40,13 +33,6 @@ export class PostCreateDTO {
     default: false
   })
   public isDraft: boolean;
-
-  @ApiProperty({
-    description: APIDesc.Repost,
-    example: false,
-    default: false
-  })
-  public isRepost: boolean;
 
   @ApiProperty({
     description: APIDesc.UserID,

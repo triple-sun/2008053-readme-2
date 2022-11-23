@@ -1,7 +1,7 @@
 export enum AuthError {
   Email = 'User with this email already exists.',
   NotFound = 'User not found',
-  Login = 'Wrong password or user not found.'
+  Login = 'Wrong password or user not found.',
 }
 
 export enum AuthInfo {

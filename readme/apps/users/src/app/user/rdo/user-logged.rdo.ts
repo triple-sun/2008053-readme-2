@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ParamName } from '@readme/core';
 import {Expose} from 'class-transformer';
-import { APIDesc, APIExample } from '../auth.enum';
+import { APIDesc, APIExample } from '../../auth/auth.enum';
 
 export class UserLoggedRDO {
   @ApiProperty({
