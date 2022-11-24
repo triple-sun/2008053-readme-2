@@ -6,7 +6,6 @@ import { PostCreateDTO } from './dto/post-create.dto';
 import { PostInfo } from './post.enum';
 import { PostService } from './post.service';
 import { PostRDO } from './rdo/post.rdo'
-import { PostFeedRDO } from './rdo/post-feed.rdo';
 import { PostUpdateDTO } from './dto/post-update.dto';
 import { CommentService } from '../comment/comment.service';
 
