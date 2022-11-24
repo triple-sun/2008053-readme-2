@@ -37,50 +37,48 @@ export class PostController {
     return fillObject(PostRDO, post);
   }
 
-  @Get(Path.ID)
+  @Get(Path.PostID)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
-  async show(@Param(ParamName.ID) id: string) {
-    const post = await this.postService.getPost(id);
+  async show(@Param(ParamName.PostID) postID: string) {
+    const post = await this.postService.getPost(postID);
 
     return fillObject(PostRDO, post);
   }
 
-  @Patch(Path.ID)
+  @Patch(Path.PostID)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
-  async update(@Param(ParamName.ID) postID: string, @Body() dto: PostUpdateDTO, @User(ParamName.ID) userID: string) {
+  async update(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO, @User(ParamName.ID) userID: string) {
     const post = await this.postService.update(postID, userID, dto);
 
     return fillObject(PostRDO, post);
   }
 
-  @Delete(Path.ID)
+  @Delete(Path.PostID)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
-  async delete(@Param(ParamName.ID) postID: string, @User(ParamName.ID) userID: string) {
+  async delete(@Param(ParamName.PostID) postID: string, @User(ParamName.ID) userID: string) {
     await this.postService.delete(postID, userID)
-    await this.commentService.deleteAllByPostID(postID)
 
-    return this.show(postID);
-
+    return this.postService.findAll()
   }
 
-  @Post(`${Path.ID}/${Path.Repost}`)
+  @Post(`${Path.PostID}/${Path.Repost}`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
-  async repost(@Param(ParamName.ID) postID: string, @User(ParamName.ID) userID: string) {
+  async repost(@Param(ParamName.PostID) postID: string, @User(ParamName.ID) userID: string) {
     const post = await this.postService.repost(userID, postID);
 
     return fillObject(PostRDO, post);

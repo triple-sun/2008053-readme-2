@@ -44,7 +44,7 @@ export class AuthController {
   return fillObject(UserLoggedRDO, user);
 }
 
-  @Get(Path.ID)
+  @Get(Path.UserID)
   @ApiResponse({
    type: UserRDO,
    status: HttpStatus.OK,
@@ -56,15 +56,15 @@ export class AuthController {
     return fillObject(UserRDO, user);
   }
 
-  @Patch(Path.ID)
+  @Patch(Path.UserID)
   @ApiResponse({
    type: UserRDO,
    status: HttpStatus.OK,
    description: AuthInfo.Updated
   })
   async update(@Param(ParamName.ID) id: string, @Body() dto: UserUpdateDTO) {
-    const post = await this.authService.update(id, dto);
+    const update = await this.authService.update(id, dto);
 
-    return fillObject(UserRDO, post);
+    return fillObject(UserRDO, update);
   }
 }

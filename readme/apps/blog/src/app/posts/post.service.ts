@@ -4,19 +4,21 @@ import { PostCreateDTO } from './dto/post-create.dto';
 import { PostUpdateDTO } from './dto/post-update.dto';
 import { PostEntity } from './post.entity';
 import { PostError } from './post.enum';
+import { CommentService } from '../comment/comment.service';
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly postRepository: PostMemoryRepository
+    private readonly postRepository: PostMemoryRepository,
+    private readonly commentService: CommentService
       ) {}
 
   async findAll() {
     return this.postRepository.index()
   }
 
-  async getPost(id: string) {
-    return this.postRepository.findByID(id);
+  async getPost(postID: string) {
+    return this.postRepository.findByID(postID);
   }
 
   async create(dto: PostCreateDTO) {
@@ -68,6 +70,9 @@ export class PostService {
       throw new Error(PostError.Permission)
     }
 
-    this.postRepository.destroy(postID)
+    await this.postRepository.destroy(postID)
+    await this.commentService.deleteAllByPostID(postID)
+
+    return this.postRepository.index()
   }
 }

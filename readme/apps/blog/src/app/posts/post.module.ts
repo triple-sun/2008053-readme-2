@@ -8,5 +8,6 @@ import { PostService } from './post.service';
   imports: [CommentModule],
   controllers: [PostController],
   providers: [PostService, PostMemoryRepository],
+  exports: [PostService]
 })
 export class PostModule {}

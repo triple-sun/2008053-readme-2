@@ -1,27 +1,28 @@
 import { Injectable } from "@nestjs/common";
-import { Comment } from "@readme/shared-types";
 import { CommentMemoryRepository } from "./comment-memory.repository";
 import { CommentEntity } from "./comment.entity";
 import { CommentError } from "./comment.enum";
+import { CommentCreateDTO } from "./dto/comment-create.dto";
 
 @Injectable()
 export class CommentService {
   constructor(
-    private readonly commentRepository: CommentMemoryRepository
+    private readonly commentRepository: CommentMemoryRepository,
       ) {}
 
-  async create(comment: Comment) {
-    const post = await new CommentEntity(comment)
+  async create(comment: CommentCreateDTO) {
+    const newComment = new CommentEntity(comment)
 
-    return this.commentRepository.create(post);
+    return this.commentRepository.create(newComment);
   }
 
-  async findByID(id: string) {
-    return this.commentRepository.findByID(id);
+  async findByID(commentID: string) {
+    return this.commentRepository.findByID(commentID);
   }
 
   async findAllByPostID(postID: string) {
     const index = await this.commentRepository.index()
+    console.log(index, postID)
 
     return index.filter((comment) => comment.postID === postID)
   }

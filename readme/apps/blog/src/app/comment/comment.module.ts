@@ -6,6 +6,6 @@ import { CommentMemoryRepository } from './comment-memory.repository';
 @Module({
   controllers: [CommentController],
   providers: [CommentService, CommentMemoryRepository],
-  exports: [CommentService, CommentMemoryRepository]
+  exports: [CommentService]
 })
 export class CommentModule {}

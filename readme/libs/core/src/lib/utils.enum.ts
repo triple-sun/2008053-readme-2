@@ -14,7 +14,9 @@ export enum Path {
   SpecAuth = 'spec-auth',
   SpecBlog = 'spec-blog',
   Login = 'login',
-  ID = ':id',
+  UserID = ':userID',
+  PostID = ':postID',
+  CommentID = ':commentID',
   Upload = 'upload',
   Subscribe = 'sub',
   Subscriptions = 'subs',
@@ -28,8 +30,15 @@ export enum EntityName {
   Comment = 'Comment'
 }
 
-export enum ParamName {
+export enum KeyName {
+  ID = 'id',
   ObjectID = '_id',
+}
+
+export enum ParamName {
+  UserID = 'userID',
+  PostID = 'postID',
+  CommentID = 'commentID',
   ID = 'id'
 }
 
