@@ -22,7 +22,6 @@ export class CommentService {
 
   async findAllByPostID(postID: string) {
     const index = await this.commentRepository.index()
-    console.log(index, postID)
 
     return index.filter((comment) => comment.postID === postID)
   }
