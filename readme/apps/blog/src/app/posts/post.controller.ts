@@ -19,7 +19,6 @@ export class PostController {
 
   @Get()
   @ApiResponse({
-    type: PostFeedRDO,
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
@@ -71,9 +70,7 @@ export class PostController {
     await this.postService.delete(postID, userID)
     await this.commentService.deleteAllByPostID(postID)
 
-    const updatedFeed = this.show(postID);
-
-    return fillObject(PostFeedRDO, updatedFeed)
+    return this.show(postID);
 
   }
 
