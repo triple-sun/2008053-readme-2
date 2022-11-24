@@ -4,7 +4,8 @@ import { APIDesc, APIExample } from "../comment.enum";
 export class CommentCreateDTO {
   @ApiProperty({
     description: APIDesc.Text,
-    example: APIExample.Text
+    example: APIExample.Text,
+    required: true
   })
   public text: string;
 

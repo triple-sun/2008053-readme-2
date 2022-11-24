@@ -23,14 +23,13 @@ export class CommentController {
     return this.commentService.findAllByPostID(postID)
   }
 
-  @Post(`${Path.PostID}`)
+  @Post()
   @ApiResponse({
     type: CommentRDO,
     status: HttpStatus.CREATED,
     description: CommentInfo.Created
   })
-  async create(@Param(ParamName.PostID) postID: string, @User(KeyName.ID) userID: string, @Body() {text}: CommentCreateDTO) {
-    const dto = {text, postID, userID}
+  async create(@Body() dto: CommentCreateDTO) {
     const comment = await this.commentService.create(dto);
 
     return fillObject(CommentRDO, comment);
