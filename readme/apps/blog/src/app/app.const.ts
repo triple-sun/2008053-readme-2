@@ -1,6 +1,6 @@
 import { RouteInfo } from "@nestjs/common/interfaces";
 import { RequestMethod } from '@nestjs/common';
-import { Path } from '../../../../libs/core/src/lib/utils.enum';
+import { Path } from '@readme/core';
 
 export const BlogPrivateRoutes: RouteInfo[] = [
   {
