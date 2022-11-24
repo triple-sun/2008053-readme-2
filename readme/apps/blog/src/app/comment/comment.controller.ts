@@ -30,7 +30,8 @@ export class CommentController {
     description: CommentInfo.Created
   })
   async create(@Param(ParamName.PostID) postID: string, @User(KeyName.ID) userID: string, @Body() {text}: CommentCreateDTO) {
-    const comment = await this.commentService.create({text, postID, userID});
+    const dto = {text, postID, userID}
+    const comment = await this.commentService.create(dto);
 
     return fillObject(CommentRDO, comment);
   }

@@ -10,8 +10,8 @@ export class CommentService {
     private readonly commentRepository: CommentMemoryRepository,
       ) {}
 
-  async create(comment: CommentCreateDTO) {
-    const newComment = new CommentEntity(comment)
+  async create(dto: CommentCreateDTO) {
+    const newComment = new CommentEntity(dto)
 
     return this.commentRepository.create(newComment);
   }
