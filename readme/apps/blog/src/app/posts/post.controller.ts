@@ -18,6 +18,16 @@ export class PostController {
     private readonly commentService: CommentService,
   ) {}
 
+  @Get()
+  @ApiResponse({
+    type: PostFeedRDO,
+    status: HttpStatus.OK,
+    description: PostInfo.Loaded
+  })
+  async getPosts() {
+    return this.postService.findAll()
+  }
+
   @Post()
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -27,18 +37,6 @@ export class PostController {
     const post = await this.postService.create({...dto, userID});
 
     return fillObject(PostRDO, post);
-  }
-
-  @Get()
-  @ApiResponse({
-    type: PostFeedRDO,
-    status: HttpStatus.OK,
-    description: PostInfo.Loaded
-  })
-  async findAll() {
-    const posts = this.postService.findAll()
-
-    return fillObject(PostFeedRDO, posts)
   }
 
   @Get(Path.ID)

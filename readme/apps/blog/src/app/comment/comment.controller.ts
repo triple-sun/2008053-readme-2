@@ -5,7 +5,6 @@ import { ParamName, fillObject, Path, Prefix, User } from '@readme/core';
 import { CommentInfo } from './comment.enum';
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
-import { CommentFeedRDO } from './rdo/comment-feed.rdo';
 import { CommentRDO } from './rdo/comment.rdo';
 
 @ApiTags(Prefix.Comments)
@@ -14,6 +13,15 @@ export class CommentController {
   constructor(
     private readonly commentService: CommentService,
   ) {}
+
+  @Get(`${Path.ID}`)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: CommentInfo.Loaded
+  })
+  async getComments(@Param(ParamName.ID) postID: string) {
+    return this.commentService.findAllByPostID(postID)
+  }
 
   @Post(`${Path.ID}`)
   @ApiResponse({
@@ -26,16 +34,6 @@ export class CommentController {
 
     return fillObject(CommentRDO, comment);
   }
-
-  @Get(`${Path.ID}`)
-  @ApiResponse({
-    type: CommentFeedRDO,
-    status: HttpStatus.OK,
-    description: CommentInfo.Loaded
-  })
-  async findAll(@Param(ParamName.ID) postID: string) {
-  return this.commentService.findAllByPostID(postID)
-}
 
   @Delete(`${Path.ID}`)
   @ApiResponse({
