@@ -1,0 +1,62 @@
+export enum Prefix {
+  API = 'api',
+  Auth = 'auth',
+  Comments = 'comments',
+  Posts = 'posts',
+  User = 'user'
+}
+
+export enum Path {
+  Blog = 'blog',
+  Posts = 'posts',
+  Comments = 'comments',
+  Register = 'register',
+  SpecAuth = 'spec-auth',
+  SpecBlog = 'spec-blog',
+  Login = 'login',
+  UserID = ':userID',
+  PostID = ':postID',
+  CommentID = ':commentID',
+  Upload = 'upload',
+  Subscribe = 'sub',
+  Subscriptions = 'subs',
+  Users = 'users',
+  Repost = 'repost'
+}
+
+export enum EntityName {
+  User = 'User',
+  Post = 'Post',
+  Comment = 'Comment'
+}
+
+export enum KeyName {
+  ID = 'id',
+  ObjectID = '_id',
+}
+
+export enum ParamName {
+  UserID = 'userID',
+  PostID = 'postID',
+  CommentID = 'commentID',
+  ID = 'id'
+}
+
+export enum Title {
+  Blog = 'Blog service',
+  Users = 'Users service'
+}
+
+export enum Desc {
+  Blog = 'Blog service API',
+  Users = 'Users service API'
+}
+
+export enum Version {
+  Blog = '1.0',
+  Users = '1.0'
+}
+
+export enum Info {
+  AppRun = '🚀 Application is running on:  http://localhost:'
+}
