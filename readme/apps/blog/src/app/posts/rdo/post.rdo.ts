@@ -1,37 +1,45 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { MinMax, KeyName } from '@readme/core';
-import { Content, ContentType } from '@readme/shared-types';
-import {Expose} from 'class-transformer';
-import { APIDesc, APIExample } from '../post.enum';
+import { Expose } from 'class-transformer';
+import { ContentType } from '../../../../../../libs/shared-types/src/lib/content/content-type.const';
+import { APIDesc, APIExample, ContentExample } from '../post.enum';
+import { Link, LinkModel } from "../../../../../../libs/shared-types/src/lib/content/link.model";
+import { Photo } from '../../../../../../libs/shared-types/src/lib/content/photo.model';
+import { Quote } from '../../../../../../libs/shared-types/src/lib/content/quote.model';
+import { Video } from '../../../../../../libs/shared-types/src/lib/content/video.model';
+import { Text } from '../../../../../../libs/shared-types/src/lib/content/text.model';
 
 export class PostRDO {
   @ApiProperty({
     description: APIDesc.ID,
     example: APIExample.ID,
-    required: true
+    required: true,
   })
   @Expose({ name: KeyName.ObjectID})
   public id: string;
 
   @ApiProperty({
     description: APIDesc.Type,
-    example: APIExample.Type,
+    example: LinkModel.name,
     required: true,
-    enum: ContentType
+    enum: ContentType,
+    enumName: 'ContentType'
   })
   @Expose()
-  public type: ContentType;
+  public type: string;
 
   @ApiProperty({
     description: APIDesc.Content,
-    example: {
-      link: APIExample.Link,
-      desc: APIExample.Desc
-    },
-    required: true
+    oneOf: [
+      { $ref: getSchemaPath(Link), example: ContentExample[ContentType.Link] },
+      { $ref: getSchemaPath(Photo), example: ContentExample[ContentType.Photo] },
+      { $ref: getSchemaPath(Quote), example: ContentExample[ContentType.Quote]  },
+      { $ref: getSchemaPath(Text), example: ContentExample[ContentType.Text]  },
+      { $ref: getSchemaPath(Video), example: ContentExample[ContentType.Video]  },
+    ]
   })
   @Expose()
-  public content: Content;
+  public content: Link | Photo | Quote | Text | Video;
 
   @ApiProperty({
     description: APIDesc.Tags,

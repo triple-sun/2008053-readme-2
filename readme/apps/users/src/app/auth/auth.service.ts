@@ -69,4 +69,6 @@ export class AuthService {
 
     return this.userRepository.update(userID, updatedUser);
   }
+
+  async 
 }

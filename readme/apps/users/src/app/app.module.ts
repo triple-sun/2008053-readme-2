@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config'
-import { USERS_DEFAULT_DB_PORT, USERS_ENV_FILE_PATH } from './app.const';
+import { USERS_DEFAULT_DB_PORT, USERS_ENV_FILE_PATH, USERS_UPLOAD_DIR } from './app.const';
 import { MongooseModule } from '@nestjs/mongoose';
 import { dbConfig, getMongoDbConfig, getSchema, validateEnvironment } from '@readme/core';
-console.log(process.env.MONGO_DB)
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [ConfigModule .forRoot({
@@ -19,6 +19,9 @@ console.log(process.env.MONGO_DB)
   MongooseModule.forRootAsync(
     getMongoDbConfig()
   ),
+  MulterModule.register({
+    dest: USERS_UPLOAD_DIR,
+  }),
   AuthModule,
   UserModule
 ],

@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { CommentMemoryRepository } from "./comment-memory.repository";
 import { CommentEntity } from "./comment.entity";
 import { CommentError } from "./comment.enum";
+import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
 
 @Injectable()
 export class CommentService {
   constructor(
-    private readonly commentRepository: CommentMemoryRepository,
+    private readonly commentRepository: CommentRepository,
       ) {}
 
   async create(dto: CommentCreateDTO) {

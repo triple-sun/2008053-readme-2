@@ -1,14 +1,14 @@
-import { Ref } from "@typegoose/typegoose";
-import { Content } from "./content.types";
+import { Content } from "./content/content-type.const";
+
 
 export interface Post {
   _id?: string;
   type: string;
-  content: Ref<Content>;
+  content?: Content;
   tags?: string[];
   isDraft?: boolean;
   isRepost?: boolean
-  userID: string;
+  userID?: string;
   authorID?: string;
   originID?: string;
 }

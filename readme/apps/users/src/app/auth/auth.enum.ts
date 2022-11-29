@@ -2,6 +2,7 @@ export enum AuthError {
   Email = 'User with this email already exists.',
   NotFound = 'User not found',
   Login = 'Wrong password or user not found.',
+  File = 'Only .jpeg or .png files are allowed'
 }
 
 export enum AuthInfo {
@@ -29,4 +30,8 @@ export enum APIExample {
   Pass = 'p4ssw0rd',
   Token = 'user@user.local',
   Subs = '[334, 2251, 2224]',
+}
+
+export enum FileValidationErrors {
+  UNSUPPORTED_FILE_TYPE = AuthError.File
 }

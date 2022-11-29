@@ -1,27 +1,33 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, getSchemaPath } from "@nestjs/swagger";
 import { MinMax } from "@readme/core";
-import { Content, ContentType } from "@readme/shared-types";
-import { APIDesc, APIExample } from "../post.enum";
+import { Text } from "@readme/shared-types";
+import { Content, ContentType } from "../../../../../../libs/shared-types/src/lib/content/content-type.const";
+import { Link } from "../../../../../../libs/shared-types/src/lib/content/link.model";
+import { Photo } from "../../../../../../libs/shared-types/src/lib/content/photo.model";
+import { Quote } from "../../../../../../libs/shared-types/src/lib/content/quote.model";
+import { Video } from "../../../../../../libs/shared-types/src/lib/content/video.model";
+import { APIDesc, APIExample, ContentExample } from "../post.enum";
 
 export class PostCreateDTO {
   @ApiProperty({
     description: APIDesc.Type,
     example: ContentType.Link,
     enum: ContentType,
-    default: ContentType.Link,
     required: true
   })
   public type: string;
 
   @ApiProperty({
     description: APIDesc.Content,
-    example: {
-      'link': APIExample.Link,
-      'desc': APIExample.Desc
-    },
-    required: true,
+    oneOf: [
+      { $ref: getSchemaPath(Link), example: ContentExample[ContentType.Link] },
+      { $ref: getSchemaPath(Photo), example: ContentExample[ContentType.Photo] },
+      { $ref: getSchemaPath(Quote), example: ContentExample[ContentType.Quote]  },
+      { $ref: getSchemaPath(Text), example: ContentExample[ContentType.Text]  },
+      { $ref: getSchemaPath(Video), example: ContentExample[ContentType.Video]  },
+    ]
   })
-  public content: Content
+  public content: Content;
 
   @ApiProperty({
     description: APIDesc.Tags,

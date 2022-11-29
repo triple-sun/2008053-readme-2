@@ -9,6 +9,5 @@ export const fillEntity = <T, V>(obj: T, entity: V) => {
 }
 
 export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
-  console.log(`mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`)
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
 }

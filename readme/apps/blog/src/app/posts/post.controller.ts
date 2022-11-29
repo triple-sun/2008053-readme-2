@@ -7,14 +7,12 @@ import { PostInfo } from './post.enum';
 import { PostService } from './post.service';
 import { PostRDO } from './rdo/post.rdo'
 import { PostUpdateDTO } from './dto/post-update.dto';
-import { CommentService } from '../comment/comment.service';
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
 export class PostController {
   constructor(
     private readonly postService: PostService,
-    private readonly commentService: CommentService,
   ) {}
 
   @Get()
@@ -31,7 +29,10 @@ export class PostController {
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
-  async create(@Body() dto: PostCreateDTO, @User(ParamName.ID) userID: string) {
+  async create(
+    @Body() dto: PostCreateDTO,
+    @User(ParamName.ID) userID: string
+    ): Promise<PostRDO> {
     const post = await this.postService.create({...dto, userID});
 
     return fillObject(PostRDO, post);

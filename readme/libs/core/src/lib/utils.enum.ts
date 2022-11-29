@@ -7,6 +7,7 @@ export enum Prefix {
 }
 
 export enum Path {
+  Avatar = 'avatar',
   Blog = 'blog',
   Posts = 'posts',
   Comments = 'comments',
@@ -16,6 +17,7 @@ export enum Path {
   Login = 'login',
   UserID = ':userID',
   PostID = ':postID',
+  Type = ':type',
   CommentID = ':commentID',
   Upload = 'upload',
   Subscribe = 'sub',
@@ -39,7 +41,8 @@ export enum ParamName {
   UserID = 'userID',
   PostID = 'postID',
   CommentID = 'commentID',
-  ID = 'id'
+  ID = 'id',
+  Type = 'type'
 }
 
 export enum Title {
@@ -89,11 +92,13 @@ export enum MinMax {
   QuoteMax = 300,
   AuthorMin = 3,
   AuthorMax = 50,
-  PhotoMbMax = 1,
+  PhotoMaxBytes = 1000000,
   DescMax = 300,
   UserNameMin = 3,
   UserNameMax = 50,
   UserPassMin = 6,
   UserPassMax = 12,
-  AvatarMaxKb = 500
+  AvatarMaxBytes = 500000,
+  CommentMin = 10,
+  CommentMax = 300
 }

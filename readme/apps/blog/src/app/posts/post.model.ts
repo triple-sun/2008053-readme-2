@@ -1,19 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { MinMax } from '@readme/core';
-import { Collection, Post, ContentType, Content } from '@readme/shared-types';
-import { Ref } from '@typegoose/typegoose';
-import { Document, SchemaTypes } from 'mongoose';
+import { Collection, Post} from '@readme/shared-types';
+import { Document } from 'mongoose';
+import { ContentType } from '../../../../../libs/shared-types/src/lib/content/content-type.const';
 
 @Schema({
   collection: Collection.Posts,
+  discriminatorKey: 'type'
 })
 
 export class PostModel extends Document implements Post {
-  @Prop({required: true, enum: Object.values(ContentType), default: ContentType.Link})
-  public type!: string;
-
-  @Prop({type: SchemaTypes.ObjectId, refPath: 'type'})
-  public content: Ref<Content>
+  @Prop({
+    type: String,
+    required: true,
+    enum: ContentType
+  })
+  public type: string;
 
   @Prop({
     type: () => [String],
@@ -38,10 +40,8 @@ export class PostModel extends Document implements Post {
   })
   public isRepost: boolean;
 
-  @Prop({
-    required: true,
-  })
-  public userID: string;
+  @Prop()
+  public userID?: string;
 
   @Prop()
   public authorID: string;
