@@ -1,10 +1,10 @@
 import { fillEntity } from "@readme/core";
-import { Content, ContentType, Post } from "@readme/shared-types";
+import { Content, Post } from "@readme/shared-types";
 
 export class PostEntity implements Post {
   public _id: string;
-  public type: ContentType;
-  public content: Content
+  public type!: string;
+  public content: Content;
   public tags: string[]
   public likes: string[]
   public comments: string[]

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { KeyName } from '@readme/core';
+import { MinMax, KeyName } from '@readme/core';
 import { Content, ContentType } from '@readme/shared-types';
 import {Expose} from 'class-transformer';
 import { APIDesc, APIExample } from '../post.enum';
@@ -31,11 +31,12 @@ export class PostRDO {
     required: true
   })
   @Expose()
-  public content: Content
+  public content: Content;
 
   @ApiProperty({
     description: APIDesc.Tags,
     example: APIExample.Tags,
+    maxItems: MinMax.TagsMax,
   })
   @Expose()
   public tags?: string[];

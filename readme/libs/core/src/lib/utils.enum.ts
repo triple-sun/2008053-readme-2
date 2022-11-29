@@ -60,3 +60,40 @@ export enum Version {
 export enum Info {
   AppRun = '🚀 Application is running on:  http://localhost:'
 }
+
+export enum DBName {
+  Blog = 'database-blog',
+  Users = 'database-users'
+}
+
+export enum ENVError {
+  DBHost = 'MongoDB host is required',
+  DBName = 'Database name is required',
+  DBPort = 'MongoDB port is required',
+  DBUser = 'MongoDB user is required',
+  DBPass = 'MongoDB password is required',
+  DBAuthBase = 'MongoDB authentication base is required',
+}
+
+export enum MinMax {
+  TagMin = 3,
+  TagMax = 10,
+  TagsMax = 8,
+  TitleMin = 20,
+  TitleMax = 50,
+  AnnMin = 50,
+  AnnMax = 255,
+  TextMin = 100,
+  TextMax = 1024,
+  QuoteMin = 20,
+  QuoteMax = 300,
+  AuthorMin = 3,
+  AuthorMax = 50,
+  PhotoMbMax = 1,
+  DescMax = 300,
+  UserNameMin = 3,
+  UserNameMax = 50,
+  UserPassMin = 6,
+  UserPassMax = 12,
+  AvatarMaxKb = 500
+}

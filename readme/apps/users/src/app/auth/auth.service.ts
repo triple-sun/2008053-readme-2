@@ -1,23 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { UserMemoryRepository } from '../user/user-memory.repository';
 import { UserEntity } from '../user/user.entity';
 import { AuthError } from './auth.enum';
 import { UserCreateDTO } from '../user/dto/user-create.dto';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { UserUpdateDTO } from '../user/dto/user-update.dto';
+import { UserRepository } from '../user/user.repository';
+
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userRepository: UserMemoryRepository
+    private readonly userRepository: UserRepository,
   ) {}
 
   async register(dto: UserCreateDTO) {
     const {email, name, password} = dto;
     const user = {
+      avatar: '',
       email,
       name,
-      passwordHash: ''
+      subscriptions: [],
+      passwordHash: '',
     };
 
     const existUser = await this.userRepository

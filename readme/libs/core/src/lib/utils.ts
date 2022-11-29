@@ -7,3 +7,8 @@ export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) =
 export const fillEntity = <T, V>(obj: T, entity: V) => {
   Object.keys(obj).forEach((key) => entity[key] = obj[key])
 }
+
+export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
+  console.log(`mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`)
+  return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
+}

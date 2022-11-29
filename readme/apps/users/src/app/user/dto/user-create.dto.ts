@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { MinMax } from "@readme/core";
 import { APIDesc, APIExample } from "../../auth/auth.enum";
 
 export class UserCreateDTO {
@@ -10,13 +11,17 @@ export class UserCreateDTO {
 
   @ApiProperty({
     description: APIDesc.Name,
-    example: APIExample.Name
+    example: APIExample.Name,
+    maxLength: MinMax.UserNameMax,
+    minLength: MinMax.UserNameMin
   })
   public name: string;
 
   @ApiProperty({
     description: APIDesc.Pass,
-    example: APIExample.Pass
+    example: APIExample.Pass,
+    maxLength: MinMax.UserPassMax,
+    minLength: MinMax.UserPassMin
   })
   public password: string;
 }

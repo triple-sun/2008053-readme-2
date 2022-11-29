@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PostMemoryRepository } from './post-memory.repository';
 import { PostCreateDTO } from './dto/post-create.dto';
 import { PostUpdateDTO } from './dto/post-update.dto';
 import { PostEntity } from './post.entity';
 import { PostError } from './post.enum';
 import { CommentService } from '../comment/comment.service';
+import { PostRepository } from './post.repository';
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly postRepository: PostMemoryRepository,
+    private readonly postRepository: PostRepository,
     private readonly commentService: CommentService
       ) {}
 
@@ -22,7 +22,7 @@ export class PostService {
   }
 
   async create(dto: PostCreateDTO) {
-    const post = new PostEntity(dto)
+    const post = new PostEntity({...dto, authorID: dto.userID})
 
     return this.postRepository.create(post);
   }
@@ -38,7 +38,7 @@ export class PostService {
       throw new Error(PostError.SelfRepost)
     }
 
-    const repost = new PostEntity({...post, userID, isRepost: true})
+    const repost = new PostEntity({...post, userID, isRepost: true, originID: post.originID})
 
     return this.postRepository.create(repost);
   }

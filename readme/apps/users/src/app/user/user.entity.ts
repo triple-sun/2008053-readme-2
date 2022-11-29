@@ -5,7 +5,7 @@ import {SALT_ROUNDS} from './user.const';
 
 export class UserEntity implements User {
   public _id: string;
-  public avatar?: string;
+  public avatar: string;
   public email: string;
   public name: string;
   public subscriptions: string[];
@@ -13,7 +13,7 @@ export class UserEntity implements User {
   public accessToken: string;
 
   constructor(user: User) {
-     fillEntity<User, UserEntity>(user, this);
+    fillEntity<User, UserEntity>(user, this);
   }
 
   public async setPassword(password: string): Promise<UserEntity> {

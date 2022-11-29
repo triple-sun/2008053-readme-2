@@ -1,13 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Content, ContentType } from "@readme/shared-types";
+import { MinMax } from "@readme/core";
+import {  Content, ContentType } from "@readme/shared-types";
 import { APIDesc, APIExample } from "../post.enum";
 
 export class PostUpdateDTO {
   @ApiProperty({
     description: APIDesc.Type,
-    example: APIExample.Type
+    example: APIExample.Type,
+    enum: ContentType,
   })
-  public type?: ContentType;
+  public type!: string;
 
   @ApiProperty({
     description: APIDesc.Content,
@@ -16,11 +18,13 @@ export class PostUpdateDTO {
       desc: APIExample.Desc
     }
   })
-  public content?: Content
+  public content: Content
 
   @ApiProperty({
     description: APIDesc.Tags,
-    example: APIExample.Tags
+    example: APIExample.Tags,
+    default: [],
+    maxItems: MinMax.TagsMax,
   })
   public tags?: string[];
 }

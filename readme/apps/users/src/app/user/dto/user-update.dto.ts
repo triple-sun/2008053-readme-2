@@ -9,12 +9,6 @@ export class UserUpdateDTO {
   public avatar?: string;
 
   @ApiProperty({
-    description: APIDesc.Pass,
-    example: APIExample.Pass
-  })
-  public password?: string;
-
-  @ApiProperty({
     description: APIDesc.Subs,
     example: APIExample.Subs
   })
