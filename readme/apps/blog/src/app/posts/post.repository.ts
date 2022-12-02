@@ -12,29 +12,42 @@ export class PostRepository implements CRUDRepo<PostEntity, string, Post> {
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>) {
   }
 
+  public async exists(id: string) {
+    return await this.postModel.exists({id})
+  }
+
   public async index(): Promise<Post[]> {
     return this.postModel
       .find();
   }
 
-  public async create(item: PostEntity): Promise<Post> {
+  public async create(item: PostEntity) {
     const newPost = new this.postModel(item);
-    return newPost.save();
+
+    if (!newPost.isRepost) {
+      newPost.originID = newPost.id;
+      newPost.authorID = newPost.userID
+    }
+
+    return await newPost.save();
   }
 
   public async destroy(id: string): Promise<void> {
-    this.postModel.deleteOne({id});
+    await this.postModel.deleteOne({id});
   }
 
-  public async findByID(id: string): Promise<Post | null> {
-    return this.postModel
-      .findOne({id})
+  public async findByID(id: string) {
+    return await this.postModel
+      .findById(id)
+      .populate('comments')
       .exec();
   }
 
-  public async update(id: string, item: PostEntity): Promise<Post> {
-    return this.postModel
+  public async update(id: string, item: PostEntity) {
+    await this.postModel
       .findByIdAndUpdate(id, item.toObject(), {new: true})
       .exec();
+
+    return item.toObject();
   }
 }

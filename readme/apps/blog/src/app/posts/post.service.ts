@@ -3,14 +3,14 @@ import { PostCreateDTO } from './dto/post-create.dto';
 import { PostUpdateDTO } from './dto/post-update.dto';
 import { PostEntity } from './post.entity';
 import { PostError } from './post.enum';
-import { CommentService } from '../comment/comment.service';
 import { PostRepository } from './post.repository';
+import { CommentRepository } from '../comment/comment.repository';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly commentService: CommentService
+    private readonly commentRepository: CommentRepository
       ) {}
 
   async findAll() {
@@ -18,61 +18,81 @@ export class PostService {
   }
 
   async getPost(postID: string) {
-    return this.postRepository.findByID(postID);
+    const post = await this.postRepository.findByID(postID);
+
+    if (!post) {
+      throw new Error(PostError.NotFound);
+    }
+
+    console.log({post: post})
+    return post;
   }
 
   async create(dto: PostCreateDTO) {
-    const post = new PostEntity({...dto, authorID: dto.userID})
+    const {contentType, content, tags, isDraft, userID} = dto;
+    const post = {
+      contentType,
+      content,
+      tags,
+      likes: [],
+      comments: [],
+      isDraft,
+      isRepost: false,
+      userID,
+    };
 
-    return this.postRepository.create(post);
+    const postEntity = new PostEntity(post)
+
+    console.log({'post': post, entity: postEntity})
+
+    return this.postRepository.create(postEntity);
   }
 
-  async repost(userID: string, postID: string) {
+  async repost(postID: string) {
     const post = await this.postRepository.findByID(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound)
     }
 
-    if (post.originID === userID) {
-      throw new Error(PostError.SelfRepost)
-    }
+    const repost = new PostEntity({...post, isRepost: true})
 
-    const repost = new PostEntity({...post, userID, isRepost: true, originID: post.originID})
-
-    return this.postRepository.create(repost);
+    return await this.postRepository.create(repost);
   }
 
-  async update(postID: string, userID: string, dto: PostUpdateDTO) {
+  async update(postID: string, dto: PostUpdateDTO) {
     const post = await this.postRepository.findByID(postID);
+    const { contentType, content, tags, userID } = dto;
 
     if (!post) {
-      throw new Error(PostError.NotFound)
+      throw new Error(PostError.NotFound);
     }
 
     if (post.userID !== userID) {
-      throw new Error(PostError.Permission)
+      throw new Error(PostError.Auth)
     }
 
-    const update = new PostEntity({...post, ...dto})
+    const postEntity = new PostEntity(post)
 
-    return this.postRepository.update(postID, update)
+    if (contentType && content) {
+      await postEntity.updateContent(contentType, content)
+    }
+
+    if (tags) {
+      await postEntity.updateTags(tags)
+    }
+
+    return await this.postRepository.update(postID, postEntity)
   }
 
-  async delete(postID: string, userID: string) {
+  async delete(postID: string) {
     const post = await this.postRepository.findByID(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound)
-    }
-
-    if (post.userID !== userID) {
-      throw new Error(PostError.Permission)
     }
 
     await this.postRepository.destroy(postID)
-    await this.commentService.deleteAllByPostID(postID)
-
-    return this.postRepository.index()
+    await this.commentRepository.destroyAllByPostID(postID)
   }
 }

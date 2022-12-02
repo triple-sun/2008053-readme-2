@@ -1,6 +1,6 @@
-
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Expose } from "class-transformer";
+import { ContentModel } from "./content.model";
 
 export class Photo {
   @Prop({
@@ -11,7 +11,7 @@ export class Photo {
 }
 
 @Schema()
-export class PhotoModel {
+export class PhotoModel implements ContentModel {
   @Prop({
     required: true
   })

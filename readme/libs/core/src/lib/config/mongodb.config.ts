@@ -2,7 +2,7 @@ import { ConfigService } from "@nestjs/config";
 import { MongooseModuleAsyncOptions } from "@nestjs/mongoose";
 import { getMongoConnectionString } from "../utils";
 
-export function getMongoDbConfig(): MongooseModuleAsyncOptions {
+export const getMongoDbConfig = (): MongooseModuleAsyncOptions => {
   return {
     useFactory: async (configService: ConfigService) => ({
       uri: getMongoConnectionString({
@@ -12,6 +12,7 @@ export function getMongoDbConfig(): MongooseModuleAsyncOptions {
         port: configService.get<number>('database.port'),
         authBase: configService.get<string>('database.authBase'),
         database: configService.get<string>('database.database'),
+        upload: configService.get<string>('upload.dest')
       })
     }),
     inject: [ConfigService]

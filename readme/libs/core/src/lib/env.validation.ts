@@ -1,6 +1,7 @@
 import {IsNumber, IsString, Max, Min, validateSync} from 'class-validator';
-import {ENVError, MIN_PORT, MAX_PORT} from '@readme/core';
 import { plainToInstance } from 'class-transformer';
+import { ENVError } from './utils.enum';
+import { MAX_PORT, MIN_PORT } from './utils.const';
 
 class EnvironmentConfig {
   @IsString({
@@ -34,6 +35,16 @@ class EnvironmentConfig {
     message: ENVError.DBAuthBase
   })
   public MONGO_AUTH_BASE: string;
+
+  @IsString({
+    message: ENVError.UploadDir
+  })
+  public UPLOAD_DIR: string;
+
+  @IsString({
+    message: ENVError.UploadDir
+  })
+  public AVATAR_DIR: string;
 }
 
 export const validateEnvironment = (config: Record<string, unknown>) => {

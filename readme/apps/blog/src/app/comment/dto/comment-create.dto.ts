@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { MinMax } from "@readme/core";
+import { Expose } from "class-transformer";
 import { APIDesc, APIExample } from "../comment.enum";
 
 export class CommentCreateDTO {
@@ -10,6 +11,7 @@ export class CommentCreateDTO {
     minLength: MinMax.CommentMin,
     maxLength: MinMax.CommentMax
   })
+  @Expose()
   public text: string;
 
   @ApiProperty({
@@ -17,6 +19,7 @@ export class CommentCreateDTO {
     example: APIExample.ID,
     required: true
   })
+  @Expose()
   public postID: string;
 
   @ApiProperty({
@@ -24,5 +27,6 @@ export class CommentCreateDTO {
     example: APIExample.ID,
     required: true
   })
+  @Expose()
   public userID: string;
 }

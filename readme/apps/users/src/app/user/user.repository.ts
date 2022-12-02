@@ -18,24 +18,27 @@ export class UserRepository implements CRUDRepo<UserEntity, string, User> {
   }
 
   public async destroy(id: string): Promise<void> {
-    this.userModel.deleteOne({id});
+    await this.userModel.deleteOne({id});
   }
 
   public async findByID(id: string): Promise<User | null> {
-    return this.userModel
+    return await this.userModel
       .findOne({id})
       .exec();
   }
 
   public async findByEmail(email: string): Promise<User | null> {
-    return this.userModel
+    return await this.userModel
       .findOne({email})
       .exec();
   }
 
   public async update(id: string, item: UserEntity): Promise<User> {
-    return this.userModel
+    console.log({id, item: item})
+    await this.userModel
       .findByIdAndUpdate(id, item.toObject(), {new: true})
       .exec();
+
+    return item.toObject();
   }
 }

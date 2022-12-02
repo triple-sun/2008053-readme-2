@@ -1,6 +1,7 @@
 export enum Prefix {
   API = 'api',
   Auth = 'auth',
+  Blog = 'blog',
   Comments = 'comments',
   Posts = 'posts',
   User = 'user'
@@ -12,7 +13,7 @@ export enum Path {
   Posts = 'posts',
   Comments = 'comments',
   Register = 'register',
-  SpecAuth = 'spec-auth',
+  SpecUsers = 'spec-users',
   SpecBlog = 'spec-blog',
   Login = 'login',
   UserID = ':userID',
@@ -64,11 +65,6 @@ export enum Info {
   AppRun = '🚀 Application is running on:  http://localhost:'
 }
 
-export enum DBName {
-  Blog = 'database-blog',
-  Users = 'database-users'
-}
-
 export enum ENVError {
   DBHost = 'MongoDB host is required',
   DBName = 'Database name is required',
@@ -76,6 +72,7 @@ export enum ENVError {
   DBUser = 'MongoDB user is required',
   DBPass = 'MongoDB password is required',
   DBAuthBase = 'MongoDB authentication base is required',
+  UploadDir = 'Upload directory path is required',
 }
 
 export enum MinMax {

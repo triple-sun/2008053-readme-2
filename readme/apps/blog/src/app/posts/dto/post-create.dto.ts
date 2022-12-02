@@ -1,11 +1,7 @@
 import { ApiProperty, getSchemaPath } from "@nestjs/swagger";
 import { MinMax } from "@readme/core";
-import { Text } from "@readme/shared-types";
-import { Content, ContentType } from "../../../../../../libs/shared-types/src/lib/content/content-type.const";
-import { Link } from "../../../../../../libs/shared-types/src/lib/content/link.model";
-import { Photo } from "../../../../../../libs/shared-types/src/lib/content/photo.model";
-import { Quote } from "../../../../../../libs/shared-types/src/lib/content/quote.model";
-import { Video } from "../../../../../../libs/shared-types/src/lib/content/video.model";
+import { Content, ContentType, Link, Photo, Quote, Text, Video } from "@readme/shared-types";
+import { Expose } from "class-transformer";
 import { APIDesc, APIExample, ContentExample } from "../post.enum";
 
 export class PostCreateDTO {
@@ -15,10 +11,12 @@ export class PostCreateDTO {
     enum: ContentType,
     required: true
   })
-  public type: string;
+  @Expose()
+  public contentType: ContentType;
 
   @ApiProperty({
     description: APIDesc.Content,
+    required: true,
     oneOf: [
       { $ref: getSchemaPath(Link), example: ContentExample[ContentType.Link] },
       { $ref: getSchemaPath(Photo), example: ContentExample[ContentType.Photo] },
@@ -27,6 +25,7 @@ export class PostCreateDTO {
       { $ref: getSchemaPath(Video), example: ContentExample[ContentType.Video]  },
     ]
   })
+  @Expose()
   public content: Content;
 
   @ApiProperty({
@@ -35,12 +34,14 @@ export class PostCreateDTO {
     default: [],
     maxItems: MinMax.TagsMax,
   })
+  @Expose()
   public tags?: string[];
 
   @ApiProperty({
     description: APIDesc.Draft,
     default: false
   })
+  @Expose()
   public isDraft?: boolean;
 
   @ApiProperty({
@@ -48,5 +49,6 @@ export class PostCreateDTO {
     example: APIExample.ID,
     required: true
   })
+  @Expose()
   public userID: string;
 }

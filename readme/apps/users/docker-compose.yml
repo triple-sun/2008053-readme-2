@@ -12,6 +12,7 @@ services:
       - 27017:27017
     volumes:
       - ./db:/data/db
+      - ./upload:/upload
 
   mongodb-express:
     image: mongo-express

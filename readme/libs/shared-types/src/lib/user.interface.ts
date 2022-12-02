@@ -1,10 +1,8 @@
-import { Types } from "mongoose";
-
 export interface User {
-  _id?: Types.ObjectId | string;
+  _id?: string;
   email: string;
   name: string;
-  avatar: string;
+  avatarUrl: string;
   subscriptions: string[];
   passwordHash: string;
 }

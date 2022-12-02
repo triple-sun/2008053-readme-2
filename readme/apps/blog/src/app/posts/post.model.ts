@@ -1,21 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { MinMax } from '@readme/core';
-import { Collection, Post} from '@readme/shared-types';
-import { Document } from 'mongoose';
-import { ContentType } from '../../../../../libs/shared-types/src/lib/content/content-type.const';
+import { Collection, ContentType, Post} from '@readme/shared-types';
+import { Document, SchemaTypes } from 'mongoose';
 
 @Schema({
   collection: Collection.Posts,
-  discriminatorKey: 'type'
+  discriminatorKey: 'contentType'
 })
 
 export class PostModel extends Document implements Post {
   @Prop({
-    type: String,
     required: true,
-    enum: ContentType
+    enum: ContentType,
+    type: String
   })
-  public type: string;
+  public contentType: ContentType;
 
   @Prop({
     type: () => [String],
@@ -31,6 +30,11 @@ export class PostModel extends Document implements Post {
   public tags?: string[]
 
   @Prop({
+    default: [],
+  })
+  public comments?: Comment[];
+
+  @Prop({
     default: false
   })
   public isDraft: boolean;
@@ -40,13 +44,17 @@ export class PostModel extends Document implements Post {
   })
   public isRepost: boolean;
 
-  @Prop()
+  @Prop({
+    required: true
+  })
   public userID?: string;
 
   @Prop()
   public authorID: string;
 
-  @Prop()
+  @Prop({
+    type: SchemaTypes.ObjectId
+  })
   public originID: string;
 }
 

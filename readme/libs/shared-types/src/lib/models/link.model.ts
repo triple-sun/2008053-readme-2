@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { MinMax } from "@readme/core";
+import { modelOptions } from "@typegoose/typegoose";
 import { Expose } from "class-transformer";
+import { ContentModel } from "./content.model";
 
 export class Link {
   @Prop({
@@ -17,9 +19,11 @@ export class Link {
 }
 
 @Schema()
-export class LinkModel {
+@modelOptions({ options: { customName: 'Link' } })
+export class LinkModel implements ContentModel {
   @Prop({
     required: true,
+    _id: false,
     type: () => Link
   })
   @Expose()

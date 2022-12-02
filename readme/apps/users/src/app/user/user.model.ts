@@ -9,7 +9,7 @@ import { Document } from 'mongoose';
 
 export class UserModel extends Document implements User {
   @Prop()
-  public avatar: string;
+  public avatarUrl: string;
 
   @Prop({
     required: true,
@@ -24,7 +24,10 @@ export class UserModel extends Document implements User {
   })
   public name: string;
 
-  @Prop()
+  @Prop({
+    default: [],
+    unique: true
+  })
   public subscriptions: string[];
 
   @Prop({

@@ -20,5 +20,11 @@ export const getSchema = (defaultPort: number) => Joi.object({
     .string(),
   MONGO_AUTH_BASE: Joi
     .string()
+    .required(),
+  UPLOAD_DIR: Joi
+    .string()
+    .required(),
+  AVATAR_DIR: Joi
+    .string()
     .required()
 });

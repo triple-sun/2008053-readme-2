@@ -26,14 +26,12 @@ export class PostController {
 
   @Post()
   @ApiResponse({
+    type: PostRDO,
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
-  async create(
-    @Body() dto: PostCreateDTO,
-    @User(ParamName.ID) userID: string
-    ): Promise<PostRDO> {
-    const post = await this.postService.create({...dto, userID});
+  async createPost(@Body() dto: PostCreateDTO) {
+    const post = await this.postService.create(dto);
 
     return fillObject(PostRDO, post);
   }
@@ -44,8 +42,10 @@ export class PostController {
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
-  async show(@Param(ParamName.PostID) postID: string) {
+  async showPost(@Param(ParamName.PostID) postID: string) {
     const post = await this.postService.getPost(postID);
+
+    console.log({PostController: post})
 
     return fillObject(PostRDO, post);
   }
@@ -56,8 +56,8 @@ export class PostController {
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
-  async update(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO, @User(ParamName.ID) userID: string) {
-    const post = await this.postService.update(postID, userID, dto);
+  async updatePost(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO) {
+    const post = await this.postService.update(postID, dto);
 
     return fillObject(PostRDO, post);
   }
@@ -67,8 +67,8 @@ export class PostController {
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
-  async delete(@Param(ParamName.PostID) postID: string, @User(ParamName.ID) userID: string) {
-    await this.postService.delete(postID, userID)
+  async deletePost(@Param(ParamName.PostID) postID: string) {
+    await this.postService.delete(postID)
 
     return this.postService.findAll()
   }
@@ -79,8 +79,8 @@ export class PostController {
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
-  async repost(@Param(ParamName.PostID) postID: string, @User(ParamName.ID) userID: string) {
-    const post = await this.postService.repost(userID, postID);
+  async repost(@Param(ParamName.PostID) postID: string) {
+    const post = await this.postService.repost(postID);
 
     return fillObject(PostRDO, post);
   }

@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { MinMax } from "@readme/core";
 import { Expose } from "class-transformer";
+import { ContentModel } from "./content.model";
 
 @Schema()
 export class Quote {
@@ -21,7 +22,7 @@ export class Quote {
 }
 
 @Schema()
-export class QuoteModel {
+export class QuoteModel implements ContentModel {
   @Prop({
     required: true
   })

@@ -1,6 +1,6 @@
 export enum CommentError {
   Permission = 'You can only delete your own comments',
-  NotFound = 'Comment not found'
+  NotFound = 'Comment not found',
 }
 
 export enum CommentInfo {

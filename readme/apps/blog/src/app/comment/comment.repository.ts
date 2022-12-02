@@ -13,21 +13,30 @@ export class CommentRepository implements CRUDRepo<CommentEntity, string, Commen
   }
 
   public async index(): Promise<Comment[]> {
-    return this.commentModel
+    return await this.commentModel
       .find();
+  }
+
+  async findAllByPostID(postID: string) {
+    return this.commentModel.find({postID})
   }
 
   public async create(item: CommentEntity): Promise<Comment> {
     const newPost = new this.commentModel(item);
-    return newPost.save();
+
+    return await newPost.save();
   }
 
   public async destroy(id: string): Promise<void> {
-    this.commentModel.deleteOne({id});
+    await this.commentModel.deleteOne({id});
+  }
+
+  public async destroyAllByPostID(postID: string): Promise<void> {
+    await this.commentModel.deleteMany({postID});
   }
 
   public async findByID(id: string): Promise<Comment | null> {
-    return this.commentModel
+    return await this.commentModel
       .findOne({id})
       .exec();
   }

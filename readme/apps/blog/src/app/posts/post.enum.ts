@@ -1,4 +1,4 @@
-import { LinkModel } from "../../../../../libs/shared-types/src/lib/content/link.model";
+import { LinkModel } from "@readme/shared-types";
 
 export enum PostError {
   Auth = 'You are not authorized',
