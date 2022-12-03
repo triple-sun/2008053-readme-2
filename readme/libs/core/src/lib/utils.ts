@@ -16,7 +16,7 @@ export const getAvatarUploadDest = (req, file, cb) => {
 
 export const getAvatarName = (req, file, cb) => {
   const exension = extname(file.originalname);
-  cb(null, `${req.userID}-avatar${exension}`)
+  cb(null, `${req.params.userID}-avatar${exension}`)
 }
 
 export const avatarExtRegExp = (/[/.](jpe?g|png)$/i)

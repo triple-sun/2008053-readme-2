@@ -5,7 +5,7 @@ import { UserUpdateDTO } from './dto/user-update.dto';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { avatarExtRegExp, fillObject, getAvatarName, getAvatarUploadDest, MinMax, ParamName, Path, Prefix } from '../../../../../libs/core/src';
+import { avatarExtRegExp, fillObject, getAvatarName, getAvatarUploadDest, MinMax, ParamName, Path, Prefix } from '@readme/core';
 import { UserInfo } from '../app.enum';
 import { UserService } from './user.service';
 import { UploadFileDTO, UserAPIDesc } from '@readme/shared-types';
