@@ -1,16 +1,25 @@
 import { Injectable } from "@nestjs/common";
-import { CommentMemoryRepository } from "./comment-memory.repository";
+import { PostError } from "../posts/post.enum";
+import { PostRepository } from "../posts/post.repository";
 import { CommentEntity } from "./comment.entity";
 import { CommentError } from "./comment.enum";
+import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
 
 @Injectable()
 export class CommentService {
   constructor(
-    private readonly commentRepository: CommentMemoryRepository,
+    private readonly commentRepository: CommentRepository,
+    private readonly postRepository: PostRepository
       ) {}
 
   async create(dto: CommentCreateDTO) {
+    const post = await this.postRepository.exists(dto.postID)
+
+    if (!post) {
+      throw new Error(PostError.NotFound)
+    }
+
     const newComment = new CommentEntity(dto)
 
     return this.commentRepository.create(newComment);
@@ -21,28 +30,24 @@ export class CommentService {
   }
 
   async findAllByPostID(postID: string) {
-    const index = await this.commentRepository.index()
-
-    return index.filter((comment) => comment.postID === postID)
+    return await this.commentRepository.findAllByPostID(postID)
   }
 
-  async delete(commentID: string, userID: string) {
+  async delete(commentID: string) {
     const comment = await this.commentRepository.findByID(commentID);
 
     if (!comment) {
       throw new Error(CommentError.NotFound)
     }
 
-    if (comment.userID !== userID) {
-      throw new Error(CommentError.Permission)
-    }
+    console.log({id: commentID, comment: comment})
 
-    return this.commentRepository.destroy(commentID)
+    await this.commentRepository.destroy(commentID)
   }
 
   async deleteAllByPostID(postID: string) {
     const comments = await this.findAllByPostID(postID)
 
-    comments.forEach((comment) => this.commentRepository.destroy(comment._id))
+    comments.forEach(async (comment) => await this.commentRepository.destroy(comment._id))
   }
 }

@@ -1,7 +1,7 @@
 
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Path, Prefix, User, KeyName } from '@readme/core';
+import { ParamName, fillObject, Path, Prefix } from '@readme/core';
 import { CommentInfo } from './comment.enum';
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
@@ -40,7 +40,7 @@ export class CommentController {
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(ParamName.CommentID) commentID: string, @User(KeyName.ID) userID: string) {
-    return this.commentService.delete(commentID, userID);
+  async delete(@Param(ParamName.CommentID) commentID: string) {
+    return this.commentService.delete(commentID);
   }
 }

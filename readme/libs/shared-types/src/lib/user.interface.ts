@@ -2,7 +2,7 @@ export interface User {
   _id?: string;
   email: string;
   name: string;
-  avatar?: string;
-  subscriptions?: string[];
+  avatarUrl: string;
+  subscriptions: string[];
   passwordHash: string;
 }

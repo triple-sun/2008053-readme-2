@@ -1,41 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { KeyName } from '@readme/core';
-import {Expose} from 'class-transformer';
-import { APIDesc, APIExample } from '../../auth/auth.enum';
+import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
+import { RDOBase, UserAPIDesc, UserAPIExample } from '@readme/shared-types';
+import { Expose } from 'class-transformer';
+import { UserCreateDTO } from '../dto/user-create.dto';
 
-export class UserRDO {
+class Token {
   @ApiProperty({
-    description: APIDesc.ID,
-    example: APIExample.ID
-  })
-  @Expose({ name: KeyName.ObjectID})
-  public id: string;
-
-  @ApiProperty({
-    description: APIDesc.Avatar,
-    example: APIExample.Avatar
+    description: UserAPIDesc.Token,
+    example: UserAPIExample.Token
   })
   @Expose()
-  public avatar: string;
-
-  @ApiProperty({
-    description: APIDesc.Email,
-    example: APIExample.Email
-  })
-  @Expose()
-  public email: string;
-
-  @ApiProperty({
-    description: APIDesc.Name,
-    example: APIExample.Name
-  })
-  @Expose()
-  public name: string;
-
-  @ApiProperty({
-    description: APIDesc.Subs,
-    example: APIExample.Subs
-  })
-  @Expose()
-  public subscriptions: string[];
+  public accessToken: string;
 }
+
+class UserRDOBase extends IntersectionType(RDOBase, Token) {}
+
+export class UserRDO extends IntersectionType(
+  UserRDOBase,
+  OmitType(
+    UserCreateDTO,
+    ['password'] as const
+    )
+) {}
+

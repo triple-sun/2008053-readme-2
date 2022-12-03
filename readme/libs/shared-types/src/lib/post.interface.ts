@@ -1,14 +1,16 @@
-import { ContentType } from "./content.enum";
-import { Content } from "./content.types";
+import { ContentType } from "./content-type.enum";
+import { Content } from "./content.type";
 
 export interface Post {
   _id?: string;
-  type?: ContentType;
+  contentType: ContentType;
   content?: Content;
   tags?: string[];
+  likes?: string[];
+  comments?: Comment[]
   isDraft?: boolean;
   isRepost?: boolean
+  userID?: string;
   authorID?: string;
   originID?: string;
-  userID?: string;
 }

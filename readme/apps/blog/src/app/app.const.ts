@@ -2,6 +2,10 @@ import { RouteInfo } from "@nestjs/common/interfaces";
 import { RequestMethod } from '@nestjs/common';
 import { Path } from '@readme/core';
 
+export const BLOG_ENV_FILE_PATH = 'environments/.blog.env'
+
+export const BLOG_DEFAULT_DB_PORT = 27017;
+
 export const BlogPrivateRoutes: RouteInfo[] = [
   {
     path: Path.Posts,

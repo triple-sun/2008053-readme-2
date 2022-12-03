@@ -1,22 +1,21 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { APIDesc, APIExample } from "../../auth/auth.enum";
+import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
+import { UserAPIDesc, UserAPIExample } from "@readme/shared-types";
+import { Expose } from "class-transformer";
+import { UserCreateDTO } from "./user-create.dto";
 
-export class UserUpdateDTO {
+class UserUpdateDTOBase {
   @ApiProperty({
-    description: APIDesc.Avatar,
-    example: APIExample.Avatar
+    description: UserAPIDesc.SubTo,
+    example: UserAPIExample.ID,
+    uniqueItems: true
   })
-  public avatar?: string;
-
-  @ApiProperty({
-    description: APIDesc.Pass,
-    example: APIExample.Pass
-  })
-  public password?: string;
-
-  @ApiProperty({
-    description: APIDesc.Subs,
-    example: APIExample.Subs
-  })
-  public subscriptions?: string[];
+  @Expose()
+  subscribeTo?: string;
 }
+
+export class UserUpdateDTO extends PartialType(
+  IntersectionType(
+    UserUpdateDTOBase,
+    PickType(UserCreateDTO, ['avatarUrl', 'password'] as const)
+  )
+) {}

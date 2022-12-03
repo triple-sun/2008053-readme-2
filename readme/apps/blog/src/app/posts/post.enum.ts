@@ -1,3 +1,5 @@
+import { LinkModel } from "@readme/shared-types";
+
 export enum PostError {
   Auth = 'You are not authorized',
   Permission = 'You can only edit and delete your own posts.',
@@ -16,7 +18,6 @@ export enum PostInfo {
 
 export enum APIDesc {
   Type = 'Post content type',
-  Content = 'Post content',
   ID = 'Unique post ID',
   Feed = 'Post feed',
   Tags = 'Post tags',
@@ -24,7 +25,17 @@ export enum APIDesc {
   Repost = 'This post is a repost',
   AuthorID = 'Original post author ID',
   OriginID = 'Original post ID',
-  UserID = 'Unique poster ID'
+  UserID = 'Unique poster ID',
+  Content = 'Post content',
+  Link = 'Post link',
+  Desc = 'Link description',
+  Title = 'Post title',
+  Ann = 'Post announcement',
+  Text = 'Post text',
+  Quote = 'Post quote',
+  Author = 'Post quote author',
+  Photo = 'Post photo url',
+  Video = 'Post video url'
 }
 
 export enum APIExample {
@@ -35,4 +46,15 @@ export enum APIExample {
   Tags = `['tag', 'another tag', 'one more tag', '8 tags max']`,
   Link = 'link@domain.domain',
   Desc = 'really cool link',
+  Title = 'nice post',
+  Ann = 'Lorem ipsum dolor sit amet.',
+  Text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada.',
+  Quote = 'Lorem ipsum dolor sit amet.',
+  Author = 'Dante',
+  Photo = '/upload/photo.jpg',
+  Video = 'https://youtube.com/videolink'
+}
+
+export const ContentExample = {
+  [LinkModel.name]: `{ link: ${APIExample.Link}, desc: ${APIExample.Desc}}`
 }
