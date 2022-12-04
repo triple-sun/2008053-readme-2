@@ -1,27 +1,21 @@
-import { Content, ContentType, Post } from "@readme/shared-types";
+import { Entity } from "@readme/core";
+import { Comment, Content, Post} from "@readme/shared-types";
 
-export class PostEntity implements Post {
-  public _id: string;
-  public contentType!: ContentType;
-  public content: Content;
-  public tags: string[]
-  public likes: string[]
-  public comments: Comment[]
+export class PostEntity implements Entity<PostEntity>, Post {
   public isDraft: boolean;
   public isRepost: boolean;
-  public authorID: string;
-  public originID: string;
+  public content: Content;
+  public tags: string[]
+  public comments: Comment[]
+  public likes: string[]
+  public authorID?: string;
   public userID: string;
+  public originID?: number;
+  public createdAt?: Date;
+  public publishAt?: Date;
 
   constructor(post: Post) {
     this.fillEntity(post);
-  }
-
-  public async updateContent(contentType: ContentType, content: Content) {
-    this.contentType = contentType;
-    this.content = content;
-
-    return this;
   }
 
   public async updateTags(tags: string[]) {
@@ -31,20 +25,22 @@ export class PostEntity implements Post {
   }
 
   public toObject() {
-    return {...this};
+    return {
+      ...this,
+      comments: this.comments.map(({id}) => ({id}))
+    };
   }
 
-  public fillEntity(post: Post) {
-    this._id = post._id;
-    this.contentType = post.contentType;
-    this.content = post.content;
-    this.tags = post.tags;
-    this.likes = post.likes;
-    this.comments = post.comments;
-    this.isDraft = post.isDraft;
-    this.isRepost = post.isRepost;
-    this.authorID = post.authorID;
-    this.originID = post.originID;
-    this.userID = post.userID;
+  public fillEntity(entity: Post) {
+    this.publishAt = new Date();
+    this.tags = [...entity.tags];
+    this.likes = [...entity.likes];
+    this.comments = [...entity.comments];
+    this.isDraft = entity.isDraft;
+    this.isRepost = entity.isRepost;
+    this.authorID = entity.authorID;
+    this.originID = entity.originID;
+    this.userID = entity.userID;
+    this.content = {...entity.content};
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PostError } from "../posts/post.enum";
+import { PostError } from "@readme/shared-types";
 import { PostRepository } from "../posts/post.repository";
 import { CommentEntity } from "./comment.entity";
 import { CommentError } from "./comment.enum";
@@ -13,27 +13,23 @@ export class CommentService {
     private readonly postRepository: PostRepository
       ) {}
 
-  async create(dto: CommentCreateDTO) {
-    const post = await this.postRepository.exists(dto.postID)
+  async getCommentsForPost(postID: number) {
+    return await this.commentRepository.findAllByPostID(postID)
+  }
+
+  async createComment(postID: number, dto: CommentCreateDTO) {
+    const post = await this.postRepository.findByID(postID)
 
     if (!post) {
       throw new Error(PostError.NotFound)
     }
 
-    const newComment = new CommentEntity(dto)
+    const newComment = new CommentEntity(postID, dto)
 
-    return this.commentRepository.create(newComment);
+    return await this.commentRepository.create(newComment);
   }
 
-  async findByID(commentID: string) {
-    return this.commentRepository.findByID(commentID);
-  }
-
-  async findAllByPostID(postID: string) {
-    return await this.commentRepository.findAllByPostID(postID)
-  }
-
-  async delete(commentID: string) {
+  async deleteComment(commentID: number) {
     const comment = await this.commentRepository.findByID(commentID);
 
     if (!comment) {
@@ -43,11 +39,5 @@ export class CommentService {
     console.log({id: commentID, comment: comment})
 
     await this.commentRepository.destroy(commentID)
-  }
-
-  async deleteAllByPostID(postID: string) {
-    const comments = await this.findAllByPostID(postID)
-
-    comments.forEach(async (comment) => await this.commentRepository.destroy(comment._id))
   }
 }

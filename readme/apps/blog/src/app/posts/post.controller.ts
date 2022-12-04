@@ -1,12 +1,15 @@
 
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Path, Prefix, User } from '@readme/core';
-import { PostCreateDTO } from './dto/post-create.dto';
-import { PostInfo } from './post.enum';
+import { ParamName, fillObject, Path, Prefix } from '@readme/core';
 import { PostService } from './post.service';
 import { PostRDO } from './rdo/post.rdo'
+import { PostCreateDTO, PostInfo } from '@readme/shared-types';
 import { PostUpdateDTO } from './dto/post-update.dto';
+
+class Ass<T> {
+  bebra: T
+}
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -15,13 +18,27 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
+  @Get(Path.PostID)
+  @ApiResponse({
+   type: PostRDO,
+   status: HttpStatus.OK,
+   description: PostInfo.Found
+  })
+  async show(@Param(ParamName.PostID) postID: string) {
+    const post = await this.postService.getPost(parseInt(postID));
+
+    console.log({PostController: post})
+
+    return fillObject(PostRDO, post);
+  }
+
   @Get()
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
-  async getPosts() {
-    return this.postService.findAll()
+  async index() {
+    return this.postService.getPosts()
   }
 
   @Post()
@@ -30,22 +47,10 @@ export class PostController {
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
-  async createPost(@Body() dto: PostCreateDTO) {
-    const post = await this.postService.create(dto);
+  async create(@Body() dto: PostCreateDTO) {
+    const post = await this.postService.createPost(dto);
 
-    return fillObject(PostRDO, post);
-  }
-
-  @Get(Path.PostID)
-  @ApiResponse({
-   type: PostRDO,
-   status: HttpStatus.OK,
-   description: PostInfo.Found
-  })
-  async showPost(@Param(ParamName.PostID) postID: string) {
-    const post = await this.postService.getPost(postID);
-
-    console.log({PostController: post})
+    console.log(post)
 
     return fillObject(PostRDO, post);
   }
@@ -56,8 +61,10 @@ export class PostController {
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
-  async updatePost(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO) {
-    const post = await this.postService.update(postID, dto);
+  async update(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO) {
+    const post = await this.postService.updatePost(parseInt(postID), dto);
+
+    console.log(post, new Ass<typeof post>)
 
     return fillObject(PostRDO, post);
   }
@@ -67,10 +74,10 @@ export class PostController {
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
-  async deletePost(@Param(ParamName.PostID) postID: string) {
-    await this.postService.delete(postID)
+  async destroy(@Param(ParamName.PostID) postID: string) {
+    await this.postService.deletePost(parseInt(postID))
 
-    return this.postService.findAll()
+    return this.postService.getPosts()
   }
 
   @Post(`${Path.PostID}/${Path.Repost}`)
@@ -80,7 +87,7 @@ export class PostController {
    description: PostInfo.Reposted
   })
   async repost(@Param(ParamName.PostID) postID: string) {
-    const post = await this.postService.repost(postID);
+    const post = await this.postService.repost(parseInt(postID));
 
     return fillObject(PostRDO, post);
   }

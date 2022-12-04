@@ -1,9 +1,17 @@
 import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
-import { RDOBase, UserAPIDesc, UserAPIExample } from '@readme/shared-types';
+import { KeyName } from '@readme/core';
+import { UserAPIDesc, UserAPIExample } from '@readme/shared-types';
 import { Expose } from 'class-transformer';
 import { UserCreateDTO } from '../dto/user-create.dto';
 
-class Token {
+class UserRDOBase {
+  @ApiProperty({
+    description: UserAPIDesc.ID,
+    example: UserAPIExample.ID
+  })
+  @Expose({ name: KeyName.ObjectID})
+  public id: string;
+
   @ApiProperty({
     description: UserAPIDesc.Token,
     example: UserAPIExample.Token
@@ -12,13 +20,11 @@ class Token {
   public accessToken: string;
 }
 
-class UserRDOBase extends IntersectionType(RDOBase, Token) {}
-
 export class UserRDO extends IntersectionType(
   UserRDOBase,
   OmitType(
     UserCreateDTO,
     ['password'] as const
-    )
+  )
 ) {}
 

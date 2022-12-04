@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentType {
+  LINK
+  PHOTO
+  QUOTE
+  TEXT
+  VIDEO
+}
+
+model Post {
+  id        Int         @id @default(autoincrement())
+  type      ContentType
+  tags      String[]    @default([])
+  likes     String[]    @default([])
+  isDraft   Boolean     @default(false)
+  isRepost  Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  publishAt DateTime    @default(now())
+  userID    String
+  authorID  String?
+  originID  Int?
+  link      Link?
+  photo     Photo?
+  quote     Quote?
+  text      Text?
+  video     Video?
+  comments  Comment[]
+
+  @@unique([id])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  text      String
+  userID    String
+  post      Post     @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID    Int
+}
+
+model Link {
+  post Post        @relation(fields: [id], references: [id], onDelete: Cascade)
+  id   Int         @id
+  type ContentType @default(LINK)
+  url  String
+  desc String?
+
+  @@unique([id, type])
+}
+
+model Photo {
+  post  Post        @relation(fields: [id], references: [id], onDelete: Cascade)
+  id    Int         @id
+  type  ContentType @default(PHOTO)
+  photo String
+
+  @@unique([id, type])
+}
+
+model Quote {
+  post   Post        @relation(fields: [id], references: [id], onDelete: Cascade)
+  id     Int         @id
+  type   ContentType @default(QUOTE)
+  quote  String
+  author String
+
+  @@unique([id, type])
+}
+
+model Text {
+  post  Post        @relation(fields: [id], references: [id], onDelete: Cascade)
+  id    Int         @id
+  type  ContentType @default(TEXT)
+  title String
+  ann   String
+  text  String
+
+  @@unique([id, type])
+}
+
+model Video {
+  post     Post        @relation(fields: [id], references: [id], onDelete: Cascade)
+  id       Int         @id
+  type     ContentType @default(VIDEO)
+  title    String
+  videoUrl String
+
+  @@unique([id, type])
+}

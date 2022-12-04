@@ -1,42 +1,35 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ApiProperty } from "@nestjs/swagger";
+import { ContentType } from "@prisma/client";
 import { MinMax } from "@readme/core";
 import { Expose } from "class-transformer";
-import { ContentModel } from "./content.model";
+import { Content } from "./content.model";
 
-export class Text {
-  @Prop({
+export class Text extends Content {
+  constructor() {
+    super(ContentType.TEXT)
+  }
+
+  @ApiProperty({
     required: true,
-    minlength: MinMax.TitleMin,
-    maxlength: MinMax.TitleMax
+    minLength: MinMax.TitleMin,
+    maxLength: MinMax.TitleMax
   })
   @Expose()
-  public title: string;
+  public title?: string;
 
-  @Prop({
+  @ApiProperty({
     required: true,
-    minlength: MinMax.AnnMin,
-    maxlength: MinMax.AnnMax
+    minLength: MinMax.AnnMin,
+    maxLength: MinMax.AnnMax
   })
   @Expose()
   public ann: string;
 
-  @Prop({
+  @ApiProperty({
     required: true,
-    minlength: MinMax.TextMin,
-    maxlength: MinMax.TextMax
+    minLength: MinMax.TextMin,
+    maxLength: MinMax.TextMax
   })
   @Expose()
   public text: string;
 }
-
-@Schema()
-export class TextModel implements ContentModel {
-  @Prop({
-    required: true,
-    type: () => Text
-  })
-  @Expose()
-  public content: Text;
-}
-
-export const TextSchema = SchemaFactory.createForClass(TextModel);

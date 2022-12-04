@@ -15,6 +15,7 @@ export enum APIDesc {
   UserID = 'Unique comment author ID',
   CommentID = 'Unique comment ID',
   PostID = 'Unique post ID',
+  Post = 'Comment post'
 }
 
 export enum APIExample {
