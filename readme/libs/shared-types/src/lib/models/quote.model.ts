@@ -1,33 +1,27 @@
-
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ApiProperty } from "@nestjs/swagger";
+import { ContentType } from "@prisma/client";
 import { MinMax } from "@readme/core";
 import { Expose } from "class-transformer";
-import { ContentModel } from "./content.model";
+import { Content } from "./content.model";
 
-@Schema()
-export class Quote {
-  @Prop({
+export class Quote extends Content {
+  constructor() {
+    super(ContentType.QUOTE)
+  }
+
+  @ApiProperty({
     required: true,
-    minlength: MinMax.QuoteMin,
-    maxlength: MinMax.QuoteMax
-  })
-  quote: string;
-
-  @Prop({
-    required: true,
-    minlength: MinMax.AuthorMin,
-    maxlength: MinMax.AuthorMax
-  })
-  author: string;
-}
-
-@Schema()
-export class QuoteModel implements ContentModel {
-  @Prop({
-    required: true
+    minLength: MinMax.QuoteMin,
+    maxLength: MinMax.QuoteMax
   })
   @Expose()
-  public content: Quote;
-}
+  quote: string;
 
-export const QuoteSchema = SchemaFactory.createForClass(QuoteModel);
+  @ApiProperty({
+    required: true,
+    minLength: MinMax.AuthorMin,
+    maxLength: MinMax.AuthorMax
+  })
+  @Expose()
+  author: string;
+}

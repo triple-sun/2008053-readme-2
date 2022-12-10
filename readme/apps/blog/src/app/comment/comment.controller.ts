@@ -20,27 +20,30 @@ export class CommentController {
     description: CommentInfo.Loaded
   })
   async getComments(@Param(ParamName.PostID) postID: string) {
-    return this.commentService.findAllByPostID(postID)
+    return this.commentService.getCommentsForPost(parseInt(postID))
   }
 
-  @Post()
+  @Post(`${Path.PostID}`)
   @ApiResponse({
-    type: CommentRDO,
+    type: [CommentRDO],
     status: HttpStatus.CREATED,
     description: CommentInfo.Created
   })
-  async create(@Body() dto: CommentCreateDTO) {
-    const comment = await this.commentService.create(dto);
+  async create(
+    @Param(ParamName.PostID) postID: string,
+    @Body() dto: CommentCreateDTO
+    ) {
+    const comment = await this.commentService.createComment(parseInt(postID), dto);
 
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`${Path.PostID}/${Path.CommentID}`)
+  @Delete(`${Path.CommentID}`)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
   async delete(@Param(ParamName.CommentID) commentID: string) {
-    return this.commentService.delete(commentID);
+    return this.commentService.deleteComment(parseInt(commentID));
   }
 }

@@ -24,7 +24,7 @@
    const document = SwaggerModule.createDocument(app, config);
    SwaggerModule.setup(Path.SpecBlog, app, document)
 
-   const port = process.env.PORT || 3334;
+   const port = process.env.PORT || 3333;
    await app.listen(port);
 
    Logger.log(

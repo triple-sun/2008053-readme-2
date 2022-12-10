@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PostCreateDTO } from './dto/post-create.dto';
-import { PostUpdateDTO } from './dto/post-update.dto';
 import { PostEntity } from './post.entity';
-import { PostError } from './post.enum';
 import { PostRepository } from './post.repository';
 import { CommentRepository } from '../comment/comment.repository';
+import { PostCreateDTO, PostError } from '@readme/shared-types';
+import { formatPostDataForRepost, formatPostForRDO } from '@readme/core';
+import { PostUpdateDTO } from './dto/post-update.dto';
 
 @Injectable()
 export class PostService {
@@ -13,56 +13,68 @@ export class PostService {
     private readonly commentRepository: CommentRepository
       ) {}
 
-  async findAll() {
-    return this.postRepository.index()
+  async getPosts() {
+    const posts = await this.postRepository.find()
+
+    console.log(posts)
+
+    return posts.map((post) => formatPostForRDO(post))
   }
 
-  async getPost(postID: string) {
+  async getPost(postID: number) {
     const post = await this.postRepository.findByID(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound);
     }
 
-    console.log({post: post})
-    return post;
+    return formatPostForRDO(post)
   }
 
-  async create(dto: PostCreateDTO) {
-    const {contentType, content, tags, isDraft, userID} = dto;
+  async createPost(dto: PostCreateDTO) {
+    const type = dto.content.type
+
     const post = {
-      contentType,
-      content,
-      tags,
+      type,
+      content: {...dto.content},
+      tags: [],
       likes: [],
       comments: [],
-      isDraft,
       isRepost: false,
-      userID,
+      userID: dto.userID,
     };
 
     const postEntity = new PostEntity(post)
 
-    console.log({'post': post, entity: postEntity})
+    const newPost = await this.postRepository.create(postEntity);
+    console.log(newPost);
 
-    return this.postRepository.create(postEntity);
+    return formatPostForRDO(newPost)
   }
 
-  async repost(postID: string) {
+  async repost(postID: number) {
     const post = await this.postRepository.findByID(postID);
+
+    const authorID = post.authorID ? post.authorID : post.userID
+    const originID = post.id
+
 
     if (!post) {
       throw new Error(PostError.NotFound)
     }
 
-    const repost = new PostEntity({...post, isRepost: true})
+    const postData = formatPostDataForRepost(post)
 
-    return await this.postRepository.create(repost);
+    const repostEntity = new PostEntity({...postData, isRepost: true, originID, authorID})
+
+    const repost = await this.postRepository.create(repostEntity);
+
+    return formatPostForRDO(repost);
   }
 
-  async update(postID: string, dto: PostUpdateDTO) {
+  async updatePost(postID: number, dto: PostUpdateDTO) {
     const post = await this.postRepository.findByID(postID);
-    const { contentType, content, tags, userID } = dto;
+    const {userID, ...update} = dto
 
     if (!post) {
       throw new Error(PostError.NotFound);
@@ -72,20 +84,14 @@ export class PostService {
       throw new Error(PostError.Auth)
     }
 
-    const postEntity = new PostEntity(post)
+    const updatedEntity = new PostEntity({...post, ...update})
 
-    if (contentType && content) {
-      await postEntity.updateContent(contentType, content)
-    }
+    const updatedPost = await this.postRepository.update(postID, updatedEntity)
 
-    if (tags) {
-      await postEntity.updateTags(tags)
-    }
-
-    return await this.postRepository.update(postID, postEntity)
+    return formatPostForRDO(updatedPost)
   }
 
-  async delete(postID: string) {
+  async deletePost(postID: number) {
     const post = await this.postRepository.findByID(postID);
 
     if (!post) {
@@ -93,6 +99,5 @@ export class PostService {
     }
 
     await this.postRepository.destroy(postID)
-    await this.commentRepository.destroyAllByPostID(postID)
   }
 }

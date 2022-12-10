@@ -1,4 +1,4 @@
-import { LinkModel } from "@readme/shared-types";
+import { ContentType } from "@prisma/client";
 
 export enum PostError {
   Auth = 'You are not authorized',
@@ -16,7 +16,7 @@ export enum PostInfo {
   Reposted = 'Post has been reposted successfully.'
 }
 
-export enum APIDesc {
+export enum PostAPIDesc {
   Type = 'Post content type',
   ID = 'Unique post ID',
   Feed = 'Post feed',
@@ -27,34 +27,33 @@ export enum APIDesc {
   OriginID = 'Original post ID',
   UserID = 'Unique poster ID',
   Content = 'Post content',
-  Link = 'Post link',
-  Desc = 'Link description',
-  Title = 'Post title',
-  Ann = 'Post announcement',
-  Text = 'Post text',
-  Quote = 'Post quote',
-  Author = 'Post quote author',
-  Photo = 'Post photo url',
-  Video = 'Post video url'
+  Link = 'Link and description',
+  Text = 'Title, announcement and text',
+  Quote = 'Quote and author',
+  Photo = 'Photo url',
+  Video = 'Video title and url'
 }
 
-export enum APIExample {
+export enum PostAPIExample {
   Bool = 'true',
-  Feed = '[{post}, {post, {post}]',
-  Type = 'video',
-  ID = '496d3bcd-078a-4ade-94c7-7725921a813d',
+  Type = 'VIDEO',
+  ID = '22',
   Tags = `['tag', 'another tag', 'one more tag', '8 tags max']`,
   Link = 'link@domain.domain',
   Desc = 'really cool link',
-  Title = 'nice post',
+  Title = 'Eample post title',
   Ann = 'Lorem ipsum dolor sit amet.',
   Text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada.',
   Quote = 'Lorem ipsum dolor sit amet.',
   Author = 'Dante',
   Photo = '/upload/photo.jpg',
-  Video = 'https://youtube.com/videolink'
+  Video = 'https://youtube.com/video'
 }
 
-export const ContentExample = {
-  [LinkModel.name]: `{ link: ${APIExample.Link}, desc: ${APIExample.Desc}}`
+export const PostContentExample = {
+  [ContentType.LINK]: `{ type: 'LINK', link: ${PostAPIExample.Link}, desc: ${PostAPIExample.Desc}}`,
+  [ContentType.PHOTO]: `{ type: 'PHOTO', photo: ${PostAPIExample.Photo}}`,
+  [ContentType.QUOTE]: `{ type: 'QUOTE', quote: ${PostAPIExample.Quote}, author: ${PostAPIExample.Author}}`,
+  [ContentType.TEXT]: `{ type: 'TEXT', title: ${PostAPIExample.Title}, ann: ${PostAPIExample.Ann}, text: ${PostAPIExample.Text}}`,
+  [ContentType.VIDEO]: `{ type: 'VIDEO', title: ${PostAPIExample.Title}, videoUrl: ${PostAPIExample.Video}}`,
 }

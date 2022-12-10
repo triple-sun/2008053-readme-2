@@ -15,14 +15,6 @@ export class CommentCreateDTO {
   public text: string;
 
   @ApiProperty({
-    description: APIDesc.PostID,
-    example: APIExample.ID,
-    required: true
-  })
-  @Expose()
-  public postID: string;
-
-  @ApiProperty({
     description: APIDesc.UserID,
     example: APIExample.ID,
     required: true

@@ -1,31 +1,25 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ApiProperty } from "@nestjs/swagger";
+import { ContentType } from "@prisma/client";
 import { MinMax } from "@readme/core";
 import { Expose } from "class-transformer";
-import { ContentModel } from "./content.model";
+import { Content } from "./content.model";
 
-export class Video {
-  type: string;
+export class Video extends Content {
+  constructor() {
+    super(ContentType.VIDEO)
+  }
 
-  @Prop({
+  @ApiProperty({
     required: true,
-    minlength: MinMax.TitleMin,
-    maxlength: MinMax.TitleMax
+    minLength: MinMax.TitleMin,
+    maxLength: MinMax.TitleMax
   })
-  title: string;
+  @Expose()
+  title?: string;
 
-  @Prop({
-    required: true
-  })
-  videoLink: string;
-}
-
-@Schema()
-export class VideoModel implements ContentModel {
-  @Prop({
+  @ApiProperty({
     required: true
   })
   @Expose()
-  public content: Video;
+  videoUrl: string;
 }
-
-export const VideoSchema = SchemaFactory.createForClass(VideoModel);

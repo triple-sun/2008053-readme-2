@@ -1,16 +1,24 @@
-import { ContentType } from "./content-type.enum";
+import { ContentType, Link, Photo, Quote, Text, Video } from "@prisma/client";
+import { Comment } from "./comment.interface";
 import { Content } from "./content.type";
 
 export interface Post {
-  _id?: string;
-  contentType: ContentType;
+  id?: number;
   content?: Content;
   tags?: string[];
   likes?: string[];
   comments?: Comment[]
   isDraft?: boolean;
-  isRepost?: boolean
+  isRepost?: boolean;
+  originID?: number;
   userID?: string;
   authorID?: string;
-  originID?: string;
+  publishAt?: Date;
+  createdAt?: Date;
+  type?: ContentType;
+  link?: Link;
+  photo?: Photo;
+  quote?: Quote;
+  text?: Text;
+  video?: Video;
 }

@@ -1,36 +1,58 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { RDOBase } from '@readme/shared-types';
-import { Expose } from 'class-transformer';
-import { PostCreateDTO } from '../dto/post-create.dto';
-import { APIDesc, APIExample } from '../post.enum';
+import { PostCreateDTO } from '@readme/shared-types';
+import { Exclude, Expose } from 'class-transformer';
+import { PostAPIDesc, PostAPIExample } from '@readme/shared-types';
+import { ContentType } from '@prisma/client';
 
 class PostRDOBase {
   @ApiProperty({
-    description: APIDesc.Repost,
-    example: APIExample.Bool
+    description: PostAPIDesc.ID,
+    example: PostAPIExample.ID
+  })
+  @Expose()
+  public id: string;
+
+  @ApiProperty({
+    description: PostAPIDesc.ID,
+    example: PostAPIExample.ID
+  })
+  @Exclude()
+  public type: ContentType;
+
+  @ApiProperty()
+  @Expose()
+  public commentIDs: number[];
+
+  @ApiProperty({
+    description: PostAPIDesc.Repost,
+    example: PostAPIExample.Bool
   })
   @Expose()
   public isRepost: boolean;
 
   @ApiProperty({
-    description: APIDesc.AuthorID,
-    example: APIExample.ID
+    description: PostAPIDesc.Draft,
+    example: PostAPIExample.Bool
+  })
+  @Expose()
+  public isDraft: boolean;
+
+  @ApiProperty({
+    description: PostAPIDesc.AuthorID,
+    example: PostAPIExample.ID
   })
   @Expose()
   public authorID: string;
 
   @ApiProperty({
-    description: APIDesc.OriginID,
-    example: APIExample.ID
+    description: PostAPIDesc.OriginID,
+    example: PostAPIExample.ID
   })
   @Expose()
   public originID: string;
 }
 
 export class PostRDO extends IntersectionType(
-  RDOBase,
-  IntersectionType(
-    PostRDOBase,
-    PostCreateDTO
-  )
+  PostCreateDTO,
+  PostRDOBase,
 ) {}

@@ -1,33 +1,23 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ApiProperty } from "@nestjs/swagger";
+import { ContentType } from "@prisma/client";
 import { MinMax } from "@readme/core";
-import { modelOptions } from "@typegoose/typegoose";
 import { Expose } from "class-transformer";
-import { ContentModel } from "./content.model";
+import { Content } from "./content.model";
 
-export class Link {
-  @Prop({
+export class Link extends Content {
+  constructor() {
+    super(ContentType.LINK)
+  }
+
+  @ApiProperty({
     required: true
   })
   @Expose()
-  public link: string;
+  public url?: string;
 
-  @Prop({
-    maxlength: MinMax.DescMax
+  @ApiProperty({
+    maxLength: MinMax.DescMax
   })
   @Expose()
   public desc?: string;
 }
-
-@Schema()
-@modelOptions({ options: { customName: 'Link' } })
-export class LinkModel implements ContentModel {
-  @Prop({
-    required: true,
-    _id: false,
-    type: () => Link
-  })
-  @Expose()
-  public content: Link
-}
-
-export const LinkSchema = SchemaFactory.createForClass(LinkModel);

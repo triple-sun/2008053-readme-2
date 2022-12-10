@@ -1,5 +1,22 @@
-import { Content } from "../content.type";
+import { ApiProperty } from "@nestjs/swagger";
+import { ContentType } from "@prisma/client";
+import { Exclude, Expose } from "class-transformer";
 
-export interface ContentModel {
-  content: Content;
+export class Content {
+  @ApiProperty({
+    required: true,
+    enum: ContentType
+  })
+  @Expose()
+  public type: ContentType;
+
+  @ApiProperty({
+    required: true,
+  })
+  @Exclude()
+  public id: number;
+
+  constructor(type: ContentType) {
+    this.type = type
+  }
 }
