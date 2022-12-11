@@ -7,10 +7,6 @@ import { PostRDO } from './rdo/post.rdo'
 import { PostCreateDTO, PostInfo } from '@readme/shared-types';
 import { PostUpdateDTO } from './dto/post-update.dto';
 
-class Ass<T> {
-  bebra: T
-}
-
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
 export class PostController {
@@ -63,8 +59,6 @@ export class PostController {
   })
   async update(@Param(ParamName.PostID) postID: string, @Body() dto: PostUpdateDTO) {
     const post = await this.postService.updatePost(parseInt(postID), dto);
-
-    console.log(post, new Ass<typeof post>)
 
     return fillObject(PostRDO, post);
   }
