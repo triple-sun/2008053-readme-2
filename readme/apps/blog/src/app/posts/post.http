@@ -25,8 +25,35 @@ GET http://localhost:3333/api/posts/1 HTTP/1.1
 
 ###
 
+# Get posts by user id or ids
+GET http://localhost:3333/api/posts?users=496d3bcd-078a-4ade-94c7-7725921a813d
+
+###
+
+# Get posts by type
+GET http://localhost:3333/api/posts?type=PHOTO
+###
+
+# Sort posts by likes
+GET http://localhost:3333/api/posts?sortBy=likes
+###
+
+# Sort posts by comments
+GET http://localhost:3333/api/posts?sortBy=comments
+###
+
 # Repost post by id
 POST http://localhost:3333/api/posts/30/repost HTTP/1.1
+
+###
+
+# Like post by id
+POST http://localhost:3333/api/posts/30/like HTTP/1.1
+Content-Type: application/json
+
+{
+  "userID": "23r1f3rvf212"
+}
 
 ###
 

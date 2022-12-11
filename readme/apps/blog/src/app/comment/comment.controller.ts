@@ -19,8 +19,8 @@ export class CommentController {
     status: HttpStatus.OK,
     description: CommentInfo.Loaded
   })
-  async getComments(@Param(ParamName.PostID) postID: string) {
-    return this.commentService.getCommentsForPost(parseInt(postID))
+  async getComments(@Param(ParamName.PostID) postID: number) {
+    return this.commentService.getCommentsForPost(postID)
   }
 
   @Post(`${Path.PostID}`)
@@ -30,10 +30,10 @@ export class CommentController {
     description: CommentInfo.Created
   })
   async create(
-    @Param(ParamName.PostID) postID: string,
+    @Param(ParamName.PostID) postID: number,
     @Body() dto: CommentCreateDTO
     ) {
-    const comment = await this.commentService.createComment(parseInt(postID), dto);
+    const comment = await this.commentService.createComment(postID, dto);
 
     return fillObject(CommentRDO, comment);
   }
@@ -43,7 +43,7 @@ export class CommentController {
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(ParamName.CommentID) commentID: string) {
-    return this.commentService.deleteComment(parseInt(commentID));
+  async delete(@Param(ParamName.CommentID) commentID: number) {
+    return this.commentService.deleteComment(commentID);
   }
 }

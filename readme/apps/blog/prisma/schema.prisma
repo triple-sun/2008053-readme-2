@@ -20,23 +20,23 @@ enum ContentType {
 }
 
 model Post {
-  id        Int         @id @default(autoincrement())
-  type      ContentType
-  tags      String[]    @default([])
-  likes     String[]    @default([])
-  isDraft   Boolean     @default(false)
-  isRepost  Boolean     @default(false)
-  createdAt DateTime    @default(now())
-  publishAt DateTime    @default(now())
-  userID    String
-  authorID  String?
-  originID  Int?
-  link      Link?
-  photo     Photo?
-  quote     Quote?
-  text      Text?
-  video     Video?
-  comments  Comment[]
+  id          Int           @id @default(autoincrement())
+  type        ContentType
+  tags        String[]
+  likes       String[]      @default([])
+  isDraft     Boolean       @default(false)
+  isRepost    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  publishAt   DateTime      @default(now())
+  userID      String
+  authorID    String?
+  originID    Int?
+  link        Link?
+  photo       Photo?
+  quote       Quote?
+  text        Text?
+  video       Video?
+  comments    Comment[]
 
   @@unique([id])
 }

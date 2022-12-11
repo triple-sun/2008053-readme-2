@@ -1,7 +1,7 @@
 import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
 import { KeyName } from '@readme/core';
 import { UserAPIDesc, UserAPIExample } from '@readme/shared-types';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { UserCreateDTO } from '../dto/user-create.dto';
 
 class UserRDOBase {
@@ -9,6 +9,7 @@ class UserRDOBase {
     description: UserAPIDesc.ID,
     example: UserAPIExample.ID
   })
+  @Transform(({ obj }) => obj._id.toString())
   @Expose({ name: KeyName.ObjectID})
   public id: string;
 

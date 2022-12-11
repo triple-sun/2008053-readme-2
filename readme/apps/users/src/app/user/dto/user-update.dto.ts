@@ -1,6 +1,7 @@
 import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
 import { UserAPIDesc, UserAPIExample } from "@readme/shared-types";
 import { Expose } from "class-transformer";
+import { IsString } from "class-validator";
 import { UserCreateDTO } from "./user-create.dto";
 
 class UserUpdateDTOBase {
@@ -9,6 +10,7 @@ class UserUpdateDTOBase {
     example: UserAPIExample.ID,
     uniqueItems: true
   })
+  @IsString()
   @Expose()
   subscribeTo?: string;
 }

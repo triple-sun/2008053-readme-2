@@ -18,12 +18,6 @@ export class PostEntity implements Entity<PostEntity>, Post {
     this.fillEntity(post);
   }
 
-  public async updateTags(tags: string[]) {
-    this.tags = tags
-
-    return this;
-  }
-
   public toObject() {
     return {
       ...this,

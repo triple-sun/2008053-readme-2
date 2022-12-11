@@ -40,8 +40,8 @@ export class AuthController {
     description: AuthError.Login,
   })
   async login(@Body() dto: UserLoginDTO) {
-    const user = await this.authService.login(dto);
+    const user = await this.authService.verifyUser(dto);
 
-    return fillObject(UserLoggedRDO, user);
+    return this.authService.loginUser(user)
   }
 }

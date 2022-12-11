@@ -33,7 +33,7 @@ export const getIncludeForType = ({
 })
 
 export const formatPostDataForCreate = (item: Post) => {
-  const {content, id, userID, ...post} = item
+  const {content, link, photo, quote, video, text, id, userID, ...post} = item
   const {type} = content
   const includeType = getIncludeForType[type]
 
@@ -94,12 +94,12 @@ export const formatPostForRDO = (post: Post) => {
 }
 
 export const formatPostDataForUpdate = (id: number, item: Post) => {
-  const { tags, isDraft, content: {type, ...content} } = item;
+  const { isDraft, content: {type, ...content}, likes } = item;
 
   const data = {
-    tags,
     isDraft,
     type,
+    likes,
     [type.toLowerCase()]: {
       upsert: {
         create: content,
@@ -115,12 +115,12 @@ export const formatPostDataForUpdate = (id: number, item: Post) => {
     data,
     include: {
       [type.toLowerCase()]: true,
-      comments: true
+      comments: true,
     }
   }
 }
 
-export const formatPostDataForRepost = (item: Post) => {
+export const formatPostDataForEntity = (item: Post) => {
   const {type, id, userID, ...post} = item
   const oldContent = item[type.toLowerCase()]
 
@@ -131,4 +131,19 @@ export const formatPostDataForRepost = (item: Post) => {
     userID,
     content
     }
+}
+
+export const toggle = (array: string[], value: string) => {
+  const result = [...array]
+  const index = array.indexOf(value);
+
+  if (index === -1) {
+      result.push(value);
+  } else {
+      result.splice(index, 1);
+  }
+
+  console.log({array, value, index, result})
+
+  return result
 }

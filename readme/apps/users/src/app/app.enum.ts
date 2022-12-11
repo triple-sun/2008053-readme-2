@@ -12,3 +12,7 @@ export enum UserInfo {
   Login = 'User has logged in successfully.',
   Register = 'New user created successfully',
 }
+
+export enum UserError {
+  Email = 'User email is not valid',
+}

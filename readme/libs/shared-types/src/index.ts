@@ -11,8 +11,7 @@ export * from './lib/models/text.model'
 export * from './lib/models/video.model'
 export * from './lib/content.type'
 export * from './lib/dto/upload-file.dto'
-export * from '../../../apps/blog/src/app/posts/dto/post-create.dto'
-
+export * from './lib/dto/post-create.dto'
 
 
 

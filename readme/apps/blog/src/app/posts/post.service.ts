@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { CommentRepository } from '../comment/comment.repository';
 import { PostCreateDTO, PostError } from '@readme/shared-types';
-import { formatPostDataForRepost, formatPostForRDO } from '@readme/core';
+import { formatPostDataForEntity, formatPostForRDO, toggle } from '@readme/core';
 import { PostUpdateDTO } from './dto/post-update.dto';
+import { PostQuery } from './query/post.query';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly commentRepository: CommentRepository
       ) {}
 
-  async getPosts() {
-    const posts = await this.postRepository.find()
-
-    console.log(posts)
+  async getPosts(query: PostQuery) {
+    const posts = await this.postRepository.find(query)
 
     return posts.map((post) => formatPostForRDO(post))
   }
@@ -37,7 +34,7 @@ export class PostService {
     const post = {
       type,
       content: {...dto.content},
-      tags: [],
+      tags: [...dto.tags],
       likes: [],
       comments: [],
       isRepost: false,
@@ -47,7 +44,6 @@ export class PostService {
     const postEntity = new PostEntity(post)
 
     const newPost = await this.postRepository.create(postEntity);
-    console.log(newPost);
 
     return formatPostForRDO(newPost)
   }
@@ -63,13 +59,32 @@ export class PostService {
       throw new Error(PostError.NotFound)
     }
 
-    const postData = formatPostDataForRepost(post)
+    const postData = formatPostDataForEntity(post)
 
     const repostEntity = new PostEntity({...postData, isRepost: true, originID, authorID})
 
     const repost = await this.postRepository.create(repostEntity);
 
     return formatPostForRDO(repost);
+  }
+
+  async likePost(postID: number, dto: PostUpdateDTO) {
+    const post = await this.postRepository.findByID(postID);
+    const {userID} = dto
+
+    if (!post) {
+      throw new Error(PostError.NotFound);
+    }
+
+    const postData = formatPostDataForEntity(post)
+
+    const likes = toggle(postData.likes, userID);
+
+    const updatedEntity = new PostEntity({...postData, likes})
+
+    const updatedPost = await this.postRepository.update(postID, updatedEntity)
+
+    return formatPostForRDO(updatedPost)
   }
 
   async updatePost(postID: number, dto: PostUpdateDTO) {
@@ -84,7 +99,9 @@ export class PostService {
       throw new Error(PostError.Auth)
     }
 
-    const updatedEntity = new PostEntity({...post, ...update})
+    const postData = formatPostDataForEntity(post)
+
+    const updatedEntity = new PostEntity({...postData, ...update})
 
     const updatedPost = await this.postRepository.update(postID, updatedEntity)
 

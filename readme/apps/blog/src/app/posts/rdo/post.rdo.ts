@@ -23,6 +23,10 @@ class PostRDOBase {
   @Expose()
   public commentIDs: number[];
 
+  @ApiProperty()
+  @Expose()
+  public likes: string[];
+
   @ApiProperty({
     description: PostAPIDesc.Repost,
     example: PostAPIExample.Bool

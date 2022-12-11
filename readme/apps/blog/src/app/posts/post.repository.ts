@@ -3,6 +3,8 @@ import { CRUDRepo, formatPostDataForCreate, formatPostDataForUpdate } from '@rea
 import { PostEntity } from './post.entity';
 import { PrismaService } from '../prisma/prisma.service';
 import { Post } from '@prisma/client';
+import { PostQuery } from './query/post.query';
+import { SortByType } from './post.enum';
 
 @Injectable()
 export class PostRepository implements CRUDRepo<PostEntity, number, Post> {
@@ -42,16 +44,43 @@ export class PostRepository implements CRUDRepo<PostEntity, number, Post> {
     });
   }
 
-  public find() {
+  public find({users, limit, type, sortBy, sort, tag, draft, page}: PostQuery) {
     return this.prisma.post.findMany({
+      where:{
+        userID: {
+          in: users,
+        },
+        type: {
+          equals: type
+        },
+        AND: {
+          tags: {
+            has: tag,
+            isEmpty: false
+          }
+      },
+        isDraft: draft
+      },
+      take: limit,
       include: {
+        _count:{
+          select: {
+            comments: true,
+          }
+        },
         comments: true,
         link: true,
         photo: true,
         quote: true,
         text: true,
         video: true,
-      }
+      },
+      orderBy: [
+        sortBy === SortByType.Comm
+          ? { [sortBy]: {_count: sort}}
+          : {[sortBy]: sort}
+      ],
+      skip: page > 0 ? limit * (page - 1) : undefined,
     });
   }
 
