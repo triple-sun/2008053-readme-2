@@ -1,12 +1,14 @@
-
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Path, Prefix } from '@readme/core';
-import { PostService } from './post.service';
-import { PostRDO } from './rdo/post.rdo'
-import { PostCreateDTO, PostInfo } from '@readme/shared-types';
+import { ParamName, fillObject, Prefix, PostInfo } from '@readme/core';
+
+import { PostCreateDTO } from './dto/post-create.dto';
 import { PostUpdateDTO } from './dto/post-update.dto';
+
+import { PostService } from './post.service';
+import { PostTypeQuery } from './query/post-type.query';
 import { PostQuery } from './query/post.query';
+import { PostRDO } from './rdo/post.rdo';
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -15,13 +17,15 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
-  @Get(Path.PostID)
+  @Get(`:${ParamName.PostID}`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
-  async show(@Param(ParamName.PostID) postID: number) {
+  async show(
+    @Param(ParamName.PostID) postID: number
+  ) {
     const post = await this.postService.getPost(postID);
 
     return fillObject(PostRDO, post);
@@ -32,7 +36,9 @@ export class PostController {
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
-  async index(@Query() query: PostQuery) {
+  async index(
+    @Query() query: PostQuery
+  ) {
     return this.postService.getPosts(query)
   }
 
@@ -42,34 +48,42 @@ export class PostController {
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
-  async create(@Body() dto: PostCreateDTO) {
-    const post = await this.postService.createPost(dto);
+  async create(
+    @Query() {type}: PostTypeQuery,
+    @Body() dto: PostCreateDTO
+  ) {
+    const post = await this.postService.createPost(dto, type);
 
     return fillObject(PostRDO, post);
   }
 
-  @Patch(Path.PostID)
+  @Patch(`:${ParamName.PostID}`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
-  async update(@Param(ParamName.PostID) postID: number, @Body() dto: PostUpdateDTO) {
+  async update(
+    @Param(ParamName.PostID) postID: number,
+    @Body() dto: PostUpdateDTO
+  ) {
     const post = await this.postService.updatePost(postID, dto);
 
     return fillObject(PostRDO, post);
   }
 
-  @Delete(Path.PostID)
+  @Delete(`:${ParamName.PostID}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
-  async destroy(@Param(ParamName.PostID) postID: number) {
+  async destroy(
+    @Param(ParamName.PostID
+      ) postID: number) {
     await this.postService.deletePost(postID)
     }
 
-  @Post(`${Path.PostID}/${Path.Repost}`)
+  @Post(`:${ParamName.PostID}/repost`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
@@ -81,14 +95,17 @@ export class PostController {
     return fillObject(PostRDO, post);
   }
 
-  @Post(`${Path.PostID}/like`)
+  @Post(`:${ParamName.PostID}/like`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
-  async like(@Param(ParamName.PostID) postID: number, @Body() dto: PostUpdateDTO) {
-    const post = await this.postService.likePost(postID, dto);
+  async like(
+    @Param(ParamName.PostID) postID: number,
+    @Body() {userID}: PostUpdateDTO
+  ) {
+    const post = await this.postService.likePost(postID, userID);
 
     return fillObject(PostRDO, post);
   }

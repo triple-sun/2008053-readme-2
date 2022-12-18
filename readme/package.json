@@ -60,6 +60,7 @@
     "prisma": "^4.7.1",
     "ts-jest": "28.0.5",
     "ts-node": "10.9.1",
+    "tslint-class-validator-rule": "^1.0.5",
     "typescript": "~4.8.2"
   }
 }

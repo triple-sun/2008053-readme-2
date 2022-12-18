@@ -1,15 +1,20 @@
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
-import {Injectable} from '@nestjs/common';
-import { CRUDRepo } from '@readme/core';
-import { UserEntity } from './user.entity';
-import { User } from '@readme/shared-types';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Injectable } from '@nestjs/common';
 import { UserModel } from './user.model';
+import { CRUDRepo, User } from '@readme/shared-types';
+import { getToggleAction } from '@readme/core';
+
+import { UserEntity } from './user.entity';
 
 @Injectable()
 export class UserRepository implements CRUDRepo<UserEntity, string, User> {
   constructor(
     @InjectModel(UserModel.name) private readonly userModel: Model<UserModel>) {
+  }
+
+  public async find() {
+    return await this.userModel.find()
   }
 
   public async create(item: UserEntity): Promise<User> {
@@ -18,10 +23,10 @@ export class UserRepository implements CRUDRepo<UserEntity, string, User> {
   }
 
   public async destroy(id: string): Promise<void> {
-    await this.userModel.deleteOne({id});
+    await this.userModel.findByIdAndDelete(id);
   }
 
-  public async findByID(id: string): Promise<User | null> {
+  public async findOne(id: string): Promise<User | null> {
     return await this.userModel
       .findOne({id})
       .exec();
@@ -34,11 +39,17 @@ export class UserRepository implements CRUDRepo<UserEntity, string, User> {
   }
 
   public async update(id: string, item: UserEntity): Promise<User> {
-    console.log({id, item: item})
-    await this.userModel
+    return await this.userModel
       .findByIdAndUpdate(id, item.toObject(), {new: true})
       .exec();
-
-    return item.toObject();
   }
+
+  public async subscribe({_id}: User, {_id: subToID}: User): Promise<User> {
+    const action = await getToggleAction(_id, subToID, this.userModel)
+
+    return await this.userModel
+      .findByIdAndUpdate( _id._id, { [`${action}`]: { subscriptions: subToID._id }}, { new: true })
+      .exec()
+  }
+
 }

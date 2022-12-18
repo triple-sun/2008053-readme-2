@@ -1,24 +1,21 @@
-import { ApiProperty, IntersectionType } from "@nestjs/swagger";
-import { Post } from "@prisma/client";
 import { Expose } from "class-transformer";
-import { APIDesc, APIExample } from "../comment.enum";
+import { ApiProperty, IntersectionType } from "@nestjs/swagger";
+
 import { CommentCreateDTO } from "../dto/comment-create.dto";
+import { IsInt, ValidateNested } from "class-validator";
+import { PostRDO } from "../../posts/rdo/post.rdo";
+import { CommentAPIProp } from "@readme/core";
 
 class CommentRDOBase {
-  @ApiProperty({
-    description: APIDesc.CommentID,
-    required: true
-  })
   @Expose()
+  @IsInt()
+  @ApiProperty(CommentAPIProp.CommentID)
   public id: string;
 
-  @ApiProperty({
-    description: APIDesc.Post,
-    example: APIExample.ID,
-    required: true
-  })
   @Expose()
-  public post: Post;
+  @ValidateNested()
+  @ApiProperty(CommentAPIProp.Post)
+  public post: PostRDO;
 }
 
 export class CommentRDO extends IntersectionType (

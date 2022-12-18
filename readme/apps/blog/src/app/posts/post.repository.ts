@@ -1,79 +1,78 @@
-import {Injectable} from '@nestjs/common';
-import { CRUDRepo, formatPostDataForCreate, formatPostDataForUpdate } from '@readme/core';
-import { PostEntity } from './post.entity';
+import { Injectable } from '@nestjs/common';
+import { connectOrCreateTags, formatPost, getContent, PostInclude, SortByType } from '@readme/core';
+import { CRUDRepo, PostBase } from '@readme/shared-types';
+
 import { PrismaService } from '../prisma/prisma.service';
-import { Post } from '@prisma/client';
+import { PostEntity } from './post.entity';
 import { PostQuery } from './query/post.query';
-import { SortByType } from './post.enum';
 
 @Injectable()
-export class PostRepository implements CRUDRepo<PostEntity, number, Post> {
+export class PostRepository implements CRUDRepo<PostEntity, number, PostBase> {
   constructor(
     private readonly prisma: PrismaService
   ) {}
 
-  public async create(item: PostEntity): Promise<Post> {
+  public async create(item: PostEntity): Promise<PostBase> {
     const entityData = item.toObject();
 
-    const post = formatPostDataForCreate(entityData)
+    const { tags, originID, content: contentData, ...data } = entityData
+    const { type, postID, ...content } = contentData
 
-    return this.prisma.post.create(post)
+    const contentType = type ? type.toLowerCase() : entityData.type.toLowerCase()
+
+    const origin = postID ? { connect: { id: originID }} : undefined
+
+    const created = await this.prisma.post.create({
+      data: {
+        ...data,
+        authorID: data.authorID ?? data.userID,
+        type: entityData.type,
+        tags: {
+          connectOrCreate: connectOrCreateTags(tags)
+        },
+        origin,
+        [contentType]: { create: {...content} }
+        },
+      include: PostInclude
+    })
+
+    return formatPost(created)
   }
 
   public async destroy(id: number): Promise<void> {
     await this.prisma.post.delete({
-      where: {
-        id,
-      }
+      where: { id }
     });
   }
 
-  public async findByID(id: number) {
-    return this.prisma.post.findUnique({
-      where: {
-        id
-      },
-      include: {
-        comments: true,
-        link: true,
-        photo: true,
-        quote: true,
-        text: true,
-        video: true,
-      }
-    });
+  public async findOne(id: number): Promise<PostBase | null> {
+    const exists = await this.prisma.post.findUnique({ where: { id }, include: PostInclude})
+
+    if (exists.id) {
+      return formatPost(exists)
+    }
+
+    return exists
   }
 
-  public find({users, limit, type, sortBy, sort, tag, draft, page}: PostQuery) {
-    return this.prisma.post.findMany({
-      where:{
+  public async find({users, limit, type, sortBy, tag, sort, draft, page}: PostQuery) {
+    const posts = await this.prisma.post.findMany({
+      where: {
         userID: {
           in: users,
         },
         type: {
           equals: type
         },
-        AND: {
-          tags: {
-            has: tag,
-            isEmpty: false
-          }
-      },
+        tags: {
+          some: tag ? { title: tag } : {}
+        },
         isDraft: draft
       },
       take: limit,
       include: {
-        _count:{
-          select: {
-            comments: true,
-          }
-        },
-        comments: true,
-        link: true,
-        photo: true,
-        quote: true,
-        text: true,
-        video: true,
+        ...PostInclude,
+        _count:{ select: { comments: true }}
       },
       orderBy: [
         sortBy === SortByType.Comm
@@ -82,13 +81,45 @@ export class PostRepository implements CRUDRepo<PostEntity, number, Post> {
       ],
       skip: page > 0 ? limit * (page - 1) : undefined,
     });
+
+    return posts.map((post) => formatPost(post))
   }
 
   public async update(id: number, item: PostEntity) {
-    const post = item.toObject();
+    const entityData = item.toObject();
 
-    const update = formatPostDataForUpdate(id, post)
+    const type = entityData.type
 
-    return this.prisma.post.update(update)
+    const {originID, content, ...updateData} = entityData
+
+    const originType = (await this.prisma.post.findUnique({ where: { id }})).type
+
+    const handleContentTypeChange = () => {
+      if (originType !== type) {
+        return ({
+          [originType.toLowerCase()]: {delete: { where: { postID: id }}},
+          [type.toLowerCase()]: {create: content}
+        })
+      }
+
+      return ({
+        [type.toLowerCase()]: { connect: { postID: id }}
+      })
+    }
+
+    const update = await this.prisma.post.update({
+      where: { id },
+      data: {
+        ...updateData,
+        ...handleContentTypeChange(),
+        type,
+        tags: { connectOrCreate: connectOrCreateTags(entityData.tags) },
+        origin: originID ? { connect: { id: originID }} : undefined
+      },
+      include: PostInclude
+    })
+
+
+    return formatPost(update)
   }
 }

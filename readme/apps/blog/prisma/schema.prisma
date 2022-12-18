@@ -20,25 +20,25 @@ enum ContentType {
 }
 
 model Post {
-  id          Int           @id @default(autoincrement())
-  type        ContentType
-  tags        String[]
-  likes       String[]      @default([])
-  isDraft     Boolean       @default(false)
-  isRepost    Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-  publishAt   DateTime      @default(now())
-  userID      String
-  authorID    String?
-  originID    Int?
-  link        Link?
-  photo       Photo?
-  quote       Quote?
-  text        Text?
-  video       Video?
-  comments    Comment[]
-
-  @@unique([id])
+  id        Int         @id @default(autoincrement())
+  type      ContentType
+  tags      Tag[]
+  likes     String[]    @default([])
+  isDraft   Boolean     @default(false)
+  isRepost  Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  publishAt DateTime    @default(now())
+  userID    String
+  authorID  String?
+  originID  Int?        @unique
+  origin    Post?       @relation("RepostHistory", fields: [originID], references: [id])
+  reposts   Post[]      @relation("RepostHistory")
+  link      Link?
+  photo     Photo?
+  quote     Quote?
+  text      Text?
+  video     Video?
+  comments  Comment[]
 }
 
 model Comment {
@@ -51,51 +51,56 @@ model Comment {
 }
 
 model Link {
-  post Post        @relation(fields: [id], references: [id], onDelete: Cascade)
-  id   Int         @id
-  type ContentType @default(LINK)
-  url  String
-  desc String?
+  post   Post        @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID Int         @id
+  type   ContentType @default(LINK) @ignore
+  url    String
+  desc   String?
 
-  @@unique([id, type])
+  @@unique([postID])
 }
 
 model Photo {
-  post  Post        @relation(fields: [id], references: [id], onDelete: Cascade)
-  id    Int         @id
-  type  ContentType @default(PHOTO)
-  photo String
+  post   Post        @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID Int         @id
+  type   ContentType @default(PHOTO) @ignore
+  photo  String
 
-  @@unique([id, type])
+  @@unique([postID])
 }
 
 model Quote {
-  post   Post        @relation(fields: [id], references: [id], onDelete: Cascade)
-  id     Int         @id
-  type   ContentType @default(QUOTE)
+  post   Post        @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID Int         @id
+  type   ContentType @default(QUOTE) @ignore
   quote  String
   author String
 
-  @@unique([id, type])
+  @@unique([postID])
 }
 
 model Text {
-  post  Post        @relation(fields: [id], references: [id], onDelete: Cascade)
-  id    Int         @id
-  type  ContentType @default(TEXT)
-  title String
-  ann   String
-  text  String
+  post   Post        @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID Int         @id
+  type   ContentType @default(TEXT) @ignore
+  title  String
+  ann    String
+  text   String
 
-  @@unique([id, type])
+  @@unique([postID])
 }
 
 model Video {
-  post     Post        @relation(fields: [id], references: [id], onDelete: Cascade)
-  id       Int         @id
-  type     ContentType @default(VIDEO)
+  post     Post        @relation(fields: [postID], references: [id], onDelete: Cascade)
+  postID   Int         @id
+  type     ContentType @default(VIDEO) @ignore
   title    String
   videoUrl String
 
-  @@unique([id, type])
+  @@unique([postID])
+}
+
+model Tag {
+  title String @id
+  posts Post[]
 }

@@ -1,13 +1,14 @@
-import {User} from '@readme/shared-types';
-import {genSalt, hash, compare} from 'bcrypt';
-import {SALT_ROUNDS} from './user.const';
+import { UsersConfig } from '@readme/core';
+import { User } from '@readme/shared-types';
+import { genSalt, hash, compare } from 'bcrypt';
+import { Types } from 'mongoose';
 
 export class UserEntity implements User {
-  public _id: string;
+  public _id: Types.ObjectId;
   public avatarUrl: string;
   public email: string;
   public name: string;
-  public subscriptions: string[];
+  public subscriptions: User[];
   public passwordHash: string;
   public accessToken: string;
 
@@ -16,20 +17,8 @@ export class UserEntity implements User {
   }
 
   public async setPassword(password: string): Promise<UserEntity> {
-    const salt = await genSalt(SALT_ROUNDS);
+    const salt = await genSalt(UsersConfig.SaltRounds);
     this.passwordHash = await hash(password, salt);
-    return this;
-  }
-
-  public async updateSubscribers(update: string[]): Promise<UserEntity> {
-    this.subscriptions = update;
-
-    return this;
-  }
-
-  public async setAvatarUrl(avatarUrl: string): Promise<UserEntity> {
-    this.avatarUrl = avatarUrl;
-
     return this;
   }
 

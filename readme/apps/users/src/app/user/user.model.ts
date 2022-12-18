@@ -1,13 +1,13 @@
+import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MinMax } from '@readme/core';
-import { Collection, User } from '@readme/shared-types';
-import { Document } from 'mongoose';
+
+import { Collection, MinMax } from '@readme/core';
+import { User } from '@readme/shared-types';
 
 @Schema({
   collection: Collection.Users,
 })
-
-export class UserModel extends Document implements User {
+export class UserModel extends mongoose.Document implements User {
   @Prop()
   public avatarUrl: string;
 
@@ -26,9 +26,9 @@ export class UserModel extends Document implements User {
 
   @Prop({
     default: [],
-    unique: true
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: UserModel.name }]
   })
-  public subscriptions: string[];
+  public subscriptions: User[]
 
   @Prop({
     required: true,

@@ -1,24 +1,28 @@
-import { ContentType, Link, Photo, Quote, Text, Video } from "@prisma/client";
+import { ContentType, Link, Tag } from "@prisma/client";
+import { ContentDTO, LinkDTO, PhotoDTO, QuoteDTO, TextDTO, VideoDTO } from "@readme/core";
 import { Comment } from "./comment.interface";
-import { Content } from "./content.type";
 
-export interface Post {
+export interface PostBase {
   id?: number;
-  content?: Content;
-  tags?: string[];
+  type?: ContentType;
+  content?: ContentDTO;
+  tags?: Tag[];
   likes?: string[];
-  comments?: Comment[]
-  isDraft?: boolean;
+  comments?: Comment[];
   isRepost?: boolean;
-  originID?: number;
+  isDraft?: boolean;
   userID?: string;
+  origin?: Post;
+  originID?: number;
   authorID?: string;
   publishAt?: Date;
   createdAt?: Date;
-  type?: ContentType;
-  link?: Link;
-  photo?: Photo;
-  quote?: Quote;
-  text?: Text;
-  video?: Video;
+}
+
+export interface Post extends PostBase {
+  link?: LinkDTO | Pick<Link, 'postID'>
+  photo?: PhotoDTO | Pick<Link, 'postID'>
+  quote?: QuoteDTO | Pick<Link, 'postID'>
+  text?: TextDTO | Pick<Link, 'postID'>
+  video?: VideoDTO | Pick<Link, 'postID'>
 }

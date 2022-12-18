@@ -1,24 +1,18 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { MinMax } from "@readme/core";
 import { Expose } from "class-transformer";
-import { APIDesc, APIExample } from "../comment.enum";
+import { IsMongoId, IsString, MaxLength, MinLength } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { CommentAPIProp, MinMax } from "@readme/core";
 
 export class CommentCreateDTO {
-  @ApiProperty({
-    description: APIDesc.Text,
-    example: APIExample.Text,
-    required: true,
-    minLength: MinMax.CommentMin,
-    maxLength: MinMax.CommentMax
-  })
   @Expose()
+  @IsString()
+  @MaxLength(MinMax.CommentMax)
+  @MinLength(MinMax.CommentMin)
+  @ApiProperty(CommentAPIProp.Text)
   public text: string;
 
-  @ApiProperty({
-    description: APIDesc.UserID,
-    example: APIExample.ID,
-    required: true
-  })
   @Expose()
+  @IsMongoId()
+  @ApiProperty(CommentAPIProp.UserID)
   public userID: string;
 }

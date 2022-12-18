@@ -1,40 +1,54 @@
-import { Entity } from "@readme/core";
-import { Comment, Content, Post} from "@readme/shared-types";
+import { ContentType } from "@prisma/client";
+import { ContentDTO, TagDTO } from "@readme/core";
+import { Entity, Post, PostBase } from "@readme/shared-types";
 
-export class PostEntity implements Entity<PostEntity>, Post {
+export class PostEntity implements Entity<PostEntity>, PostBase {
   public isDraft: boolean;
   public isRepost: boolean;
-  public content: Content;
-  public tags: string[]
-  public comments: Comment[]
+  public tags: TagDTO[]
+  public commentIDs: number[]
   public likes: string[]
-  public authorID?: string;
   public userID: string;
-  public originID?: number;
   public createdAt?: Date;
   public publishAt?: Date;
+  public type?: ContentType;
+  public content: ContentDTO;
+  public authorID?: string;
+  public originID?: number;
+  public origin?: Post;
 
   constructor(post: Post) {
     this.fillEntity(post);
   }
 
   public toObject() {
+    return {...this};
+  }
+
+  public toUpdate(): PostBase {
+    return {...this}
+  }
+
+  public toCreate() {
     return {
       ...this,
-      comments: this.comments.map(({id}) => ({id}))
-    };
+      [this.content.type.toLowerCase()]: this.content
+    }
   }
 
   public fillEntity(entity: Post) {
-    this.publishAt = new Date();
-    this.tags = [...entity.tags];
-    this.likes = [...entity.likes];
-    this.comments = [...entity.comments];
-    this.isDraft = entity.isDraft;
     this.isRepost = entity.isRepost;
-    this.authorID = entity.authorID;
-    this.originID = entity.originID;
+    this.publishAt = new Date();
+
+    this.type = entity.type;
+    this.content = {...entity.content}
+
+    this.isDraft = entity.isDraft;
     this.userID = entity.userID;
-    this.content = {...entity.content};
+    this.tags = entity.tags ?? []
+    this.likes = entity.likes ?? []
+
+    this.authorID = entity.userID
+    this.originID = entity.id
   }
 }

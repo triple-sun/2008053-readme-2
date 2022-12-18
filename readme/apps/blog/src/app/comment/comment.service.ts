@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { PostError } from "@readme/shared-types";
-import { PostRepository } from "../posts/post.repository";
+import { CommentError, PostError } from "@readme/core";
+
 import { CommentEntity } from "./comment.entity";
-import { CommentError } from "./comment.enum";
+import { PostRepository } from "../posts/post.repository";
 import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
+import { CommentQuery } from "./query/comment.query";
 
 @Injectable()
 export class CommentService {
@@ -13,12 +14,12 @@ export class CommentService {
     private readonly postRepository: PostRepository
       ) {}
 
-  async getCommentsForPost(postID: number) {
-    return await this.commentRepository.findAllByPostID(postID)
+  async getCommentsForPost(query: CommentQuery) {
+    return await this.commentRepository.findAllByPostID(query)
   }
 
   async createComment(postID: number, dto: CommentCreateDTO) {
-    const post = await this.postRepository.findByID(postID)
+    const post = await this.postRepository.findOne(postID)
 
     if (!post) {
       throw new Error(PostError.NotFound)
@@ -30,7 +31,7 @@ export class CommentService {
   }
 
   async deleteComment(commentID: number) {
-    const comment = await this.commentRepository.findByID(commentID);
+    const comment = await this.commentRepository.findOne(commentID);
 
     if (!comment) {
       throw new Error(CommentError.NotFound)

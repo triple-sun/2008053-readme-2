@@ -1,59 +1,52 @@
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { PostCreateDTO } from '@readme/shared-types';
 import { Exclude, Expose } from 'class-transformer';
-import { PostAPIDesc, PostAPIExample } from '@readme/shared-types';
-import { ContentType } from '@prisma/client';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+import { ContentType, Post } from '@prisma/client';
+
+import { PostCreateDTO } from '../dto/post-create.dto';
+import { IsArray, IsBoolean, IsEnum, IsMongoId, IsString, ValidateNested } from 'class-validator';
+import { PostAPIProp } from '@readme/core';
 
 class PostRDOBase {
-  @ApiProperty({
-    description: PostAPIDesc.ID,
-    example: PostAPIExample.ID
-  })
   @Expose()
+  @IsString()
+  @ApiProperty(PostAPIProp.PostID)
   public id: string;
 
-  @ApiProperty({
-    description: PostAPIDesc.ID,
-    example: PostAPIExample.ID
-  })
   @Exclude()
+  @IsEnum(ContentType)
+  @ApiProperty(PostAPIProp.Type)
   public type: ContentType;
 
-  @ApiProperty()
   @Expose()
+  @IsArray()
+  @ApiProperty()
   public commentIDs: number[];
 
-  @ApiProperty()
   @Expose()
+  @IsMongoId()
+  @IsArray({each: true})
+  @ApiProperty()
   public likes: string[];
 
-  @ApiProperty({
-    description: PostAPIDesc.Repost,
-    example: PostAPIExample.Bool
-  })
   @Expose()
+  @IsBoolean()
+  @ApiProperty(PostAPIProp.IsRepost)
   public isRepost: boolean;
 
-  @ApiProperty({
-    description: PostAPIDesc.Draft,
-    example: PostAPIExample.Bool
-  })
   @Expose()
+  @IsBoolean()
+  @ApiProperty(PostAPIProp.IsDraft)
   public isDraft: boolean;
 
-  @ApiProperty({
-    description: PostAPIDesc.AuthorID,
-    example: PostAPIExample.ID
-  })
   @Expose()
+  @IsMongoId()
+  @ApiProperty(PostAPIProp.AuthorID)
   public authorID: string;
 
-  @ApiProperty({
-    description: PostAPIDesc.OriginID,
-    example: PostAPIExample.ID
-  })
   @Expose()
-  public originID: string;
+  @ValidateNested()
+  @ApiProperty(PostAPIProp.Origin)
+  public origin: Post;
 }
 
 export class PostRDO extends IntersectionType(
