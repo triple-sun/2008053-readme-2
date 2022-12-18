@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { connectOrCreateTags, formatPost, getContent, PostInclude, SortByType } from '@readme/core';
+import { connectOrCreateTags, formatPost, PostInclude, SortByType } from '@readme/core';
 import { CRUDRepo, PostBase } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';

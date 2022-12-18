@@ -84,7 +84,7 @@ export enum ENVError {
 export enum MinMax {
   TagMin = 3,
   TagMax = 10,
-  TagsMax = 8,
+  TagsLimit = 8,
   TitleMin = 20,
   TitleMax = 50,
   AnnMin = 50,
@@ -104,5 +104,6 @@ export enum MinMax {
   AvatarMaxBytes = 500000,
   CommentMin = 10,
   CommentMax = 300,
-  CommentsLimit = 30
+  CommentsLimit = 30,
+  PostsLimit = 25
 }

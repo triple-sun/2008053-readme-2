@@ -24,7 +24,6 @@ export const formatPost = (post: Post): PostBase => {
 }
 
 export const getMongoConnectionString = ({user, pass, host, port, database, authBase, upload}): string => {
-  console.log(upload)
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
 }
 

@@ -6,6 +6,7 @@ import { QuoteDTO } from "../../dto/content/quote.dto";
 import { TextDTO } from "../../dto/content/text.dto";
 import { VideoDTO } from "../../dto/content/video.dto";
 import { TagDTO } from "../../dto/tag.dto";
+import { APIDesc, APIExample } from "../../enum/comment.enum";
 import { PostAPIDesc, PostAPIExample } from "../../enum/post.enum";
 import { MinMax } from "../../enum/utils.enum";
 import { TAPIProp } from "../api-prop";
@@ -26,7 +27,7 @@ export const PostAPIProp: TAPIProp = {
     description: PostAPIDesc.Tags,
     example: PostAPIExample.Tags,
     default: [],
-    maxItems: MinMax.TagsMax,
+    maxItems: MinMax.TagsLimit,
     type: [TagDTO]
   },
   UserID: {
@@ -65,5 +66,11 @@ export const PostAPIProp: TAPIProp = {
     example: PostAPIExample.Tag,
     minLength: MinMax.TagMin,
     maxLength: MinMax.TagMax,
+  },
+  Limit: {
+    default: MinMax.PostsLimit,
+    maximum: MinMax.PostsLimit,
+    description: APIDesc.Limit,
+    example: APIExample.ID
   }
 }

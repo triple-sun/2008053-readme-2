@@ -24,5 +24,16 @@ export const CommentAPIProp: TAPIProp = {
     description: APIDesc.Post,
     required: true,
     type: 'Post'
+  },
+  PostID: {
+    required: true,
+    description: APIDesc.PostID,
+    example: APIExample.ID
+  },
+  Limit: {
+    default: MinMax.CommentsLimit,
+    maximum: MinMax.CommentsLimit,
+    description: APIDesc.Limit,
+    example: APIExample.ID
   }
 }

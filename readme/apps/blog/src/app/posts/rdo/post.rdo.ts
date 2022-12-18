@@ -20,7 +20,7 @@ class PostRDOBase {
   @Expose()
   @IsArray()
   @ApiProperty()
-  public commentIDs: number[];
+  public comments: Comment[];
 
   @Expose()
   @IsMongoId()

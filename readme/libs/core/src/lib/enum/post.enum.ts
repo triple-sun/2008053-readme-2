@@ -11,9 +11,7 @@ export enum SortByType {
   Comm = 'comments',
 }
 
-export const Default = {
-  PostLimit: 25,
-  CommentLimit: 30,
+export const Sort = {
   PostSort: SortType.Desc,
   PotSortBy: SortByType.Date,
 }

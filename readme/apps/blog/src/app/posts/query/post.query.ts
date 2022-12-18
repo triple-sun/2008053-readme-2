@@ -1,7 +1,8 @@
 import { IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Length, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ContentType } from '@prisma/client';
-import { MinMax, Default, SortByType, SortType } from '@readme/core';
+import { MinMax, PostAPIProp, Sort, SortByType, SortType } from '@readme/core';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PostQuery {
   @IsArray()
@@ -11,25 +12,28 @@ export class PostQuery {
 
   @IsInt()
   @IsOptional()
-  @Max(Default.PostLimit)
-  @Transform(({ value } ) => +value || Default.PostLimit)
-  public limit? = Default.PostLimit;
+  @Max(MinMax.PostsLimit)
+  @Transform(({ value } ) => +value || MinMax.PostsLimit)
+  @ApiProperty(PostAPIProp.Limit)
+  public limit? = MinMax.PostsLimit;
 
   @IsOptional()
   @IsEnum(ContentType)
+  @ApiProperty(PostAPIProp.Type)
   public type?: ContentType;
 
   @IsOptional()
   @IsEnum(SortByType)
-  public sortBy?: SortByType.Date | SortByType.Likes | SortByType.Comm = Default.PotSortBy
+  public sortBy?: SortByType.Date | SortByType.Likes | SortByType.Comm = Sort.PotSortBy
 
   @IsOptional()
   @IsEnum(SortType)
-  public sort?: SortType.Desc | SortType.Asc = Default.PostSort;
+  public sort?: SortType.Desc | SortType.Asc = Sort.PostSort;
 
   @IsString()
   @IsOptional()
   @Length(MinMax.TagMin, MinMax.TagMax)
+  @ApiProperty(PostAPIProp.Tag)
   public tag?: string;
 
   @IsBoolean()

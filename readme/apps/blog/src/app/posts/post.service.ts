@@ -57,14 +57,9 @@ export class PostService {
       throw new Error(PostError.NotFound)
     }
 
-    console.log({origin})
-
     const {authorID, ...postBase} = origin
 
-
     const repostEntity = new PostEntity({...postBase, isRepost: true, authorID: authorID ?? origin.userID })
-
-    console.log({repostEntity})
 
     const repost = await this.postRepository.create(repostEntity);
 

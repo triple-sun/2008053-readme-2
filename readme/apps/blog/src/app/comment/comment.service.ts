@@ -36,9 +36,7 @@ export class CommentService {
     if (!comment) {
       throw new Error(CommentError.NotFound)
     }
-
-    console.log({id: commentID, comment: comment})
-
+    
     await this.commentRepository.destroy(commentID)
   }
 }

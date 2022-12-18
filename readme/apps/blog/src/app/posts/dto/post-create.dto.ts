@@ -14,7 +14,7 @@ export class PostCreateDTO {
   @IsArray()
   @IsOptional()
   @ValidateNested()
-  @ArrayMaxSize(MinMax.TagsMax)
+  @ArrayMaxSize(MinMax.TagsLimit)
   @ApiProperty(PostAPIProp.Tags)
   public tags?: TagDTO[];
 
