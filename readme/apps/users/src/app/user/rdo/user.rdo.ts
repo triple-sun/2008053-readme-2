@@ -1,23 +1,38 @@
+import { IsArray, IsJWT, IsMongoId } from 'class-validator';
+import { Expose, Transform } from 'class-transformer';
 import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
-import { KeyName } from '@readme/core';
-import { UserAPIDesc, UserAPIExample } from '@readme/shared-types';
-import { Expose } from 'class-transformer';
+import { KeyName, UserAPIDesc, UserAPIExample } from '@readme/core';
 import { UserCreateDTO } from '../dto/user-create.dto';
+import { User } from '@readme/shared-types';
+import { Types } from 'mongoose';
 
 class UserRDOBase {
+  @Expose({ name: KeyName.ObjectID})
+  @IsMongoId()
+  @Transform(({ obj }) => obj._id)
   @ApiProperty({
     description: UserAPIDesc.ID,
     example: UserAPIExample.ID
   })
-  @Expose({ name: KeyName.ObjectID})
-  public id: string;
+  public id: Types.ObjectId
 
+  @Expose()
+  @IsMongoId()
+  @IsArray({each: true})
+  @ApiProperty({
+    description: UserAPIDesc.Subs,
+    example: UserAPIExample.Subs,
+    default: []
+  })
+  public subscriptions: User[];
+
+  @Expose()
+  @IsJWT()
   @ApiProperty({
     description: UserAPIDesc.Token,
     example: UserAPIExample.Token
   })
-  @Expose()
-  public accessToken: string;
+  public token: string;
 }
 
 export class UserRDO extends IntersectionType(

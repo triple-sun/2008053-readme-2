@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from './user.entity';
+import { AuthError } from '@readme/core';
+
 import { UserUpdateDTO } from './dto/user-update.dto';
+import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
-import { AuthError } from '../app.enum';
 
 @Injectable()
 export class UserService {
@@ -10,8 +11,12 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
+  async getUsers() {
+    return await this.userRepository.find()
+  }
+
   async getUser(userID: string) {
-    const user = await this.userRepository.findByID(userID);
+    const user = await this.userRepository.findOne(userID);
 
     if (!user) {
       throw new Error(AuthError.NotFound);
@@ -20,31 +25,38 @@ export class UserService {
     return user;
   }
 
-  async update(userID: string, { avatarUrl, password, subscribeTo } : UserUpdateDTO) {
-    const user = await this.userRepository.findByID(userID);
+  async update(userID: string, { avatarUrl, password }: UserUpdateDTO) {
+    const user = await this.userRepository.findOne(userID)
 
     if (!user) {
       throw new Error(AuthError.NotFound);
     }
 
-    const userEntity = new UserEntity(user)
-
-    if (avatarUrl) {
-      await userEntity.setAvatarUrl(avatarUrl)
+    const update = {
+      ...user,
+      avatarUrl: avatarUrl ?? user.avatarUrl,
     }
 
-    if (password) {
-      await userEntity.setPassword(password)
+    const userEntity = password
+      ? new UserEntity(update)
+      : await new UserEntity(update).setPassword(password)
+
+    return await this.userRepository.update(userID, userEntity)
+  }
+
+  async subscribe(userID: string, subToID: string) {
+    const user = await this.userRepository.findOne(userID)
+
+    if (!user) {
+      throw new Error(AuthError.NotFound);
     }
 
-    if (subscribeTo)  {
-      const update = userEntity.subscriptions.includes(subscribeTo)
-        ? userEntity.subscriptions.filter((sub) => sub !== subscribeTo)
-        : [...userEntity.subscriptions, subscribeTo]
+    const subTo = await this.userRepository.findOne(subToID)
 
-      await userEntity.updateSubscribers(update)
+    if (!subTo) {
+      throw new Error(AuthError.Sub);
     }
 
-    return this.userRepository.update(userID, userEntity)
+    return await this.userRepository.subscribe(user, subTo)
   }
 }

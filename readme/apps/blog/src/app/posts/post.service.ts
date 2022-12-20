@@ -1,80 +1,93 @@
 import { Injectable } from '@nestjs/common';
+import { ContentType } from '@prisma/client';
+import { PostError, toggleArrElement } from '@readme/core';
+import { PostBase } from '@readme/shared-types';
+
+import { PostCreateDTO } from './dto/post-create.dto';
+import { PostUpdateDTO } from './dto/post-update.dto';
+
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { CommentRepository } from '../comment/comment.repository';
-import { PostCreateDTO, PostError } from '@readme/shared-types';
-import { formatPostDataForRepost, formatPostForRDO } from '@readme/core';
-import { PostUpdateDTO } from './dto/post-update.dto';
+import { PostQuery } from './query/post.query';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly commentRepository: CommentRepository
       ) {}
 
-  async getPosts() {
-    const posts = await this.postRepository.find()
 
-    console.log(posts)
+  async getPosts(query: PostQuery) {
+    const posts = await this.postRepository.find(query)
 
-    return posts.map((post) => formatPostForRDO(post))
+    return posts
+      .map((post): PostBase => ({
+        ...post,
+        type: post.type,
+        content: post[post.type.toLowerCase()]
+      }))
   }
 
-  async getPost(postID: number) {
-    const post = await this.postRepository.findByID(postID);
+  async getPost(postID: number): Promise<PostBase> {
+    const post = await this.postRepository.findOne(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound);
     }
 
-    return formatPostForRDO(post)
+    return post
   }
 
-  async createPost(dto: PostCreateDTO) {
-    const type = dto.content.type
+  async createPost(dto: PostCreateDTO, contentType: ContentType) {
+    if (dto.content.type !== contentType) {
+      throw new Error(PostError.QueryType)
+    }
 
-    const post = {
-      type,
-      content: {...dto.content},
-      tags: [],
-      likes: [],
-      comments: [],
-      isRepost: false,
-      userID: dto.userID,
-    };
-
-    const postEntity = new PostEntity(post)
+    const postEntity = new PostEntity({...dto, type: contentType, comments: [], likes: []})
 
     const newPost = await this.postRepository.create(postEntity);
-    console.log(newPost);
 
-    return formatPostForRDO(newPost)
+    return newPost
   }
 
-  async repost(postID: number) {
-    const post = await this.postRepository.findByID(postID);
+  async repost(postID: number): Promise<PostBase> {
+    const origin = await this.postRepository.findOne(postID);
 
-    const authorID = post.authorID ? post.authorID : post.userID
-    const originID = post.id
-
-
-    if (!post) {
+    if (!origin) {
       throw new Error(PostError.NotFound)
     }
 
-    const postData = formatPostDataForRepost(post)
+    const {authorID, ...postBase} = origin
 
-    const repostEntity = new PostEntity({...postData, isRepost: true, originID, authorID})
+    const repostEntity = new PostEntity({...postBase, isRepost: true, authorID: authorID ?? origin.userID })
 
     const repost = await this.postRepository.create(repostEntity);
 
-    return formatPostForRDO(repost);
+    return {
+      ...repost,
+      content: repost[repost.type.toLowerCase()]
+    };
+  }
+
+  async likePost(postID: number, userID: string): Promise<PostBase> {
+    const post = await this.postRepository.findOne(postID);
+
+    if (!post) {
+      throw new Error(PostError.NotFound);
+    }
+
+    const likes = toggleArrElement(post.likes, userID);
+
+    const updatedEntity = new PostEntity({...post, likes})
+
+    const updatedPost = await this.postRepository.update(postID, updatedEntity)
+
+    return updatedPost
   }
 
   async updatePost(postID: number, dto: PostUpdateDTO) {
-    const post = await this.postRepository.findByID(postID);
-    const {userID, ...update} = dto
+    const post = await this.postRepository.findOne(postID);
+    const {userID, tags, content} = dto
 
     if (!post) {
       throw new Error(PostError.NotFound);
@@ -84,15 +97,15 @@ export class PostService {
       throw new Error(PostError.Auth)
     }
 
-    const updatedEntity = new PostEntity({...post, ...update})
+    const updatedEntity = new PostEntity({...post, tags, content})
 
     const updatedPost = await this.postRepository.update(postID, updatedEntity)
 
-    return formatPostForRDO(updatedPost)
+    return updatedPost
   }
 
   async deletePost(postID: number) {
-    const post = await this.postRepository.findByID(postID);
+    const post = await this.postRepository.findOne(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound)

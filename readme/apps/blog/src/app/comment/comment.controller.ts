@@ -1,10 +1,10 @@
-
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Path, Prefix } from '@readme/core';
-import { CommentInfo } from './comment.enum';
+import { ParamName, fillObject, Prefix, CommentInfo } from '@readme/core';
+
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
+import { CommentQuery } from './query/comment.query';
 import { CommentRDO } from './rdo/comment.rdo';
 
 @ApiTags(Prefix.Comments)
@@ -14,36 +14,38 @@ export class CommentController {
     private readonly commentService: CommentService,
   ) {}
 
-  @Get(`${Path.PostID}`)
+  @Get()
   @ApiResponse({
     status: HttpStatus.OK,
     description: CommentInfo.Loaded
   })
-  async getComments(@Param(ParamName.PostID) postID: string) {
-    return this.commentService.getCommentsForPost(parseInt(postID))
+  async getComments(
+    @Query() query: CommentQuery
+    ) {
+    return this.commentService.getCommentsForPost(query)
   }
 
-  @Post(`${Path.PostID}`)
+  @Post()
   @ApiResponse({
     type: [CommentRDO],
     status: HttpStatus.CREATED,
     description: CommentInfo.Created
   })
   async create(
-    @Param(ParamName.PostID) postID: string,
+    @Query() {postID}: CommentQuery,
     @Body() dto: CommentCreateDTO
     ) {
-    const comment = await this.commentService.createComment(parseInt(postID), dto);
+    const comment = await this.commentService.createComment(postID, dto);
 
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`${Path.CommentID}`)
+  @Delete(`:${ParamName.CommentID}`)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(ParamName.CommentID) commentID: string) {
-    return this.commentService.deleteComment(parseInt(commentID));
+  async delete(@Param(ParamName.CommentID) commentID: number) {
+    return this.commentService.deleteComment(commentID);
   }
 }

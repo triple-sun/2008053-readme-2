@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { User } from '@readme/shared-types';
+import { AuthError } from '@readme/core';
+
 import { UserEntity } from '../user/user.entity';
-import { AuthError } from '../app.enum';
+import { UserRepository } from '../user/user.repository';
 import { UserCreateDTO } from '../user/dto/user-create.dto';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
-import { UserRepository } from '../user/user.repository';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(dto: UserCreateDTO) {
@@ -19,6 +23,7 @@ export class AuthService {
       avatarUrl: '',
       subscriptions: [],
       passwordHash: '',
+      accessToken: ''
     };
 
     const existUser = await this.userRepository
@@ -35,21 +40,30 @@ export class AuthService {
       .create(userEntity);
   }
 
-  async login(dto: UserLoginDTO) {
+  async verifyUser(dto: UserLoginDTO) {
     const {email, password} = dto;
 
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email)
 
     if (!user) {
-      throw new Error(AuthError.Login);
+      throw new UnauthorizedException(AuthError.Login);
     }
 
     const userEntity = new UserEntity(user);
 
     if (! await userEntity.comparePassword(password)) {
-      throw new Error(AuthError.Login);
+      throw new UnauthorizedException(AuthError.Login);
     }
 
     return userEntity.toObject();
+  }
+
+  async loginUser(user: User) {
+    const payload = {
+      sub: user._id,
+      email: user.email,
+    };
+
+    return await this.jwtService.signAsync(payload)
   }
 }

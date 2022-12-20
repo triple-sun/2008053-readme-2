@@ -3,7 +3,7 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Desc, Info, Path, Prefix, Title, Version } from '@readme/core';
@@ -24,7 +24,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(Path.SpecUsers, app, document)
 
-  const port = process.env.PORT || 3333;
+  app.useGlobalPipes(new ValidationPipe());
+
+  const port = process.env.PORT || 4444;
   await app.listen(port);
 
   Logger.log(

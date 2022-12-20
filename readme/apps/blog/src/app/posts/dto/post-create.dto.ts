@@ -1,27 +1,25 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { MinMax } from "@readme/core";
-import { Content, PostAPIDesc, PostAPIExample } from "@readme/shared-types";
 import { Expose } from "class-transformer";
+import { ArrayMaxSize, IsArray, IsMongoId, IsOptional, ValidateNested } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
+import { ContentDTO, MinMax, PostAPIProp, TagDTO } from "@readme/core";
 
 export class PostCreateDTO {
   @Expose()
-  public content: Content;
+  @ValidateNested()
+  @ApiProperty(PostAPIProp.Content)
+  public content: ContentDTO;
 
-  @ApiProperty({
-    description: PostAPIDesc.Tags,
-    example: PostAPIExample.Tags,
-    default: [],
-    maxItems: MinMax.TagsMax,
-  })
   @Expose()
-  public tags?: string[];
+  @IsArray()
+  @IsOptional()
+  @ValidateNested()
+  @ArrayMaxSize(MinMax.TagsLimit)
+  @ApiProperty(PostAPIProp.Tags)
+  public tags?: TagDTO[];
 
-  @ApiProperty({
-    description: PostAPIDesc.UserID,
-    example: PostAPIExample.ID,
-    required: true
-  })
   @Expose()
+  @IsMongoId()
+  @ApiProperty(PostAPIProp.UserID)
   public userID: string;
 }

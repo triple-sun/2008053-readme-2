@@ -2,8 +2,7 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
-
- import { Logger } from '@nestjs/common';
+ import { Logger, ValidationPipe } from '@nestjs/common';
  import { NestFactory } from '@nestjs/core';
  import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
  import { Desc, Info, Path, Prefix, Title, Version } from '@readme/core';
@@ -20,6 +19,10 @@
      .build();
 
    app.setGlobalPrefix(globalPrefix);
+
+   app.useGlobalPipes(new ValidationPipe({
+    transform: true
+  }));
 
    const document = SwaggerModule.createDocument(app, config);
    SwaggerModule.setup(Path.SpecBlog, app, document)

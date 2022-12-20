@@ -1,14 +1,17 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { UserRDO } from './rdo/user.rdo';
+import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserUpdateDTO } from './dto/user-update.dto';
-import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { avatarExtRegExp, fillObject, getAvatarFileName, getAvatarUploadDest, MinMax, ParamName, Prefix, UploadFileDTO, UserAPIDesc, UserInfo } from '@readme/core';
+
+import { Express } from 'express';
 import { diskStorage } from 'multer';
-import { avatarExtRegExp, fillObject, getAvatarName, getAvatarUploadDest, MinMax, ParamName, Path, Prefix } from '@readme/core';
-import { UserInfo } from '../app.enum';
+
 import { UserService } from './user.service';
-import { UploadFileDTO, UserAPIDesc } from '@readme/shared-types';
+import { MongoIdValidationPipe } from '../pipes/mongo-id-validation.pipe';
+import { UserRDO } from './rdo/user.rdo';
+import { UserUpdateDTO } from './dto/user-update.dto';
+import { SubQuery } from './query/sub.query';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -17,19 +20,32 @@ export class UserController {
     private readonly userService: UserService,
   ) {}
 
-  @Get(Path.UserID)
+  @Get()
   @ApiResponse({
    type: UserRDO,
    status: HttpStatus.OK,
    description: UserInfo.Found
   })
-  async show(@Param(ParamName.UserID) userID: string) {
+  async index() {
+    const users = await this.userService.getUsers()
+
+    return users.map((user) => fillObject(UserRDO, user));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(`:${ParamName.UserID}`)
+  @ApiResponse({
+   type: UserRDO,
+   status: HttpStatus.OK,
+   description: UserInfo.Found
+  })
+  async show(@Param(ParamName.UserID, MongoIdValidationPipe) userID: string) {
     const user = await this.userService.getUser(userID);
 
     return fillObject(UserRDO, user);
   }
 
-  @Patch(Path.UserID)
+  @Patch(`:${ParamName.UserID}`)
   @ApiBody({
     type: UserUpdateDTO
   })
@@ -39,7 +55,7 @@ export class UserController {
    description: UserInfo.Updated
   })
   async update(
-    @Param(ParamName.UserID) userID: string,
+    @Param(ParamName.UserID, MongoIdValidationPipe) userID: string,
     @Body() dto: UserUpdateDTO
   ) {
     const update = await this.userService.update(userID, dto);
@@ -47,11 +63,11 @@ export class UserController {
     return fillObject(UserRDO, update);
   }
 
-  @Patch(`${Path.UserID}/avatar`)
+  @Patch(`:${ParamName.UserID}/avatar`)
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: getAvatarUploadDest,
-      filename: getAvatarName,
+      filename: getAvatarFileName,
     })
   }))
   @ApiConsumes('multipart/form-data')
@@ -65,7 +81,7 @@ export class UserController {
    description: UserInfo.Avatar
   })
   async uploadAvatar(
-    @Param(ParamName.UserID) userID: string,
+    @Param(ParamName.UserID, MongoIdValidationPipe) userID: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
@@ -79,6 +95,21 @@ export class UserController {
     file: Express.Multer.File
   ) {
     const update = await this.userService.update(userID, {avatarUrl: file.path});
+
+    return fillObject(UserRDO, update);
+  }
+
+  @Patch(`:${ParamName.UserID}/subscribe`)
+  @ApiResponse({
+   type: UserRDO,
+   status: HttpStatus.OK,
+   description: UserInfo.Updated
+  })
+  async subscribe(
+    @Param(ParamName.UserID, MongoIdValidationPipe) userID: string,
+    @Query() {to}: SubQuery
+  ) {
+    const update = await this.userService.subscribe(userID, to);
 
     return fillObject(UserRDO, update);
   }

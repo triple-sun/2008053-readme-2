@@ -8,7 +8,12 @@ async function fillDb() {
     update: {},
     create: {
               type: 'LINK',
-              tags: ['link-post', 'link'],
+              tags: {
+                create: [
+                  {title: 'link-post'},
+                  {title: 'link'}
+                ]
+              },
               likes: ['43', '58'],
               isDraft: false,
               isRepost: false,
@@ -28,7 +33,12 @@ async function fillDb() {
     update: {},
     create: {
               type: 'LINK',
-              tags: ['link-post', 'link'],
+              tags: {
+                connectOrCreate: [
+                  { where: { title: 'link-post' }, create: { title: 'link-post' }},
+                  { where: { title: 'link' }, create: { title: 'link' }},
+                  { where: { title: 'another-tag' }, create: { title: 'another-tag' }},
+              ]},
               likes: ['65', '22'],
               isDraft: false,
               isRepost: true,
