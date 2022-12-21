@@ -6,7 +6,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { APIConfig, EnvValidationConfig, getAppRunningString, Path, Port, Prefix } from '@readme/core';
+import { APIConfig, getAppRunningString, Path, Port, Prefix } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
