@@ -1,8 +1,7 @@
+import { getAppEnvSchema, Port } from '@readme/core';
 import * as Joi from 'joi';
 
-import { Port } from '../../enum/utils.enum';
-
-export const UsersSchema = Joi.object({
+const envSchema = {
   MONGO_DB: Joi
     .string()
     .required(),
@@ -29,4 +28,6 @@ export const UsersSchema = Joi.object({
   JWT_SECRET: Joi
     .string()
     .required()
-});
+}
+
+export default getAppEnvSchema(Port.UsersAPIDefault, envSchema)

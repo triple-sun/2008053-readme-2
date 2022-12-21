@@ -1,11 +1,14 @@
 export enum Port {
   Min = 0,
   Max = 65535,
-  DBDefault = 27017
+  DBDefault = 27017,
+  BlogAPIDefault = 3333,
+  NotifyAPIDefault = 5555,
+  UsersAPIDefault = 4444
 }
 
 export enum Prefix {
-  API = 'api',
+  Global = 'api',
   Auth = 'auth',
   Blog = 'blog',
   Comments = 'comments',
@@ -27,8 +30,7 @@ export enum Path {
   Posts = 'posts',
   Comments = 'comments',
   Register = 'register',
-  SpecUsers = 'spec-users',
-  SpecBlog = 'spec-blog',
+  Spec = 'spec',
   Login = 'login',
   Upload = 'upload',
   Subscribe = 'sub',
@@ -48,37 +50,14 @@ export enum KeyName {
   ObjectID = '_id',
 }
 
-
-
-export enum Title {
-  Blog = 'Blog service',
-  Users = 'Users service'
-}
-
-export enum Desc {
-  Blog = 'Blog service API',
-  Users = 'Users service API'
-}
-
-export enum Version {
-  Blog = '1.0',
-  Users = '1.0'
-}
-
-export enum Info {
-  AppRun = '🚀 Application is running on:  http://localhost:'
-}
-
-export enum ENVError {
-  DBHost = 'MongoDB host is required',
-  DBName = 'Database name is required',
-  DBPort = 'MongoDB port is required',
-  DBUser = 'MongoDB user is required',
-  DBPass = 'MongoDB password is required',
-  DBAuthBase = 'MongoDB authentication base is required',
-  UploadDir = 'Upload directory path is required',
-  AvatarDir = 'Avatar upload dir is required',
-  JwtSecret = 'Jwt secret key is required'
+export enum APIConfig {
+  BlogDesc = 'Blog service API',
+  BlogTitle = 'Blog service',
+  NotifyDesc = 'Notification service API',
+  NotifyTitle = 'Notification service',
+  UsersDesc = 'Users service API',
+  UsersTitle = 'Users service',
+  Version = '1.0'
 }
 
 export enum MinMax {

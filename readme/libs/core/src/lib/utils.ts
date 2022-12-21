@@ -2,7 +2,12 @@ import { extname } from 'path';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
 import { Tag } from '@prisma/client';
 import { Post, PostBase, User } from '@readme/shared-types';
-import mongoose, { Model, Types } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
+import * as Joi from 'joi';
+import { validateSync } from 'class-validator';
+import { EnvValidationConfig } from './config/env.validation.config';
+import { Prefix } from './enum/utils.enum';
+
 
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
@@ -23,7 +28,9 @@ export const formatPost = (post: Post): PostBase => {
   }
 }
 
-export const getMongoConnectionString = ({user, pass, host, port, database, authBase, upload}): string => {
+export const getAppRunningString = (appName: string, port: number | string) => `🚀 ${appName} is running on:  http://localhost:${port}/${Prefix.Global}`
+
+export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
 }
 
@@ -68,3 +75,36 @@ export const connectOrCreateTags = (tags: Tag[]): {
   }))
 }
 
+const getAppEnvSchemaBase = (defaultAPIPort) => ({
+  API_PORT: Joi
+    .number()
+    .port()
+    .default(defaultAPIPort)
+    .required()
+})
+export const getAppEnvSchema = (defaultAPIPort: number, schemaObject: Joi.PartialSchemaMap) => Joi.object({
+  ...getAppEnvSchemaBase(defaultAPIPort),
+  ...schemaObject
+})
+
+export const validateEnv = (envConfig: typeof EnvValidationConfig) => (
+  (config: Record<string, unknown>) => {
+    const environmentsConfig = plainToInstance(
+      envConfig,
+      config,
+      { enableImplicitConversion: true  },
+    );
+
+    const errors = validateSync(
+      environmentsConfig, {
+        skipMissingProperties: false
+      }
+    );
+
+    if (errors.length > 0) {
+      throw new Error(errors.toString());
+    }
+
+    return environmentsConfig;
+  }
+)

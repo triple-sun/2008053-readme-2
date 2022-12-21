@@ -2,12 +2,11 @@ import { Body, Controller, HttpCode, HttpStatus, Post} from '@nestjs/common';
 import { AuthError, fillObject, Path, Prefix, UserInfo } from '@readme/core';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { AuthService } from './auth.service';
 import { UserLoggedRDO } from '../user/rdo/user-logged.rdo';
 import { UserCreateDTO } from '../user/dto/user-create.dto';
 import { UserRDO } from '../user/rdo/user.rdo';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
-
+import { AuthService } from './auth.service';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
