@@ -1,18 +1,18 @@
 import { UsersConfig } from '@readme/core';
-import { User } from '@readme/shared-types';
+import { IUser } from '@readme/shared-types';
 import { genSalt, hash, compare } from 'bcrypt';
 import { Types } from 'mongoose';
 
-export class UserEntity implements User {
+export class UserEntity implements IUser {
   public _id: Types.ObjectId;
   public avatarUrl: string;
   public email: string;
   public name: string;
-  public subscriptions: User[];
+  public subscriptions: IUser[];
   public passwordHash: string;
   public accessToken: string;
 
-  constructor(user: User) {
+  constructor(user: IUser) {
     this.fillEntity(user);
   }
 
@@ -30,7 +30,7 @@ export class UserEntity implements User {
     return {...this};
   }
 
-  public fillEntity(user: User) {
+  public fillEntity(user: IUser) {
     this._id = user._id;
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;

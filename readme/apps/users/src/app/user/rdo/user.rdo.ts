@@ -3,7 +3,7 @@ import { Expose, Transform } from 'class-transformer';
 import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
 import { KeyName, UserAPIDesc, UserAPIExample } from '@readme/core';
 import { UserCreateDTO } from '../dto/user-create.dto';
-import { User } from '@readme/shared-types';
+import { IUser } from '@readme/shared-types';
 import { Types } from 'mongoose';
 
 class UserRDOBase {
@@ -24,7 +24,7 @@ class UserRDOBase {
     example: UserAPIExample.Subs,
     default: []
   })
-  public subscriptions: User[];
+  public subscriptions: IUser[];
 
   @Expose()
   @IsJWT()

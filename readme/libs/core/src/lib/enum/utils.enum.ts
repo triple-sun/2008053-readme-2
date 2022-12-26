@@ -4,7 +4,8 @@ export enum Port {
   DBDefault = 27017,
   BlogAPIDefault = 3333,
   NotifyAPIDefault = 5555,
-  UsersAPIDefault = 4444
+  UsersAPIDefault = 4444,
+  MailDefault = 5025
 }
 
 export enum Prefix {
@@ -12,6 +13,7 @@ export enum Prefix {
   Auth = 'auth',
   Blog = 'blog',
   Comments = 'comments',
+  Mail = 'mail',
   Posts = 'posts',
   User = 'users'
 }

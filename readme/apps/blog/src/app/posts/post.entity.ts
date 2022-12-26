@@ -1,8 +1,8 @@
 import { ContentType } from "@prisma/client";
 import { ContentDTO, TagDTO } from "@readme/core";
-import { Entity, Post, PostBase } from "@readme/shared-types";
+import { IEntity, IPost, IPostBase } from "@readme/shared-types";
 
-export class PostEntity implements Entity<PostEntity>, PostBase {
+export class PostEntity implements IEntity<PostEntity>, IPostBase {
   public isDraft: boolean;
   public isRepost: boolean;
   public tags: TagDTO[]
@@ -15,9 +15,9 @@ export class PostEntity implements Entity<PostEntity>, PostBase {
   public content: ContentDTO;
   public authorID?: string;
   public originID?: number;
-  public origin?: Post;
+  public origin?: IPost;
 
-  constructor(post: Post) {
+  constructor(post: IPost) {
     this.fillEntity(post);
   }
 
@@ -25,7 +25,7 @@ export class PostEntity implements Entity<PostEntity>, PostBase {
     return {...this};
   }
 
-  public toUpdate(): PostBase {
+  public toUpdate(): IPostBase {
     return {...this}
   }
 
@@ -36,7 +36,7 @@ export class PostEntity implements Entity<PostEntity>, PostBase {
     }
   }
 
-  public fillEntity(entity: Post) {
+  public fillEntity(entity: IPost) {
     this.isRepost = entity.isRepost;
     this.publishAt = new Date();
 

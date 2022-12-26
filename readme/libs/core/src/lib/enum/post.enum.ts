@@ -71,7 +71,6 @@ export enum PostAPIExample {
   Author = 'Dante',
   Photo = '/upload/photo.jpg',
   Video = 'https://youtube.com/video',
-
 }
 
 export const PostContentExample = {

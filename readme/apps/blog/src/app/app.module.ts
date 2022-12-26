@@ -6,7 +6,6 @@ import { PostModule } from './posts/post.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { blogConfigModuleConfig } from '../config/config.module.config';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot(blogConfigModuleConfig),

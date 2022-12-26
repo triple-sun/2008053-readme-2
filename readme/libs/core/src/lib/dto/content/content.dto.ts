@@ -1,6 +1,7 @@
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 import { ContentType } from "@prisma/client";
+
 import { IsEnum, IsUppercase } from "class-validator";
 import { VideoDTO } from "./video.dto";
 import { LinkDTO } from "./link.dto";
