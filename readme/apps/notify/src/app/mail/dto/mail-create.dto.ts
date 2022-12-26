@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MailAPIProp } from '@readme/core';
-import { IPost } from '@readme/shared-types';
-import { IsArray, IsEmail, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEmail, IsString } from 'class-validator';
 
 export class MailCreateDTO {
   @IsEmail()
@@ -13,7 +12,6 @@ export class MailCreateDTO {
   public name?: string;
 
   @IsArray()
-  @ValidateNested()
   @ApiProperty(MailAPIProp.Posts)
-  public posts?: IPost[];
+  public postIDs?: string[];
 }

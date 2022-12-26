@@ -4,9 +4,9 @@ export enum MailConfig {
 }
 
 export enum MailAPIDesc {
-  Posts = 'Post list'
+  PostIDs = 'Posts ids'
 }
 
 export enum MailAPIExample {
-  Posts = '["post1", "post2", "post3"]'
+  PostIDs = '["postID1", "postID2", "postID3"]'
 }

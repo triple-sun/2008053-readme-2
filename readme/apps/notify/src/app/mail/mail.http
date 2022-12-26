@@ -1,4 +1,4 @@
-# Create new comment for post by id
+# Send new email
 POST http://localhost:5555/api/mail/ HTTP/1.1
 Content-Type: application/json
 
@@ -9,10 +9,5 @@ Content-Type: application/json
     "33", "38", "49"
   ]
 }
-
-###
-
-# Delete the comment by id
-DELETE http://localhost:3333/api/comments/9 HTTP/1.1
 
 ###

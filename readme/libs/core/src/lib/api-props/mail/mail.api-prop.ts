@@ -13,9 +13,9 @@ export const MailAPIProp: TAPIProp = {
     description: UserAPIDesc.Name,
     example: UserAPIExample.Name
   },
-  Posts: {
+  PostIDs: {
     required: true,
-    description: MailAPIDesc.Posts,
-    example: MailAPIExample.Posts
+    description: MailAPIDesc.PostIDs,
+    example: MailAPIExample.PostIDs
   },
 }
