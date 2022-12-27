@@ -1,7 +1,7 @@
 import { ENVError, EnvValidationConfig, validateEnv } from "@readme/core";
 import { IsInt, IsString } from 'class-validator';
 
-class BlogEnvValidation extends EnvValidationConfig {
+class NotifyEnvValidation extends EnvValidationConfig {
   @IsInt({
     message: ENVError.SMTPPort
   })
@@ -28,6 +28,6 @@ class BlogEnvValidation extends EnvValidationConfig {
   public MAIL_FROM: string;
 }
 
-export default validateEnv(BlogEnvValidation)
+export default validateEnv(NotifyEnvValidation)
 
 
