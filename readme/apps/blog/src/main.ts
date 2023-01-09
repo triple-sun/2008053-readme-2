@@ -28,7 +28,7 @@
    const document = SwaggerModule.createDocument(app, config);
    SwaggerModule.setup(Path.Spec, app, document)
 
-   const port = process.env.PORT || Port.BlogAPIDefault;
+   const port = process.env.API_PORT || Port.BlogAPIDefault;
    await app.listen(port);
 
    Logger.log(

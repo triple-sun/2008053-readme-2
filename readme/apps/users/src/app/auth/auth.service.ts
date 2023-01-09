@@ -4,7 +4,6 @@ import { AuthError } from '@readme/core';
 
 import { UserEntity } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { UserCreateDTO } from '../user/dto/user-create.dto';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { JwtService } from '@nestjs/jwt';
 
@@ -14,31 +13,6 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
-
-  async register(dto: UserCreateDTO) {
-    const {email, name, password} = dto;
-    const user = {
-      email,
-      name,
-      avatarUrl: '',
-      subscriptions: [],
-      passwordHash: '',
-      accessToken: ''
-    };
-
-    const existUser = await this.userRepository
-      .findByEmail(email);
-
-    if (existUser) {
-      throw new Error(AuthError.Email);
-    }
-
-    const userEntity = await new UserEntity(user)
-      .setPassword(password)
-
-    return this.userRepository
-      .create(userEntity);
-  }
 
   async verifyUser(dto: UserLoginDTO) {
     const {email, password} = dto;

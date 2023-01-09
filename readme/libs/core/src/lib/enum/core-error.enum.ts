@@ -24,5 +24,5 @@ export enum CoreError {
   ObjectID = 'is invalid ObjectID',
   Unauthorized = 'Unauthorized',
   Token = 'Invalid token',
-  Validation = 'Validation error:'
-}
+  Validation = 'Validation error:',
+  Subscriber = 'The subscriber with same email already exists'}

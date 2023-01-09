@@ -1,3 +1,4 @@
+/* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import { extname } from 'path';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
 import { Tag } from '@prisma/client';
@@ -5,8 +6,8 @@ import { IPost, IPostBase, IUser } from '@readme/shared-types';
 import mongoose, { Model } from 'mongoose';
 import * as Joi from 'joi';
 import { validateSync } from 'class-validator';
-import { EnvValidationConfig } from './config/env.validation.config';
-import { Prefix } from './enum/utils.enum';
+import { APIEnvConfig } from '../config/env.config';
+import { Prefix } from '../enum/utils.enum';
 
 
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
@@ -28,14 +29,18 @@ export const formatPost = (post: IPost): IPostBase => {
   }
 }
 
-export const getAppRunningString = (appName: string, port: number | string) => `🚀 ${appName} is running on:  http://localhost:${port}/${Prefix.Global}`
+export const getAppRunningString = (appName: string, port: number | string) => `🚀 ${appName} REST service is running on:  http://localhost:${port}/${Prefix.Global}`
 
 export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
 }
 
-export const getMailTransportString = ({user, pass, host, port}): string => {
+export const getMailerTransportString = ({user, pass, host, port}): string => {
   return `smtp://${user}:${pass}@${host}:${port}`;
+}
+
+export const getAMQPConnectionString = ({user, pass, host}): string => {
+  return `amqp://${user}:${pass}@${host}`;
 }
 
 export const getAvatarUploadDest = (req, file, cb) => {
@@ -79,19 +84,27 @@ export const connectOrCreateTags = (tags: Tag[]): {
   }))
 }
 
-const getAppEnvSchemaBase = (defaultAPIPort) => ({
+export const getAPIEnvSchema = (defaultAPIPort: number) => ({
   API_PORT: Joi
     .number()
     .port()
     .default(defaultAPIPort)
     .required()
 })
-export const getAppEnvSchema = (defaultAPIPort: number, schemaObject: Joi.PartialSchemaMap) => Joi.object({
-  ...getAppEnvSchemaBase(defaultAPIPort),
-  ...schemaObject
-})
 
-export const validateEnv = (envConfig: typeof EnvValidationConfig) => (
+export const getAppEnvSchema = (defaultAPIPort: number, ...schemas: Joi.PartialSchemaMap[]) => {
+  let envSchema: Joi.PartialSchemaMap
+
+  schemas.forEach(schema => {
+    envSchema = {...schema, envSchema}
+  });
+
+  return Joi.object({
+  ...getAPIEnvSchema(defaultAPIPort),
+  ...envSchema
+})}
+
+export const validateEnv = (envConfig: typeof APIEnvConfig) => (
   (config: Record<string, unknown>) => {
     const environmentsConfig = plainToInstance(
       envConfig,

@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { AuthError } from '@readme/core';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { AuthError, CommandEvent, RMQ_SERVICE } from '@readme/core';
+import { UserCreateDTO } from './dto/user-create.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { UserEntity } from './user.entity';
@@ -9,6 +11,7 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
+    @Inject(RMQ_SERVICE) private readonly rmqClient: ClientProxy,
   ) {}
 
   async getUsers() {
@@ -23,6 +26,43 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async register(dto: UserCreateDTO) {
+    const {email, name, password} = dto;
+    const user = {
+      email,
+      name,
+      avatarUrl: '',
+      subscriptions: [],
+      passwordHash: '',
+      accessToken: ''
+    };
+
+    const existUser = await this.userRepository
+      .findByEmail(email);
+
+    if (existUser) {
+      throw new Error(AuthError.Email);
+    }
+
+    const userEntity = await new UserEntity(user)
+      .setPassword(password)
+
+    const createdUser = await this.userRepository
+      .create(userEntity);
+
+
+    this.rmqClient.emit(
+      { cmd: CommandEvent.AddSubscriber },
+      {
+        email: createdUser.email,
+        firstname: createdUser.name,
+        userId: createdUser._id.toString(),
+      }
+    );
+
+    return createdUser
   }
 
   async update(userID: string, { avatarUrl, password }: UserUpdateDTO) {

@@ -1,7 +1,7 @@
-import { getAppEnvSchema, Port } from '@readme/core';
+import { getAPIEnvSchema, Port } from '@readme/core';
 import * as Joi from 'joi';
 
-const envSchema = {
+const blogEnvSchema = {
   DATABASE_URL: Joi
     .string()
     .required(),
@@ -10,4 +10,7 @@ const envSchema = {
     .required(),
 }
 
-export default getAppEnvSchema(Port.BlogAPIDefault, envSchema)
+export default Joi.object({
+  ...getAPIEnvSchema(Port.BlogAPIDefault),
+  ...blogEnvSchema
+})

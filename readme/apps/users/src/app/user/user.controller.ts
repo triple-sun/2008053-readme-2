@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { avatarExtRegExp, fillObject, getAvatarFileName, getAvatarUploadDest, MinMax, ParamName, Prefix, UploadFileDTO, UserAPIDesc, UserInfo } from '@readme/core';
+import { avatarExtRegExp, fillObject, getAvatarFileName, getAvatarUploadDest, MinMax, ParamName, Path, Prefix, UploadFileDTO, UserAPIDesc, UserInfo } from '@readme/core';
 
 import { Express } from 'express';
 import { diskStorage } from 'multer';
@@ -12,6 +12,7 @@ import { UserRDO } from './rdo/user.rdo';
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { SubQuery } from './query/sub.query';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UserCreateDTO } from './dto/user-create.dto';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -45,6 +46,20 @@ export class UserController {
     return fillObject(UserRDO, user);
   }
 
+  @Post(Path.Register)
+  @ApiResponse({
+    type: UserRDO,
+    status: HttpStatus.CREATED,
+    description: UserInfo.Register
+  })
+  async register(
+    @Body() dto: UserCreateDTO
+  ) {
+    const user = await this.userService.register(dto);
+
+    return fillObject(UserRDO, user);
+  }
+
   @Patch(`:${ParamName.UserID}`)
   @ApiBody({
     type: UserUpdateDTO
@@ -63,13 +78,15 @@ export class UserController {
     return fillObject(UserRDO, update);
   }
 
-  @Patch(`:${ParamName.UserID}/avatar`)
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: getAvatarUploadDest,
-      filename: getAvatarFileName,
-    })
-  }))
+  @Patch(`:${ParamName.UserID}/${Path.Avatar}`)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: getAvatarUploadDest,
+        filename: getAvatarFileName,
+      })
+    }
+  ))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: UserAPIDesc.Avatar,

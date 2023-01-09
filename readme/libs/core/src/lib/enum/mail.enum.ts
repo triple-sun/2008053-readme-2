@@ -1,6 +1,8 @@
 export enum MailConfig {
-  Subject = 'New posts in your feed',
-  Template = 'new-posts'
+  NewPostsSubject = 'New posts in your feed',
+  NewSubSubject = '',
+  NewPostsTemplate = 'new-posts',
+  NewSubTemplate = 'new-sub'
 }
 
 export enum MailAPIDesc {

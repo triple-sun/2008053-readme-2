@@ -4,15 +4,21 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { APIConfig, getAppRunningString, Path, Port, Prefix } from '@readme/core';
+import { APIConfig, getAppRunningString, getRMQConfig, Path, Port, Prefix } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = Prefix.Global;
 
+  const configService = app.get<ConfigService>(ConfigService);
+  app.connectMicroservice(getRMQConfig(configService));
+
+  await app.startAllMicroservices();
+
+  const globalPrefix = Prefix.Global;
   app.setGlobalPrefix(globalPrefix);
 
   const config = new DocumentBuilder()
@@ -23,6 +29,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(Path.Spec, app, document)
+
+
 
   const port = process.env.API_PORT || Port.NotifyAPIDefault;
 

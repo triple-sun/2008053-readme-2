@@ -1,13 +1,13 @@
 import { IsArray, IsJWT, IsMongoId } from 'class-validator';
 import { Expose, Transform } from 'class-transformer';
 import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
-import { KeyName, UserAPIDesc, UserAPIExample } from '@readme/core';
+import { FieldName, UserAPIDesc, UserAPIExample } from '@readme/core';
 import { UserCreateDTO } from '../dto/user-create.dto';
 import { IUser } from '@readme/shared-types';
 import { Types } from 'mongoose';
 
 class UserRDOBase {
-  @Expose({ name: KeyName.ObjectID})
+  @Expose({ name: FieldName.ObjectID})
   @IsMongoId()
   @Transform(({ obj }) => obj._id)
   @ApiProperty({

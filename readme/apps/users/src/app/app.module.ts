@@ -4,7 +4,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose';
 import { usersConfigModuleConfig } from '../config/config.module.config';
-import { getMongoDbConfig } from '../config/mongodb.config';
+import { getMongoDbConfig } from '@readme/core';
 
 @Module({
   imports: [

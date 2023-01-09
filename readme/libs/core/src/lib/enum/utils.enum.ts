@@ -44,12 +44,14 @@ export enum Path {
 export enum EntityName {
   User = 'User',
   Post = 'Post',
-  Comment = 'Comment'
+  Comment = 'Comment',
+  Subscriber = 'Subscriber'
 }
 
-export enum KeyName {
+export enum FieldName {
   ID = 'id',
   ObjectID = '_id',
+  Email = 'email'
 }
 
 export enum APIConfig {

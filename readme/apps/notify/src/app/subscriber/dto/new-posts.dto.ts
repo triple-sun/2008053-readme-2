@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { MailAPIProp } from '@readme/core';
 import { IsArray, IsEmail, IsString } from 'class-validator';
 
-export class MailCreateDTO {
+export class NewPostsDTO {
   @IsEmail()
   @ApiProperty(MailAPIProp.Email)
   public email?: string;

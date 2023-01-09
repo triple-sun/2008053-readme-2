@@ -1,7 +1,8 @@
-import { ENVError, EnvValidationConfig, validateEnv } from '@readme/core';
+import { IntersectionType } from '@nestjs/swagger';
+import { ENVError, APIEnvConfig, validateEnv } from '@readme/core';
 import { IsString } from 'class-validator';
 
-class BlogEnvValidation extends EnvValidationConfig {
+class BlogEnvConfig {
   @IsString({
     message: ENVError.DBUrl
   })
@@ -13,4 +14,9 @@ class BlogEnvValidation extends EnvValidationConfig {
   public UPLOAD_DIR: string;
 }
 
-export default validateEnv(BlogEnvValidation)
+class EnvConfig extends IntersectionType(
+  APIEnvConfig,
+  BlogEnvConfig
+) {}
+
+export default validateEnv(EnvConfig)

@@ -14,11 +14,19 @@ export enum ENVError {
   DBUrl = 'Database url is required',
   UploadDir = 'Upload directory path is required',
   AvatarDir = 'Avatar upload dir is required',
-  JwtSecret = 'Jwt secret key is required'
+  JwtSecret = 'Jwt secret key is required',
+  RMQHost = 'RabbitMQ host is required',
+  RMQUser = 'RabbitMQ user is required',
+  RMQPass = 'RabbitMQ password is required',
+  RMQSubscriberQueue = 'RabbitMQ Subscribers Queue is required',
 }
 
 export enum EnvRegisterAs {
   Blog = 'blog',
+  Mailer = 'mailer',
+  JWT = 'jwt',
+  RabbitMQ = 'rmq',
+  Mongo = 'mongo',
   Notify = 'notify',
   Users = 'users'
 }

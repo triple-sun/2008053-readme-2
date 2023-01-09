@@ -1,11 +1,10 @@
-import { configModuleConfig, jwtOptions } from "@readme/core";
-import envSchema from "../env/env.schema";
+import { configModuleConfig, jwtOptions, mongoDbOptions, rmqOptions } from "@readme/core";
+import usersEnvSchema from "../env/env.schema";
 import envValidation from "../env/env.validation";
-import envConfig from "./env.config";
 
 export const usersConfigModuleConfig = {
   ...configModuleConfig,
-  load: [envConfig, jwtOptions],
+  load: [jwtOptions, mongoDbOptions, rmqOptions],
   validate: envValidation,
-  validationSchema: envSchema
+  validationSchema: usersEnvSchema
 }
