@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { ContentType } from '@prisma/client';
-import { PostError, toggleArrElement } from '@readme/core';
+import { CommandEvent, PostError, RMQ_SERVICE, toggleArrElement } from '@readme/core';
 import { IPostBase } from '@readme/shared-types';
 
 import { PostCreateDTO } from './dto/post-create.dto';
@@ -8,15 +9,15 @@ import { PostUpdateDTO } from './dto/post-update.dto';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
+import { PostSendNewQuery } from './query/post-send-new.query';
 import { PostQuery } from './query/post.query';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-      ) {}
-
-
+    @Inject(RMQ_SERVICE) private readonly rmqClient: ClientProxy,
+  ) {}
   async getPosts(query: PostQuery) {
     const posts = await this.postRepository.find(query)
 
@@ -112,5 +113,17 @@ export class PostService {
     }
 
     await this.postRepository.destroy(postID)
+  }
+
+  async sendNew({email, userIDs}: PostSendNewQuery) {
+    const posts = await this.getPosts({userIDs})
+
+    return this.rmqClient.emit(
+      { cmd: CommandEvent.NewPosts },
+      {
+        email,
+        posts
+      }
+    );
   }
 }

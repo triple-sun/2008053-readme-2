@@ -57,8 +57,8 @@ export class UserService {
       { cmd: CommandEvent.AddSubscriber },
       {
         email: createdUser.email,
-        firstname: createdUser.name,
-        userId: createdUser._id.toString(),
+        name: createdUser.name,
+        userID: createdUser._id.toString(),
       }
     );
 

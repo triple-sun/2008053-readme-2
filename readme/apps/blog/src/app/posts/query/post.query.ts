@@ -8,7 +8,7 @@ export class PostQuery {
   @IsArray()
   @IsOptional()
   @Transform(({ value }) => value.split(','))
-  public users?: string[];
+  public userIDs?: string[];
 
   @IsInt()
   @IsOptional()

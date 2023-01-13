@@ -7,7 +7,8 @@ class EnvConfig extends IntersectionType(
     MailerEnvConfig,
     IntersectionType(
       MongoEnvConfig,
-      RMQEnvConfig)
+      RMQEnvConfig
+    )
   )
 ) {}
 

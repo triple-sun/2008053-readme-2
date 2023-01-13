@@ -1,5 +1,5 @@
 import { IsString } from 'class-validator';
-import { APIEnvConfig, ENVError, JWTEnvConfig, MongoEnvConfig, validateEnv } from '@readme/core';
+import { APIEnvConfig, ENVError, JWTEnvConfig, MongoEnvConfig, RMQEnvConfig, validateEnv } from '@readme/core';
 import { IntersectionType } from '@nestjs/swagger';
 
 class UsersEnvConfig {
@@ -15,7 +15,10 @@ class EnvConfig extends IntersectionType(
     JWTEnvConfig,
     IntersectionType(
       MongoEnvConfig,
-      UsersEnvConfig
+      IntersectionType(
+        RMQEnvConfig,
+        UsersEnvConfig
+      )
     )
   )
 ) {}

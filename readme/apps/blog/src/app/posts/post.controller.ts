@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Prefix, PostInfo } from '@readme/core';
+import { ParamName, fillObject, Prefix, PostInfo, Path } from '@readme/core';
 
 import { PostCreateDTO } from './dto/post-create.dto';
 import { PostUpdateDTO } from './dto/post-update.dto';
 
 import { PostService } from './post.service';
+import { PostSendNewQuery } from './query/post-send-new.query';
 import { PostTypeQuery } from './query/post-type.query';
 import { PostQuery } from './query/post.query';
 import { PostRDO } from './rdo/post.rdo';
@@ -78,10 +79,10 @@ export class PostController {
     description: PostInfo.Deleted
   })
   async destroy(
-    @Param(ParamName.PostID
-      ) postID: number) {
+    @Param(ParamName.PostID) postID: number
+  ) {
     await this.postService.deletePost(postID)
-    }
+  }
 
   @Post(`:${ParamName.PostID}/repost`)
   @ApiResponse({
@@ -108,5 +109,12 @@ export class PostController {
     const post = await this.postService.likePost(postID, userID);
 
     return fillObject(PostRDO, post);
+  }
+
+  @Get(Path.SendNewPosts)
+  async sendNew(
+    @Query() query: PostSendNewQuery,
+  ) {
+    return this.postService.sendNew(query)
   }
 }

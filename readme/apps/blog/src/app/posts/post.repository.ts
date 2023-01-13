@@ -55,7 +55,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
     return exists
   }
 
-  public async find({users, limit, type, sortBy, tag, sort, draft, page}: PostQuery) {
+  public async find({userIDs: users, limit, type, sortBy, tag, sort, draft, page}: PostQuery) {
     const posts = await this.prisma.post.findMany({
       where: {
         userID: {

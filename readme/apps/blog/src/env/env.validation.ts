@@ -1,5 +1,5 @@
 import { IntersectionType } from '@nestjs/swagger';
-import { ENVError, APIEnvConfig, validateEnv } from '@readme/core';
+import { ENVError, APIEnvConfig, validateEnv, RMQEnvConfig } from '@readme/core';
 import { IsString } from 'class-validator';
 
 class BlogEnvConfig {
@@ -16,7 +16,10 @@ class BlogEnvConfig {
 
 class EnvConfig extends IntersectionType(
   APIEnvConfig,
-  BlogEnvConfig
+  IntersectionType(
+    RMQEnvConfig,
+    BlogEnvConfig
+  )
 ) {}
 
 export default validateEnv(EnvConfig)
