@@ -8,6 +8,12 @@ export enum Port {
   MailDefault = 5025
 }
 
+export enum EnvFilePath {
+  Blog = 'environments/blog.env',
+  Notify = 'environments/notify.env',
+  Users = 'environments/users.env'
+}
+
 export enum Prefix {
   Global = 'api',
   Auth = 'auth',
@@ -57,11 +63,11 @@ export enum FieldName {
 
 export enum APIConfig {
   BlogDesc = 'Blog service API',
-  BlogTitle = 'Blog service',
+  BlogTitle = 'Blog microservice',
   NotifyDesc = 'Notification service API',
-  NotifyTitle = 'Notification service',
+  NotifyTitle = 'Notification microservice',
   UsersDesc = 'Users service API',
-  UsersTitle = 'Users service',
+  UsersTitle = 'Users microservice',
   Version = '1.0'
 }
 

@@ -2,22 +2,22 @@ import * as Joi from 'joi';
 import { Port } from '../enum/utils.enum';
 
 export const mailerEnvSchema = {
-  MAIL_PORT: Joi
+  MAILER_PORT: Joi
     .number()
     .port()
     .default(Port.MailDefault)
     .required(),
-  MAIL_HOST: Joi
+  MAILER_HOST: Joi
     .string()
     .hostname()
     .required(),
-  MAIL_USER: Joi
+  MAILER_USER: Joi
     .string()
     .required(),
-  MAIL_PASS: Joi
+  MAILER_PASS: Joi
     .string()
     .required(),
-  MAIL_FROM: Joi
+  MAILER_FROM: Joi
     .string()
     .required()
 }

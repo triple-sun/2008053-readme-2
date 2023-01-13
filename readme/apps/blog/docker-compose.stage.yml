@@ -1,0 +1,55 @@
+version: '3.5'
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "readme-blog"
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d readme-blog" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    networks:
+      - postgres
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@readme.local"
+      PGADMIN_DEFAULT_PASSWORD: "test"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - ./db:/var/lib/pgadmin
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+    networks:
+      - postgres
+
+
+  readme.blog:
+    container_name: readme.blog
+    image: readme.blog
+    depends_on:
+      - postgres
+    environment:
+      API_PORT: 3333
+      DATABASE_URL: postgres://admin:test@postgres:5432/readme-blog
+      UPLOAD_DIR: /upload
+      RMQ_USER: admin
+      RMQ_PASS: test
+      RMQ_HOST: rabbitmq:5672
+      RMQ_QUEUE: readme.subscribers
+
+networks:
+  postgres:
+    driver: bridge

@@ -14,6 +14,7 @@
         "main": "apps/blog/src/main.ts",
         "tsConfig": "apps/blog/tsconfig.app.json",
         "assets": ["apps/blog/src/assets"],
+        "generatePackageJson": true,
         "transformers": [
           {
             "name": "@nestjs/swagger/plugin",
@@ -90,6 +91,15 @@
       "options": {
         "command": "npx prisma db seed",
         "cwd": "apps/blog"
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run users:build",
+          "docker build -f ./apps/blog/dockerfile . -t readme.blog --no-cache --force-rm"
+        ]
       }
     }
   },

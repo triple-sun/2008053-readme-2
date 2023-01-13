@@ -6,13 +6,12 @@ import { getAMQPConnectionString } from '../utils/utils';
 
 export const rmqOptions = registerAs(EnvRegisterAs.RabbitMQ, () => ({
   user: process.env.RMQ_USER,
-  pass: process.env.RMQ_PASSWORD,
+  pass: process.env.RMQ_PASS,
   host: process.env.RMQ_HOST,
   queue: process.env.RMQ_QUEUE,
 }));
 
-export function getRMQConfig(configService: ConfigService): RmqOptions {
-  return {
+export const getRMQConfig = (configService: ConfigService): RmqOptions => ({
     transport: Transport.RMQ,
     options: {
       urls: [
@@ -29,5 +28,4 @@ export function getRMQConfig(configService: ConfigService): RmqOptions {
         durable: true,
       }
     }
-  }
-}
+})

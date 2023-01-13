@@ -29,7 +29,7 @@ export const formatPost = (post: IPost): IPostBase => {
   }
 }
 
-export const getAppRunningString = (appName: string, port: number | string) => `🚀 ${appName} REST service is running on:  http://localhost:${port}/${Prefix.Global}`
+export const getAppRunningString = (appName: string, port: number | string) => `🚀 ${appName} REST API is running on:  http://localhost:${port}/${Prefix.Global}`
 
 export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;

@@ -8,12 +8,12 @@ import { ISubscriber } from '@readme/shared-types';
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  public async sendNotifyNewPosts({email, name, postIDs}: NewPostsDTO) {
+  public async sendNotifyNewPosts({email, name, posts}: NewPostsDTO) {
     await this.mailerService.sendMail({
       to: email,
       subject: MailConfig.NewPostsSubject,
       template: MailConfig.NewPostsTemplate,
-      context: { name, postIDs }
+      context: { name, posts }
     })
   }
 
