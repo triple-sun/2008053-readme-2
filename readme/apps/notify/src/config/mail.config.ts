@@ -5,7 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import { EnvRegisterAs, getMailTransportString } from "@readme/core";
 import { join } from "path";
 
-export const getMailConfig = (): MailerAsyncOptions => {
+export const getMailerConfig = (): MailerAsyncOptions => {
   return {
     useFactory: async (configService: ConfigService) => ({
       transport: getMailTransportString({

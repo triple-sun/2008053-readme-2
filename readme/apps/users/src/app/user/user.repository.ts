@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
-import { getToggleAction } from '@readme/core';
 
 import { UserEntity } from './user.entity';
 
@@ -45,10 +44,10 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
   }
 
   public async subscribe({_id}: IUser, {_id: subToID}: IUser): Promise<IUser> {
-    const action = await getToggleAction(_id, subToID, this.userModel)
+    const isSubscribed = await this.userModel.findOne({ _id, subscriptions: { '$in': [subToID] }})
 
     return await this.userModel
-      .findByIdAndUpdate( _id._id, { [`${action}`]: { subscriptions: subToID._id }}, { new: true })
+      .findByIdAndUpdate( _id._id, { [`${isSubscribed ? '$pull' : '$addToSet'}`]: { subscriptions: subToID._id }}, { new: true })
       .exec()
   }
 

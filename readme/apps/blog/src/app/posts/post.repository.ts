@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { connectOrCreateTags, formatPost, PostInclude, SortByType } from '@readme/core';
+import { connectOrCreateTags, PostInclude, SortByType } from '@readme/core';
 import { ICRUDRepo, IPostBase } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,7 +36,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
       include: PostInclude
     })
 
-    return formatPost(created)
+    return created
   }
 
   public async destroy(id: number): Promise<void> {
@@ -47,10 +47,6 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
 
   public async findOne(id: number): Promise<IPostBase | null> {
     const exists = await this.prisma.post.findUnique({ where: { id }, include: PostInclude})
-
-    if (exists.id) {
-      return formatPost(exists)
-    }
 
     return exists
   }
@@ -82,7 +78,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
       skip: page > 0 ? limit * (page - 1) : undefined,
     });
 
-    return posts.map((post) => formatPost(post))
+    return posts
   }
 
   public async update(id: number, item: PostEntity) {
@@ -120,6 +116,6 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
     })
 
 
-    return formatPost(update)
+    return update
   }
 }

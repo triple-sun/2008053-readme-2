@@ -1,5 +1,5 @@
 # Send new email
-POST http://localhost:5555/api/mail/ HTTP/1.1
+POST http://localhost:3334/api/mail
 Content-Type: application/json
 
 {

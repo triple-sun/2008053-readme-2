@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ContentType } from '@prisma/client';
+import { ContentType, Post } from '@prisma/client';
 import { PostError, toggleArrElement } from '@readme/core';
 import { IPostBase } from '@readme/shared-types';
 
@@ -21,11 +21,6 @@ export class PostService {
     const posts = await this.postRepository.find(query)
 
     return posts
-      .map((post): IPostBase => ({
-        ...post,
-        type: post.type,
-        content: post[post.type.toLowerCase()]
-      }))
   }
 
   async getPost(postID: number): Promise<IPostBase> {
@@ -69,7 +64,7 @@ export class PostService {
     };
   }
 
-  async likePost(postID: number, userID: string): Promise<IPostBase> {
+  async likePost(postID: number, userID: string): Promise<Post> {
     const post = await this.postRepository.findOne(postID);
 
     if (!post) {
