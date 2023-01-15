@@ -1,61 +1,124 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ContentType } from '@prisma/client';
-import { CommandEvent, PostError, RMQ_SERVICE, toggleArrElement } from '@readme/core';
-import { IPostBase } from '@readme/shared-types';
-
-import { PostCreateDTO } from './dto/post-create.dto';
-import { PostUpdateDTO } from './dto/post-update.dto';
+import { CommandEvent, NotFoundErrorMessage, PostCreateDTO, PostError, PostUpdateDTO, Service, toggleArrElement, UserIDQuery } from '@readme/core';
+import { IPost } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { PostSendNewQuery } from './query/post-send-new.query';
-import { PostQuery } from './query/post.query';
+import { PostFeedQuery } from './query/post-feed.query';
+import { PostsNotifyQuery } from './query/posts-notify.query';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    @Inject(RMQ_SERVICE) private readonly rmqClient: ClientProxy,
+    private readonly amqpConnection: AmqpConnection,
+    @Inject(Service.RMQService) private readonly rmqClient: ClientProxy,
   ) {}
-  async getPosts(query: PostQuery) {
+
+  async getPosts(query: PostFeedQuery) {
+    const bbb = await this.amqpConnection.request<string[]>({
+      exchange: 'readme',
+      routingKey: 'rpc-users',
+      payload: query.userID,
+      timeout: 10000
+    })
+
+    console.log(bbb)
+
     const posts = await this.postRepository.find(query)
 
     return posts
-      .map((post): IPostBase => ({
-        ...post,
-        type: post.type,
-        content: post[post.type.toLowerCase()]
-      }))
   }
 
-  async getPost(postID: number): Promise<IPostBase> {
+  async getPost(postID: number): Promise<IPost> {
     const post = await this.postRepository.findOne(postID);
 
     if (!post) {
-      throw new Error(PostError.NotFound);
+      throw new Error(
+        NotFoundErrorMessage.PostNotFoundID(postID)
+      );
     }
 
     return post
   }
 
-  async createPost(dto: PostCreateDTO, contentType: ContentType) {
-    if (dto.content.type !== contentType) {
-      throw new Error(PostError.QueryType)
+  async createPost({userID}: UserIDQuery, dto: PostCreateDTO) {
+    const contentType = dto.type.toLowerCase()
+
+    const post = {
+      [contentType]: dto[contentType],
+      type: dto.type,
+      tags: dto.tags,
+      userID,
+      comments: [],
+      likes: [],
     }
 
-    const postEntity = new PostEntity({...dto, type: contentType, comments: [], likes: []})
+    const postEntity = new PostEntity(post)
 
     const newPost = await this.postRepository.create(postEntity);
+
+    this.rmqClient.emit(
+      { cmd: CommandEvent.UpdatePosts },
+      {
+        userID,
+        postID: newPost.id
+      }
+    );
 
     return newPost
   }
 
-  async repost(postID: number): Promise<IPostBase> {
-    const origin = await this.postRepository.findOne(postID);
+  async updatePost(postID: number, {userID}: UserIDQuery, dto: PostUpdateDTO) {
+    const {type, tags, publishAt} = dto
+    const post = await this.getPost(postID);
 
-    if (!origin) {
+    const contentType = type ? type.toLowerCase() : post.type.toLowerCase()
+
+    if (post.userID !== userID) {
+      throw new Error(PostError.Permission)
+    }
+
+    const update = {
+      ...post,
+      ...dto[contentType],
+      type,
+      publishAt,
+      tags
+    }
+
+    const updatedEntity = new PostEntity(update)
+
+    const updatedPost = await this.postRepository.update(postID, updatedEntity)
+
+    return updatedPost
+  }
+
+  async deletePost(postID: number, userID: string) {
+    const post = await this.postRepository.findOne(postID);
+
+    if (!post) {
       throw new Error(PostError.NotFound)
+    }
+
+    if (post.userID !== userID) {
+      throw new Error(PostError.Permission)
+    }
+
+    await this.postRepository.destroy(postID)
+  }
+
+  async repost(postID: number, userID: string): Promise<IPost> {
+    const origin = await this.getPost(postID);
+
+    if (origin.authorID === userID) {
+      throw new Error(PostError.SelfRepost)
+    }
+
+    if (origin.userID === userID) {
+      throw new Error(PostError.DuplicateRepost)
     }
 
     const {authorID, ...postBase} = origin
@@ -66,57 +129,41 @@ export class PostService {
 
     return {
       ...repost,
-      content: repost[repost.type.toLowerCase()]
     };
   }
 
-  async likePost(postID: number, userID: string): Promise<IPostBase> {
+  async likePost(postID: number, query: UserIDQuery): Promise<IPost> {
+    const post = await this.getPost(postID);
+
+    const likes = toggleArrElement(post.likes, query.userID);
+
+    const updatedPost = await this.postRepository.like(postID, likes)
+
+    return updatedPost
+  }
+
+  async publishPost(postID: number, query: UserIDQuery): Promise<IPost> {
     const post = await this.postRepository.findOne(postID);
 
     if (!post) {
       throw new Error(PostError.NotFound);
     }
 
-    const likes = toggleArrElement(post.likes, userID);
+    if (post.userID !== query.userID) {
+      throw new Error(PostError.Permission)
+    }
 
-    const updatedEntity = new PostEntity({...post, likes})
+    if (!post.isDraft) {
+      throw new Error(PostError.Published)
+    }
 
-    const updatedPost = await this.postRepository.update(postID, updatedEntity)
+    const updatedPost = await this.postRepository.publish(postID)
 
     return updatedPost
   }
 
-  async updatePost(postID: number, dto: PostUpdateDTO) {
-    const post = await this.postRepository.findOne(postID);
-    const {userID, tags, content} = dto
-
-    if (!post) {
-      throw new Error(PostError.NotFound);
-    }
-
-    if (post.userID !== userID) {
-      throw new Error(PostError.Auth)
-    }
-
-    const updatedEntity = new PostEntity({...post, tags, content})
-
-    const updatedPost = await this.postRepository.update(postID, updatedEntity)
-
-    return updatedPost
-  }
-
-  async deletePost(postID: number) {
-    const post = await this.postRepository.findOne(postID);
-
-    if (!post) {
-      throw new Error(PostError.NotFound)
-    }
-
-    await this.postRepository.destroy(postID)
-  }
-
-  async sendNew({email, userIDs}: PostSendNewQuery) {
-    const posts = await this.getPosts({userIDs})
+  async notify({email, userID}: PostsNotifyQuery) {
+    const posts = await this.getPosts({userID})
 
     return this.rmqClient.emit(
       { cmd: CommandEvent.NewPosts },

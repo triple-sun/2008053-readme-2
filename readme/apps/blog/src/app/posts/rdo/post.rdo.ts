@@ -2,19 +2,19 @@ import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ContentType, Post } from '@prisma/client';
 
-import { PostCreateDTO } from '../dto/post-create.dto';
+import { PostCreateDTO } from '../../../../../../libs/core/src/lib/dto/post-create.dto';
 import { IsArray, IsBoolean, IsEnum, IsMongoId, IsString, ValidateNested } from 'class-validator';
-import { PostAPIProp } from '@readme/core';
+import { FieldName, PostAPIProp } from '@readme/core';
 
 class PostRDOBase {
   @Expose()
   @IsString()
-  @ApiProperty(PostAPIProp.PostID)
+  @ApiProperty(PostAPIProp[FieldName.ID])
   public id: string;
 
   @Exclude()
   @IsEnum(ContentType)
-  @ApiProperty(PostAPIProp.Type)
+  @ApiProperty(PostAPIProp[FieldName.Type])
   public type: ContentType;
 
   @Expose()

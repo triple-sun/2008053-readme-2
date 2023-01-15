@@ -18,9 +18,11 @@ export const Sort = {
 
 export enum PostError {
   Auth = 'You are not authorized',
-  Permission = 'You can only edit and delete your own posts.',
+  Permission = 'You can only edit, publish or delete your own posts.',
   NotFound = 'Post not found.',
-  SelfRepost = 'You cannot repost your own posts.',
+  SelfRepost = 'You can`t repost your own posts.',
+  DuplicateRepost = 'You can`t repost the same post twice',
+  Published = 'This post is already published',
   QueryType = 'Wrong type query'
 }
 
@@ -49,11 +51,11 @@ export enum PostAPIDesc {
   Origin = 'Original post',
   UserID = 'Unique poster ID',
   Content = 'Post content (schema depends on post type)',
-  Link = 'Link and description',
+  LinkUrl = 'Link url',
   Text = 'Title, announcement and text',
   Quote = 'Quote and author',
   Photo = 'Photo url',
-  Video = 'Video title and url'
+  VideoUrl = 'Video url'
 }
 
 export enum PostAPIExample {
@@ -62,21 +64,21 @@ export enum PostAPIExample {
   ID = '22',
   Tag = 'tag',
   Tags = `['tag', 'another tag', 'one more tag', '8 tags max']`,
-  Link = 'https://link.subdomain.domain',
-  Desc = 'Really nice post',
+  LinkUrl = 'https://link.subdomain.domain',
+  Desc = 'Really nice link',
   Title = 'Eample post title',
   Ann = 'Lorem ipsum dolor sit amet.',
   Text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada.',
   Quote = 'Lorem ipsum dolor sit amet.',
   Author = 'Dante',
   Photo = '/upload/photo.jpg',
-  Video = 'https://youtube.com/video',
+  VideoUrl = 'https://youtube.com/video',
 }
 
 export const PostContentExample = {
-  [ContentType.LINK]: `{ type: 'LINK', link: ${PostAPIExample.Link}, desc: ${PostAPIExample.Desc}}`,
+  [ContentType.LINK]: `{ type: 'LINK', link: ${PostAPIExample.LinkUrl}, desc: ${PostAPIExample.Desc}}`,
   [ContentType.PHOTO]: `{ type: 'PHOTO', photo: ${PostAPIExample.Photo}}`,
   [ContentType.QUOTE]: `{ type: 'QUOTE', quote: ${PostAPIExample.Quote}, author: ${PostAPIExample.Author}}`,
   [ContentType.TEXT]: `{ type: 'TEXT', title: ${PostAPIExample.Title}, ann: ${PostAPIExample.Ann}, text: ${PostAPIExample.Text}}`,
-  [ContentType.VIDEO]: `{ type: 'VIDEO', title: ${PostAPIExample.Title}, videoUrl: ${PostAPIExample.Video}}`,
+  [ContentType.VIDEO]: `{ type: 'VIDEO', title: ${PostAPIExample.Title}, videoUrl: ${PostAPIExample.VideoUrl}}`,
 }

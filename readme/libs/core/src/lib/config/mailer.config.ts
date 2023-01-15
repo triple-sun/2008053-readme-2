@@ -1,7 +1,6 @@
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { MailerAsyncOptions } from "@nestjs-modules/mailer/dist/interfaces/mailer-async-options.interface";
 import { ConfigService, registerAs } from "@nestjs/config";
-import { getMailerTransportString } from "../utils/utils";
 
 import { join } from "path";
 import { EnvRegisterAs } from "../enum/env.enum";
@@ -14,15 +13,8 @@ export const mailerOptions = registerAs(EnvRegisterAs.Mailer, () => ({
   from: process.env.MAILER_FROM
 }))
 
-export const getMailerConfig = (): MailerAsyncOptions => {
-  return {
-  useFactory: async (configService: ConfigService) =>{
-    console.log(getMailerTransportString({
-      user: configService.get<string>(`${EnvRegisterAs.Mailer}.user`),
-      pass: configService.get<string>(`${EnvRegisterAs.Mailer}.pass`),
-      host: configService.get<string>(`${EnvRegisterAs.Mailer}.host`),
-      port: configService.get<number>(`${EnvRegisterAs.Mailer}.port`),
-    }))
+export const getMailerConfig = (): MailerAsyncOptions => ({
+  useFactory: async (configService: ConfigService) => {
     return {
       transport: {
         host: configService.get<string>(`${EnvRegisterAs.Mailer}.host`),
@@ -45,5 +37,4 @@ export const getMailerConfig = (): MailerAsyncOptions => {
       }
     }},
     inject: [ConfigService]
-  }
-}
+  })

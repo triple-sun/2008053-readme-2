@@ -1,7 +1,9 @@
 import { PartialType, PickType } from "@nestjs/swagger";
-
-import { UserCreateDTO } from "./user-create.dto";
+import { UserDTO } from "@readme/core";
 
 export class UserUpdateDTO extends PartialType(
-    PickType(UserCreateDTO, ['avatarUrl', 'password'] as const)
+  PickType(
+    UserDTO,
+    ['avatarUrl', 'password'] as const
+  )
 ) {}

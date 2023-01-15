@@ -2,7 +2,6 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
-
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -29,8 +28,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(Path.Spec, app, document)
-
-
 
   const port = process.env.API_PORT || Port.NotifyAPIDefault;
 

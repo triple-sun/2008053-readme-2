@@ -3,4 +3,7 @@ export interface ISubscriber {
   email: string;
   name: string;
   userID: string;
+  notifiedAt?: Date;
+  posts?: number[]
+  subscriptions?: string[]
 }

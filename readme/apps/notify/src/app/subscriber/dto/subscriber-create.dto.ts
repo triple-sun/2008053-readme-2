@@ -1,5 +1,3 @@
-export class SubscriberCreateDTO {
-  email: string;
-  name: string;
-  userID: string;
-}
+import { UserDTO } from "@readme/core";
+
+export class SubscriberCreateDTO extends UserDTO {}

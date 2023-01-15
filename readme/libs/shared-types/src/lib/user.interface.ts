@@ -5,6 +5,7 @@ export interface IUser {
   email: string;
   name: string;
   avatarUrl: string;
-  subscriptions: IUser[];
+  subscribers: string[];
   passwordHash: string;
+  posts?: number[]
 }

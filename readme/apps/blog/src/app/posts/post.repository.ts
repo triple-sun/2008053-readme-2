@@ -1,42 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { connectOrCreateTags, formatPost, PostInclude, SortByType } from '@readme/core';
-import { ICRUDRepo, IPostBase } from '@readme/shared-types';
+import { PostInclude, SortByType } from '@readme/core';
+import { ICRUDRepo, IPost,  } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostQuery } from './query/post.query';
+import { PostFeedQuery } from './query/post-feed.query';
 
 @Injectable()
-export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> {
+export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
   constructor(
     private readonly prisma: PrismaService
   ) {}
 
-  public async create(item: PostEntity): Promise<IPostBase> {
-    const entityData = item.toObject();
-
-    const { tags, originID, content: contentData, ...data } = entityData
-    const { type, postID, ...content } = contentData
-
-    const contentType = type ? type.toLowerCase() : entityData.type.toLowerCase()
-
-    const origin = postID ? { connect: { id: originID }} : undefined
-
-    const created = await this.prisma.post.create({
+  public async create(item: PostEntity): Promise<IPost> {
+    return await this.prisma.post.create({
       data: {
-        ...data,
-        authorID: data.authorID ?? data.userID,
-        type: entityData.type,
-        tags: {
-          connectOrCreate: connectOrCreateTags(tags)
-        },
-        origin,
-        [contentType]: { create: {...content} }
+        ...item.toObject(),
         },
       include: PostInclude
     })
-
-    return formatPost(created)
   }
 
   public async destroy(id: number): Promise<void> {
@@ -45,27 +27,29 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
     });
   }
 
-  public async findOne(id: number): Promise<IPostBase | null> {
-    const exists = await this.prisma.post.findUnique({ where: { id }, include: PostInclude})
-
-    if (exists.id) {
-      return formatPost(exists)
-    }
+  public async findOne(id: number): Promise<IPost | null> {
+    const exists = await this.prisma.post.findUnique({
+      where: { id },
+      include: PostInclude
+    })
 
     return exists
   }
 
-  public async find({userIDs: users, limit, type, sortBy, tag, sort, draft, page}: PostQuery) {
+  public async find({from, limit, type, sortBy, tag, sort, isDraft: draft, page, since, userID}: PostFeedQuery) {
     const posts = await this.prisma.post.findMany({
       where: {
         userID: {
-          in: users,
+          in: from.includes(userID) ? from : [userID, ...from]
         },
         type: {
-          equals: type
+          equals: type ?? undefined
         },
         tags: {
-          some: tag ? { title: tag } : {}
+          has: tag
+        },
+        createdAt: {
+          gt: since
         },
         isDraft: draft
       },
@@ -82,44 +66,37 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
       skip: page > 0 ? limit * (page - 1) : undefined,
     });
 
-    return posts.map((post) => formatPost(post))
+    return posts
   }
 
   public async update(id: number, item: PostEntity) {
-    const entityData = item.toObject();
+    return await this.prisma.post.update({
+      where: { id },
+      data: item.toObject(),
+      include: PostInclude
+    })
+  }
 
-    const type = entityData.type
-
-    const {originID, content, ...updateData} = entityData
-
-    const originType = (await this.prisma.post.findUnique({ where: { id }})).type
-
-    const handleContentTypeChange = () => {
-      if (originType !== type) {
-        return ({
-          [originType.toLowerCase()]: {delete: { where: { postID: id }}},
-          [type.toLowerCase()]: {create: content}
-        })
-      }
-
-      return ({
-        [type.toLowerCase()]: { connect: { postID: id }}
-      })
-    }
-
-    const update = await this.prisma.post.update({
+  public async like(id: number, likes: string[]) {
+    return await this.prisma.post.update({
       where: { id },
       data: {
-        ...updateData,
-        ...handleContentTypeChange(),
-        type,
-        tags: { connectOrCreate: connectOrCreateTags(entityData.tags) },
-        origin: originID ? { connect: { id: originID }} : undefined
+        likes
       },
       include: PostInclude
     })
-
-
-    return formatPost(update)
   }
+
+  public async publish(id: number) {
+    return await this.prisma.post.update({
+      where: { id },
+      data: {
+        isDraft: false,
+        publishAt: new Date()
+      },
+      include: PostInclude
+    })
+  }
+
+
 }

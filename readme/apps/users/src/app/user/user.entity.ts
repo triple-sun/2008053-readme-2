@@ -8,9 +8,9 @@ export class UserEntity implements IUser {
   public avatarUrl: string;
   public email: string;
   public name: string;
-  public subscriptions: IUser[];
+  public subscribers: string[];
+  public posts: number[];
   public passwordHash: string;
-  public accessToken: string;
 
   constructor(user: IUser) {
     this.fillEntity(user);
@@ -35,7 +35,8 @@ export class UserEntity implements IUser {
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;
     this.email = user.email;
-    this.subscriptions = user.subscriptions;
+    this.subscribers = user.subscribers;
+    this.posts = user.posts;
     this.passwordHash = user.passwordHash;
   }
 }

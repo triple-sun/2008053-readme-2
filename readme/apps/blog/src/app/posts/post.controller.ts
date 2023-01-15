@@ -1,14 +1,12 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Prefix, PostInfo, Path } from '@readme/core';
+import { FileInterceptor } from '@nestjs/platform-express';
 
-import { PostCreateDTO } from './dto/post-create.dto';
-import { PostUpdateDTO } from './dto/post-update.dto';
+import { fillObject, Prefix, PostInfo, Path, MongoIDValidationPipe, UserIDQuery, MinMax, getImageUploadPipe, PostCreateDTO, getStorageOptions, UploadType, handlePostDTO, FieldName, TagsValidationPipe, PostUpdateDTO } from '@readme/core';
 
 import { PostService } from './post.service';
-import { PostSendNewQuery } from './query/post-send-new.query';
-import { PostTypeQuery } from './query/post-type.query';
-import { PostQuery } from './query/post.query';
+import { PostFeedQuery } from './query/post-feed.query';
+import { PostsNotifyQuery } from './query/posts-notify.query';
 import { PostRDO } from './rdo/post.rdo';
 
 @ApiTags(Prefix.Posts)
@@ -18,14 +16,14 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
-  @Get(`:${ParamName.PostID}`)
+  @Get(`:${FieldName.PostID}`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
   async show(
-    @Param(ParamName.PostID) postID: number
+    @Param(FieldName.PostID) postID: number
   ) {
     const post = await this.postService.getPost(postID);
 
@@ -38,83 +36,98 @@ export class PostController {
     description: PostInfo.Loaded
   })
   async index(
-    @Query() query: PostQuery
+    @Query() query: PostFeedQuery,
   ) {
     return this.postService.getPosts(query)
   }
 
   @Post()
+  @UseInterceptors(
+    FileInterceptor('file', getStorageOptions(UploadType.Photo))
+  )
   @ApiResponse({
     type: PostRDO,
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
   async create(
-    @Query() {type}: PostTypeQuery,
-    @Body() dto: PostCreateDTO
+    @Query(FieldName.UserID, MongoIDValidationPipe) query: UserIDQuery,
+    @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostCreateDTO,
+    @UploadedFile(getImageUploadPipe(MinMax.PhotoMaxBytes)) file: Express.Multer.File,
   ) {
-    const post = await this.postService.createPost(dto, type);
+    const dto = handlePostDTO<PostCreateDTO>(rawDTO, file.path)
+    const post = this.postService.createPost(query, dto)
 
     return fillObject(PostRDO, post);
   }
 
-  @Patch(`:${ParamName.PostID}`)
+  @Patch(`:${FieldName.PostID}`)
+  @UseInterceptors(
+    FileInterceptor('file', getStorageOptions(UploadType.Photo))
+  )
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
   async update(
-    @Param(ParamName.PostID) postID: number,
-    @Body() dto: PostUpdateDTO
+    @Param(FieldName.PostID) postID: number,
+    @Query(FieldName.UserID, MongoIDValidationPipe) query: UserIDQuery,
+    @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostUpdateDTO,
+    @UploadedFile(getImageUploadPipe(MinMax.PhotoMaxBytes)) file: Express.Multer.File,
   ) {
-    const post = await this.postService.updatePost(postID, dto);
+    const dto = handlePostDTO<PostUpdateDTO>(rawDTO, file.path)
+    const post = await this.postService.updatePost(postID, query, dto);
 
     return fillObject(PostRDO, post);
   }
 
-  @Delete(`:${ParamName.PostID}`)
+  @Delete(`:${FieldName.PostID}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
   async destroy(
-    @Param(ParamName.PostID) postID: number
+    @Param(FieldName.PostID) postID: number,
+    @Query(FieldName.UserID, MongoIDValidationPipe) {userID}: UserIDQuery
   ) {
-    await this.postService.deletePost(postID)
+    await this.postService.deletePost(postID, userID)
   }
 
-  @Post(`:${ParamName.PostID}/repost`)
+  @Post(`:${FieldName.PostID}/repost`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
-  async repost(@Param(ParamName.PostID) postID: number) {
-    const post = await this.postService.repost(postID);
+  async repost(
+    @Param(FieldName.PostID) postID: number,
+    @Query(FieldName.UserID, MongoIDValidationPipe) {userID}: UserIDQuery
+  ) {
+    const post = await this.postService.repost(postID, userID);
 
     return fillObject(PostRDO, post);
   }
 
-  @Post(`:${ParamName.PostID}/like`)
+  @Post(`:${FieldName.PostID}/like`)
   @ApiResponse({
    type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
   async like(
-    @Param(ParamName.PostID) postID: number,
-    @Body() {userID}: PostUpdateDTO
+    @Param(FieldName.PostID) postID: number,
+    @Query(FieldName.UserID, MongoIDValidationPipe) query: UserIDQuery
   ) {
-    const post = await this.postService.likePost(postID, userID);
+    const post = await this.postService.likePost(postID, query);
 
     return fillObject(PostRDO, post);
   }
 
   @Get(Path.SendNewPosts)
   async sendNew(
-    @Query() query: PostSendNewQuery,
+    @Query() query: PostsNotifyQuery,
   ) {
-    return this.postService.sendNew(query)
+    return this.postService.notify(query)
   }
 }

@@ -1,45 +1,26 @@
-import { IsArray, IsJWT, IsMongoId } from 'class-validator';
+import { IsDate, IsMongoId } from 'class-validator';
 import { Expose, Transform } from 'class-transformer';
-import { ApiProperty, IntersectionType, OmitType } from '@nestjs/swagger';
-import { FieldName, UserAPIDesc, UserAPIExample } from '@readme/core';
-import { UserCreateDTO } from '../dto/user-create.dto';
-import { IUser } from '@readme/shared-types';
+import { ApiProperty, IntersectionType, OmitType, PickType } from '@nestjs/swagger';
+import { FieldName, UserDTO, UsersAPIProp } from '@readme/core';
 import { Types } from 'mongoose';
 
-class UserRDOBase {
+class UserBaseRDO {
   @Expose({ name: FieldName.ObjectID})
   @IsMongoId()
   @Transform(({ obj }) => obj._id)
-  @ApiProperty({
-    description: UserAPIDesc.ID,
-    example: UserAPIExample.ID
-  })
+  @ApiProperty(UsersAPIProp[FieldName.ID])
   public id: Types.ObjectId
 
   @Expose()
-  @IsMongoId()
-  @IsArray({each: true})
-  @ApiProperty({
-    description: UserAPIDesc.Subs,
-    example: UserAPIExample.Subs,
-    default: []
-  })
-  public subscriptions: IUser[];
-
-  @Expose()
-  @IsJWT()
-  @ApiProperty({
-    description: UserAPIDesc.Token,
-    example: UserAPIExample.Token
-  })
-  public token: string;
+  @IsDate()
+  @ApiProperty(UsersAPIProp[FieldName.CreatedAt])
+  public createdAt: Date;
 }
 
 export class UserRDO extends IntersectionType(
-  UserRDOBase,
-  OmitType(
-    UserCreateDTO,
-    ['password'] as const
-  )
+  UserBaseRDO,
+  IntersectionType(
+    PickType(UserDTO, ['posts', 'subscribers'] as const),
+    OmitType(UserDTO, ['password', 'token'] as const))
 ) {}
 

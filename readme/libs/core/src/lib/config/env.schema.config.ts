@@ -1,6 +1,13 @@
 import * as Joi from 'joi';
 import { Port } from '../enum/utils.enum';
 
+export const apiEnvSchema = {
+  API_PORT: Joi
+    .number()
+    .port()
+    .required(),
+}
+
 export const mailerEnvSchema = {
   MAILER_PORT: Joi
     .number()

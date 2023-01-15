@@ -6,9 +6,12 @@ import { IUser } from '@readme/shared-types';
 
 @Schema({
   collection: Collection.Users,
+  timestamps: true
 })
 export class UserModel extends mongoose.Document implements IUser {
-  @Prop()
+  @Prop({
+    default: ''
+  })
   public avatarUrl: string;
 
   @Prop({
@@ -28,7 +31,12 @@ export class UserModel extends mongoose.Document implements IUser {
     default: [],
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: UserModel.name }]
   })
-  public subscriptions: IUser[]
+  public subscribers: string[]
+
+  @Prop({
+    default: [],
+  })
+  public posts: number[];
 
   @Prop({
     required: true,

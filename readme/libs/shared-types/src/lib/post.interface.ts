@@ -1,29 +1,28 @@
 /* eslint-disable @nrwl/nx/enforce-module-boundaries */
-import { ContentType, Link, Tag } from "@prisma/client";
-import { ContentDTO, LinkDTO, PhotoDTO, QuoteDTO, TextDTO, VideoDTO } from "@readme/core";
+import { ContentType } from "@prisma/client";
 import { IComment } from "./comment.interface";
 
-export interface IPostBase {
+export interface IPost {
   id?: number;
-  type?: ContentType;
-  content?: ContentDTO;
-  tags?: Tag[];
+  type: ContentType;
+  link?: string
+  desc?: string
+  text?: string
+  ann?: string
+  quote?: string
+  author?: string
+  videoLink?: string;
+  photoLink?: string;
+  tags?: string[];
   likes?: string[];
   comments?: IComment[];
+  likeCount?: number;
+  commentCount?: number;
   isRepost?: boolean;
   isDraft?: boolean;
-  userID?: string;
-  origin?: IPost;
+  userID: string;
   originID?: number;
   authorID?: string;
   publishAt?: Date;
   createdAt?: Date;
-}
-
-export interface IPost extends IPostBase {
-  link?: LinkDTO | Pick<Link, 'postID'>
-  photo?: PhotoDTO | Pick<Link, 'postID'>
-  quote?: QuoteDTO | Pick<Link, 'postID'>
-  text?: TextDTO | Pick<Link, 'postID'>
-  video?: VideoDTO | Pick<Link, 'postID'>
 }

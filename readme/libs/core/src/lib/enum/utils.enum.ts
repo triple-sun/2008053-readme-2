@@ -3,9 +3,14 @@ export enum Port {
   Max = 65535,
   DBDefault = 27017,
   BlogAPIDefault = 3333,
-  NotifyAPIDefault = 5555,
-  UsersAPIDefault = 4444,
+  NotifyAPIDefault = 3334,
+  UsersAPIDefault = 3335,
   MailDefault = 5025
+}
+
+export enum UploadType {
+  Photo = 'photo',
+  Avatar = 'avatar'
 }
 
 export enum EnvFilePath {
@@ -24,14 +29,6 @@ export enum Prefix {
   User = 'users'
 }
 
-export enum ParamName {
-  UserID = 'userID',
-  PostID = 'postID',
-  CommentID = 'commentID',
-  ID = 'id',
-  Type = 'type'
-}
-
 export enum Path {
   Avatar = 'avatar',
   Blog = 'blog',
@@ -41,7 +38,9 @@ export enum Path {
   Spec = 'spec',
   Login = 'login',
   Upload = 'upload',
-  Subscribe = 'sub',
+  Photo = 'photo',
+  Link = 'link',
+  Subscribe = 'subscribe',
   Subscriptions = 'subs',
   Users = 'users',
   Repost = 'repost',
@@ -52,48 +51,10 @@ export enum EntityName {
   User = 'User',
   Post = 'Post',
   Comment = 'Comment',
-  Subscriber = 'Subscriber'
-}
-
-export enum FieldName {
-  ID = 'id',
-  ObjectID = '_id',
-  Email = 'email'
-}
-
-export enum APIConfig {
-  BlogDesc = 'Blog service API',
-  BlogTitle = 'Blog microservice',
-  NotifyDesc = 'Notification service API',
-  NotifyTitle = 'Notification microservice',
-  UsersDesc = 'Users service API',
-  UsersTitle = 'Users microservice',
-  Version = '1.0'
-}
-
-export enum MinMax {
-  TagMin = 3,
-  TagMax = 10,
-  TagsLimit = 8,
-  TitleMin = 20,
-  TitleMax = 50,
-  AnnMin = 50,
-  AnnMax = 255,
-  TextMin = 100,
-  TextMax = 1024,
-  QuoteMin = 20,
-  QuoteMax = 300,
-  AuthorMin = 3,
-  AuthorMax = 50,
-  PhotoMaxBytes = 1000000,
-  DescMax = 300,
-  UserNameMin = 3,
-  UserNameMax = 50,
-  UserPassMin = 6,
-  UserPassMax = 12,
-  AvatarMaxBytes = 500000,
-  CommentMin = 10,
-  CommentMax = 300,
-  CommentsLimit = 30,
-  PostsLimit = 25
+  Subscriber = 'Subscriber',
+  Link = 'Link',
+  Photo = 'Photo',
+  Video = 'Video',
+  Quote = 'Quote',
+  Text = 'Text'
 }

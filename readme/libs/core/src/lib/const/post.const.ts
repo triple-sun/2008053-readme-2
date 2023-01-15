@@ -1,8 +1,8 @@
-import { MinMax } from "../enum/utils.enum";
+import { MinMax } from "../enum/minmax.enum";
 
 export const PostInclude = {
   comments: {
-    take: MinMax.CommentsLimit
+    take: MinMax.CommentsLimit,
   },
   origin: true,
   tags: true,

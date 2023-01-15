@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserSubscribeDTO } from '@readme/core';
 import { ICRUDRepo, ISubscriber } from '@readme/shared-types';
 import { Model } from 'mongoose';
 import { SubscriberEntity } from './subscriber.entity';
@@ -38,5 +39,24 @@ export class SubscriberRepository implements ICRUDRepo<SubscriberEntity, string,
       .exec()
   }
 
+  public async findByUserID(userID: string): Promise<ISubscriber | null> {
+    return this.subscriberModel
+      .findOne({ userID })
+      .exec()
+  }
 
+  public async subscribe({userID, subToID}: UserSubscribeDTO): Promise<ISubscriber> {
+    const isSubscribed = await this.subscriberModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
+
+    return await this.subscriberModel
+      .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: subToID }}, { new: true })
+      .exec()
+  }
+
+  public async updatePosts({userID, postID}) {
+    const isInPosts = await this.subscriberModel.findOne({ _id: userID, posts: { '$in': [postID] }})
+
+    return await this.subscriberModel
+      .findByIdAndUpdate(userID, {[isInPosts ? '$pull' : '$addToSet']: { posts: postID }}, { new: true })
+      .exec()  }
 }

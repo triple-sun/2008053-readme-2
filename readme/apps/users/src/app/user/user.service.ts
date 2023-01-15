@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AuthError, CommandEvent, RMQ_SERVICE } from '@readme/core';
+import { CommandEvent, ExistsErrorMessage, NotFoundErrorMessage, Service, UpdatePostsDTO, UserSubscribeDTO } from '@readme/core';
 import { UserCreateDTO } from './dto/user-create.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
@@ -11,7 +11,7 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    @Inject(RMQ_SERVICE) private readonly rmqClient: ClientProxy,
+    @Inject(Service.RMQService) private readonly rmqClient: ClientProxy,
   ) {}
 
   async getUsers() {
@@ -22,36 +22,36 @@ export class UserService {
     const user = await this.userRepository.findOne(userID);
 
     if (!user) {
-      throw new Error(AuthError.NotFound);
+      throw new NotFoundException(
+        NotFoundErrorMessage.UserNotFoundID(userID)
+      )
     }
 
     return user;
   }
 
-  async register(dto: UserCreateDTO) {
+  async registerUser(dto: UserCreateDTO) {
     const {email, name, password} = dto;
     const user = {
       email,
       name,
       avatarUrl: '',
-      subscriptions: [],
+      subscribers: [],
       passwordHash: '',
       accessToken: ''
     };
 
-    const existUser = await this.userRepository
-      .findByEmail(email);
+    const exists = await this.userRepository.findByEmail(email);
 
-    if (existUser) {
-      throw new Error(AuthError.Email);
+    if (exists) {
+      throw new ConflictException(
+        ExistsErrorMessage.UserExitsEmail
+      );
     }
 
-    const userEntity = await new UserEntity(user)
-      .setPassword(password)
+    const userEntity = await new UserEntity(user).setPassword(password)
 
-    const createdUser = await this.userRepository
-      .create(userEntity);
-
+    const createdUser = await this.userRepository.create(userEntity);
 
     this.rmqClient.emit(
       { cmd: CommandEvent.AddSubscriber },
@@ -65,12 +65,8 @@ export class UserService {
     return createdUser
   }
 
-  async update(userID: string, { avatarUrl, password }: UserUpdateDTO) {
-    const user = await this.userRepository.findOne(userID)
-
-    if (!user) {
-      throw new Error(AuthError.NotFound);
-    }
+  async updateUser(userID: string, { avatarUrl, password }: UserUpdateDTO) {
+    const user = await this.getUser(userID)
 
     const update = {
       ...user,
@@ -84,19 +80,28 @@ export class UserService {
     return await this.userRepository.update(userID, userEntity)
   }
 
-  async subscribe(userID: string, subToID: string) {
-    const user = await this.userRepository.findOne(userID)
+  async subscribe(dto: UserSubscribeDTO) {
+    const {userID, subToID} = dto;
 
-    if (!user) {
-      throw new Error(AuthError.NotFound);
-    }
+    await this.getUser(userID);
+    await this.getUser(subToID);
 
-    const subTo = await this.userRepository.findOne(subToID)
+    const subscribed = await this.userRepository.subscribe(dto);
 
-    if (!subTo) {
-      throw new Error(AuthError.Sub);
-    }
+    this.rmqClient.emit(
+      { cmd: CommandEvent.UserSubscribe },
+      {
+        userID,
+        subToID
+      }
+    );
 
-    return await this.userRepository.subscribe(user, subTo)
+    return subscribed;
+  }
+
+  public async updatePosts(dto: UpdatePostsDTO) {
+    await this.getUser(dto.userID);
+
+    return await this.userRepository.updatePosts(dto)
   }
 }

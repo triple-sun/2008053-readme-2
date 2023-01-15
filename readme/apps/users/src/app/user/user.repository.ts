@@ -3,9 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
-import { getToggleAction } from '@readme/core';
 
 import { UserEntity } from './user.entity';
+import { UserSubscribeDTO } from '@readme/core';
+import { UpdatePostsDTO } from '../../../../../libs/core/src/lib/dto/update-posts.dto';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -44,12 +45,19 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .exec();
   }
 
-  public async subscribe({_id}: IUser, {_id: subToID}: IUser): Promise<IUser> {
-    const action = await getToggleAction(_id, subToID, this.userModel)
+  public async subscribe({userID, subToID}: UserSubscribeDTO): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id: subToID, subscribers: { '$in': [userID] }})
 
     return await this.userModel
-      .findByIdAndUpdate( _id._id, { [`${action}`]: { subscriptions: subToID._id }}, { new: true })
+      .findByIdAndUpdate(subToID, {[isSubscribed ? '$pull' : '$addToSet']: { subscribers: userID }}, { new: true })
       .exec()
   }
 
+  public async updatePosts({userID, postID}: UpdatePostsDTO): Promise<IUser> {
+    const isInPosts = await this.userModel.findOne({ _id: userID, posts: { '$in': [postID] }})
+
+    return await this.userModel
+      .findByIdAndUpdate(userID, {[isInPosts ? '$pull' : '$addToSet']: { postIDs: postID }}, { new: true })
+      .exec()
+  }
 }

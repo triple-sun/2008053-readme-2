@@ -10,8 +10,7 @@
  import { AppModule } from './app/app.module';
 
  async function bootstrap() {
-   const app = await NestFactory.create(AppModule);
-   const globalPrefix = Prefix.Global;
+  const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
     .setTitle(APIConfig.BlogTitle)
@@ -19,21 +18,19 @@
     .setVersion(APIConfig.Version)
     .build();
 
-   app.setGlobalPrefix(globalPrefix);
+  app.setGlobalPrefix(Prefix.Global);
 
-   app.useGlobalPipes(new ValidationPipe({
-    transform: true
-  }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-   const document = SwaggerModule.createDocument(app, config);
-   SwaggerModule.setup(Path.Spec, app, document)
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(Path.Spec, app, document)
 
-   const port = process.env.API_PORT || Port.BlogAPIDefault;
-   await app.listen(port);
+  const port = process.env.API_PORT || Port.BlogAPIDefault;
+  await app.listen(port);
 
-   Logger.log(
-     getAppRunningString(APIConfig.BlogTitle, port)
-   );
- }
+  Logger.log(
+    getAppRunningString(APIConfig.BlogTitle, port)
+  );
+}
 
  bootstrap();

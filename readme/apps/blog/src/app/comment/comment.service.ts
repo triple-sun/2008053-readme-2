@@ -1,31 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { CommentError, PostError } from "@readme/core";
+import { CommentInfo, NotFoundErrorMessage } from "@readme/core";
 
 import { CommentEntity } from "./comment.entity";
-import { PostRepository } from "../posts/post.repository";
 import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
-import { CommentQuery } from "./query/comment.query";
+import { CommentListQuery } from "./query/comment-list.query";
+import { PostService } from "../posts/post.service";
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
-    private readonly postRepository: PostRepository
+    private readonly postService: PostService
       ) {}
 
-  async getCommentsForPost(query: CommentQuery) {
+  async getCommentsForPost(query: CommentListQuery) {
+    await this.postService.getPost(query.postID)
+
     return await this.commentRepository.findAllByPostID(query)
   }
 
-  async createComment(postID: number, dto: CommentCreateDTO) {
-    const post = await this.postRepository.findOne(postID)
+  async createComment(postID: number, userID: string, dto: CommentCreateDTO) {
+    const newComment = new CommentEntity({postID, userID, ...dto})
 
-    if (!post) {
-      throw new Error(PostError.NotFound)
-    }
-
-    const newComment = new CommentEntity(postID, dto)
+    await this.postService.getPost(postID)
 
     return await this.commentRepository.create(newComment);
   }
@@ -34,9 +32,13 @@ export class CommentService {
     const comment = await this.commentRepository.findOne(commentID);
 
     if (!comment) {
-      throw new Error(CommentError.NotFound)
+      throw new Error(
+        NotFoundErrorMessage.CommentNotFoundID(commentID)
+      )
     }
-    
+
     await this.commentRepository.destroy(commentID)
+
+    return CommentInfo.Deleted
   }
 }

@@ -1,19 +1,26 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { blogConfig } from '../../config/blog.config';
 
 import { CommentModule } from './comment/comment.module';
+import { PostController } from './posts/post.controller';
 import { PostModule } from './posts/post.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { blogConfigModuleConfig } from '../config/config.module.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(blogConfigModuleConfig),
     PrismaModule,
+    PostModule,
+    CommentModule,
+    ConfigModule.forRoot(blogConfig),
+  ],
+  controllers: [
+    PostController
+  ],
+  providers: [
     PostModule,
     CommentModule
   ],
-  controllers: [],
-  providers: [PostModule, CommentModule],
+  exports: []
 })
 export class AppModule {}

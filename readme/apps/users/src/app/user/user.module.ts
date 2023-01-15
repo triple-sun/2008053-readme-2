@@ -1,8 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { getJwtConfig, getRMQConfig, RMQ_SERVICE } from '@readme/core';
+import { jwtModuleConfig, rmqClientConfig } from '@readme/core';
 
 import { UserModel, UserSchema } from './user.model';
 import { UserController } from './user.controller';
@@ -15,21 +14,9 @@ import { ClientsModule } from '@nestjs/microservices';
 @Module({
   imports: [
     PassportModule,
-    MongooseModule.forFeature([
-      { name: UserModel.name, schema: UserSchema}
-    ]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: getJwtConfig,
-      inject: [ConfigService]
-    }),
-    ClientsModule.registerAsync([
-      {
-        name: RMQ_SERVICE,
-        useFactory: getRMQConfig,
-        inject: [ConfigService]
-      }
-    ]),
+    MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+    JwtModule.registerAsync(jwtModuleConfig),
+    ClientsModule.registerAsync(rmqClientConfig),
   ],
   providers: [
     UserRepository,

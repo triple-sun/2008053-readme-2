@@ -11,8 +11,7 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = Prefix.Global;
-  app.setGlobalPrefix(globalPrefix);
+  app.setGlobalPrefix(Prefix.Global);
 
   const config = new DocumentBuilder()
     .setTitle(APIConfig.UsersTitle)

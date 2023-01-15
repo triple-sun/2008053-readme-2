@@ -9,19 +9,16 @@ export enum CommentInfo {
   Deleted = 'Your comment has been successfully deleted.',
 }
 
-export enum APIDesc {
-  Feed = 'Comments feed for post',
-  Text = 'Comment text',
-  Limit = 'Max entries per page',
+export enum CommentAPIDesc {
+  Limit = 'Max comments per page',
   UserID = 'Unique comment author ID',
   CommentID = 'Unique comment ID',
   PostID = 'Unique post ID',
-  Post = 'Comment post'
 }
 
-export enum APIExample {
+export enum CommentAPIExample {
   Feed = '[{comment}, {comment}, {comment}]',
   Limit = 10,
   ID = 123,
-  Text = 'Идет медведь по лесу, видит, машина горит. Сел в нее и сгорел.',
+  Text = 'Lorem ipsum dolor set amet',
 }

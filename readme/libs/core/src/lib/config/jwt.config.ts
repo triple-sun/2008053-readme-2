@@ -1,4 +1,4 @@
-import { ConfigService, registerAs } from '@nestjs/config';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { EnvRegisterAs } from '../enum/env.enum';
 
@@ -11,4 +11,10 @@ export const getJwtConfig = async (configService: ConfigService): Promise<JwtMod
     secret: configService.get<string>(`${EnvRegisterAs.JWT}.secret`),
     signOptions: { expiresIn: '60s', algorithm: 'HS256' }
   }
+}
+
+export const jwtModuleConfig = {
+  imports: [ConfigModule],
+  useFactory: getJwtConfig,
+  inject: [ConfigService]
 }

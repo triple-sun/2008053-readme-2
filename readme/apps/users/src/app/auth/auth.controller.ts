@@ -3,7 +3,6 @@ import { AuthError, fillObject, Path, Prefix, UserInfo } from '@readme/core';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserLoggedRDO } from '../user/rdo/user-logged.rdo';
-import { UserRDO } from '../user/rdo/user.rdo';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { AuthService } from './auth.service';
 
@@ -32,6 +31,6 @@ export class AuthController {
 
     const token = await this.authService.loginUser(user)
 
-    return fillObject(UserRDO, {...user, token})
+    return fillObject(UserLoggedRDO, {...user, token})
   }
 }

@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamName, fillObject, Prefix, CommentInfo } from '@readme/core';
+import { FieldName, fillObject, Prefix, CommentInfo } from '@readme/core';
 
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
-import { CommentQuery } from './query/comment.query';
+import { CommentCreateQuery } from './query/comment-create.query';
+import { CommentListQuery } from './query/comment-list.query';
 import { CommentRDO } from './rdo/comment.rdo';
 
 @ApiTags(Prefix.Comments)
@@ -20,9 +21,11 @@ export class CommentController {
     description: CommentInfo.Loaded
   })
   async getComments(
-    @Query() query: CommentQuery
-    ) {
-    return this.commentService.getCommentsForPost(query)
+    @Query() query: CommentListQuery
+  ) {
+    const comments = await this.commentService.getCommentsForPost(query)
+
+    return comments.map((comment) => fillObject(CommentRDO, comment))
   }
 
   @Post()
@@ -32,20 +35,20 @@ export class CommentController {
     description: CommentInfo.Created
   })
   async create(
-    @Query() {postID}: CommentQuery,
+    @Query() {postID, userID}: CommentCreateQuery,
     @Body() dto: CommentCreateDTO
     ) {
-    const comment = await this.commentService.createComment(postID, dto);
+    const comment = await this.commentService.createComment(postID, userID, dto);
 
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`:${ParamName.CommentID}`)
+  @Delete(`:${FieldName.CommentID}`)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(ParamName.CommentID) commentID: number) {
+  async delete(@Param(FieldName.CommentID) commentID: number) {
     return this.commentService.deleteComment(commentID);
   }
 }
