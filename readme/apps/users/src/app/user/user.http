@@ -1,17 +1,17 @@
 # Get users
-GET http://localhost:4444/api/users
+GET http://localhost:3335/api/users
 
 
 ###
 
 # Get user by ID with authenthication (auth token received via login in auth.http)
-GET http://localhost:4444/api/users/639b51839f1f06a7ddd8d3b8
+GET http://localhost:3335/api/users/639b51839f1f06a7ddd8d3b8
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzliNTE4MzlmMWYwNmE3ZGRkOGQzYjgiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmRvbWFpbSIsImlhdCI6MTY3MTMyMDEzMywiZXhwIjoxNjcxMzIwMTkzfQ.bEdfxnv0PwG51asbH7IEQbwoCgr9aMyp5nO2SEyq5ao
 
 ###
 
 # Update user by ID
-PATCH  http://localhost:4444/api/users/639b51839f1f06a7ddd8d3b8
+PATCH  http://localhost:3335/api/users/update/639b51839f1f06a7ddd8d3b8
 Content-Type: application/json
 
 {
@@ -21,8 +21,8 @@ Content-Type: application/json
 
 ###
 
-# Subscribe/unsubscribe to/from user by ID
-PATCH  http://localhost:4444/api/users/639b51839f1f06a7ddd8d3b8/subscribe?to=638a5bc64ca776bd324605e5
+# Subscribe/unsubscribe by ID
+PATCH  http://localhost:3335/api/users/subscribe?subToID=638a5bc64ca776bd324605e5&userID=639e73981ca903a10ea63fa3
 
 ###
 

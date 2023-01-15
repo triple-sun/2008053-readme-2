@@ -5,10 +5,10 @@ import { Types } from 'mongoose';
 
 export class UserEntity implements IUser {
   public _id: Types.ObjectId;
-  public avatarUrl: string;
+  public avatarUrl?: string;
   public email: string;
   public name: string;
-  public subscribers: string[];
+  public subscriptions?: Types.ObjectId[];
   public posts: number[];
   public passwordHash: string;
 
@@ -35,7 +35,7 @@ export class UserEntity implements IUser {
     this.name = user.name;
     this.avatarUrl = user.avatarUrl;
     this.email = user.email;
-    this.subscribers = user.subscribers;
+    this.subscriptions = user.subscriptions;
     this.posts = user.posts;
     this.passwordHash = user.passwordHash;
   }

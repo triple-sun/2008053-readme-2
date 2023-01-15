@@ -20,6 +20,7 @@ export enum UserInfo {
 
 export enum UserError {
   Email = 'User email is not valid',
+  SelfSubscribe = 'You can`t subscribe to yourself'
 }
 
 export enum UserAPIDesc {

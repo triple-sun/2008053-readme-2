@@ -1,17 +1,17 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { Express } from 'express';
 
-import { CommandEvent, fillObject, MinMax, MongoIDValidationPipe, FieldName, Path, Prefix, UpdatePostsDTO, UploadFileDTO, UserAPIDesc, UserInfo, UserSubscribeDTO, getStorageOptions, UploadType, getImageUploadPipe } from '@readme/core';
+import { CommandEvent, fillObject, MinMax, MongoIDValidationPipe, FieldName, Path, Prefix, UpdatePostsDTO, UploadFileDTO, UserAPIDesc, UserInfo, UserSubscribeQuery, getStorageOptions, UploadType, getImageUploadPipe } from '@readme/core';
 import { UserService } from './user.service';
 import { UserRDO } from './rdo/user.rdo';
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { EventPattern } from '@nestjs/microservices';
-import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { RMQRoute } from 'nestjs-rmq';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -65,7 +65,7 @@ export class UserController {
     return fillObject(UserRDO, user);
   }
 
-  @Patch(`:${FieldName.UserID}`)
+  @Put(`${Path.Update}/:${FieldName.UserID}`)
   @ApiBody({
     type: UserUpdateDTO
   })
@@ -83,7 +83,7 @@ export class UserController {
     return fillObject(UserRDO, update);
   }
 
-  @Patch(`:${FieldName.UserID}/${Path.Avatar}`)
+  @Patch(`${Path.Avatar}/:${FieldName.UserID}`)
   @UseInterceptors(
     FileInterceptor('file', getStorageOptions(UploadType.Avatar))
   )
@@ -113,7 +113,7 @@ export class UserController {
    description: UserInfo.Updated
   })
   async subscribe(
-    @Query() query: UserSubscribeDTO
+    @Query() query: UserSubscribeQuery
   ) {
     const update = await this.userService.subscribe(query);
 
@@ -125,14 +125,10 @@ export class UserController {
     return this.userService.updatePosts(dto)
   }
 
-  @RabbitRPC({
-    exchange: 'readme',
-    routingKey: 'rpc-users',
-    queue: 'readme.subscribers'
-  })
-  public async getSubs(@RabbitPayload() payload: string) {
-    const user = await this.userService.getUser(payload)
+  @RMQRoute('rpc-users')
+  public async getSubs(userID: string) {
+    const user = await this.userService.getUser(userID)
 
-    return user.subscribers
+    return user.subscriptions.map((sub) => sub.toString())
   }
 }

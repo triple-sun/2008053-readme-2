@@ -1,35 +1,26 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { CommandEvent, NotFoundErrorMessage, PostCreateDTO, PostError, PostUpdateDTO, Service, toggleArrElement, UserIDQuery } from '@readme/core';
+import { Injectable } from '@nestjs/common';
+import { NotFoundErrorMessage, PostCreateDTO, PostError, PostUpdateDTO, toggleArrElement, UserIDQuery } from '@readme/core';
 import { IPost } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
 import { PostFeedQuery } from './query/post-feed.query';
 import { PostsNotifyQuery } from './query/posts-notify.query';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { RMQService } from 'nestjs-rmq';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly amqpConnection: AmqpConnection,
-    @Inject(Service.RMQService) private readonly rmqClient: ClientProxy,
+    private readonly rmqService: RMQService
   ) {}
 
   async getPosts(query: PostFeedQuery) {
-    const bbb = await this.amqpConnection.request<string[]>({
-      exchange: 'readme',
-      routingKey: 'rpc-users',
-      payload: query.userID,
-      timeout: 10000
-    })
+    const subscriptions = await this.rmqService.send<string, string[]>('rpc-users', query.userID)
+    console.log(subscriptions)
+    //const posts = await this.postRepository.find(query)
 
-    console.log(bbb)
-
-    const posts = await this.postRepository.find(query)
-
-    return posts
+    //return posts
   }
 
   async getPost(postID: number): Promise<IPost> {
@@ -59,14 +50,6 @@ export class PostService {
     const postEntity = new PostEntity(post)
 
     const newPost = await this.postRepository.create(postEntity);
-
-    this.rmqClient.emit(
-      { cmd: CommandEvent.UpdatePosts },
-      {
-        userID,
-        postID: newPost.id
-      }
-    );
 
     return newPost
   }
@@ -163,14 +146,6 @@ export class PostService {
   }
 
   async notify({email, userID}: PostsNotifyQuery) {
-    const posts = await this.getPosts({userID})
-
-    return this.rmqClient.emit(
-      { cmd: CommandEvent.NewPosts },
-      {
-        email,
-        posts
-      }
-    );
+    return await this.getPosts({userID})
   }
 }

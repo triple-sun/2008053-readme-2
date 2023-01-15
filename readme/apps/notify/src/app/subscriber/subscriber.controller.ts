@@ -1,6 +1,6 @@
 import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
-import { CommandEvent, CommandMessage, UpdatePostsDTO, UserSubscribeDTO } from '@readme/core';
+import { CommandEvent, CommandMessage, UpdatePostsDTO, UserSubscribeQuery } from '@readme/core';
 import { SubscriberService } from './subscriber.service';
 import { SubscriberCreateDTO } from './dto/subscriber-create.dto';
 import { SubscriberNotifyDTO } from './dto/subscriber-notify.dto';
@@ -22,7 +22,7 @@ export class SubscriberController {
   }
 
   @EventPattern({ cmd: CommandEvent.UserSubscribe})
-  public async subscribe(dto: UserSubscribeDTO) {
+  public async subscribe(dto: UserSubscribeQuery) {
     return this.subscriberService.updateSubscriptions(dto)
   }
 

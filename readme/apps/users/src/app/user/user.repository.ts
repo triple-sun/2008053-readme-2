@@ -5,8 +5,7 @@ import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UserSubscribeDTO } from '@readme/core';
-import { UpdatePostsDTO } from '../../../../../libs/core/src/lib/dto/update-posts.dto';
+import { UpdatePostsDTO, UserSubscribeQuery } from '@readme/core';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -45,11 +44,13 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .exec();
   }
 
-  public async subscribe({userID, subToID}: UserSubscribeDTO): Promise<IUser> {
-    const isSubscribed = await this.userModel.findOne({ _id: subToID, subscribers: { '$in': [userID] }})
+  public async subscribe({userID, subToID}: UserSubscribeQuery): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
+
+    console.log({isSubscribed});
 
     return await this.userModel
-      .findByIdAndUpdate(subToID, {[isSubscribed ? '$pull' : '$addToSet']: { subscribers: userID }}, { new: true })
+      .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: userID }}, { new: true })
       .exec()
   }
 

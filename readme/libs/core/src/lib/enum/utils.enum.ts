@@ -44,7 +44,8 @@ export enum Path {
   Subscriptions = 'subs',
   Users = 'users',
   Repost = 'repost',
-  SendNewPosts = 'send-new'
+  SendNewPosts = 'send-new',
+  Update = 'update'
 }
 
 export enum EntityName {

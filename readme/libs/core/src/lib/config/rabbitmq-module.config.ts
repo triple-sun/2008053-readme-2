@@ -1,34 +1,32 @@
-import { ConfigService, registerAs } from "@nestjs/config"
-import { AsyncModuleConfig } from '@golevelup/nestjs-modules'
+import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
 
 import { EnvRegisterAs } from "../enum/env.enum"
-import { getAMQPConnectionString } from "../utils/env.utils"
+
+import { AsyncModuleConfig } from '@golevelup/nestjs-modules'
 import { RabbitMQConfig } from '@golevelup/nestjs-rabbitmq'
 
-export const rmqModuleOptions = registerAs(EnvRegisterAs.RabbitMQModule, () => ({
+export const rabbitMQModuleOptions = registerAs(EnvRegisterAs.RMQ, () => ({
   user: process.env.RMQ_USER,
   pass: process.env.RMQ_PASS,
   host: process.env.RMQ_HOST,
   queue: process.env.RMQ_QUEUE,
   exchange: process.env.RMQ_EXCHANGE,
-  topic: process.env.RMQ_EXCHANGE_TYPE
+  uri: process.env.RMQ_URI
 }))
 
 export const getRabbitMQModuleConfig = (): AsyncModuleConfig<RabbitMQConfig> => ({
-  useFactory: (configService: ConfigService) => {
+  useFactory: async (configService: ConfigService) => {
     return {
       exchanges: [{
-        name: configService.get<string>(`${EnvRegisterAs.RabbitMQModule}.exchange`),
-        type: configService.get<string>(`${EnvRegisterAs.RabbitMQModule}.topic`)
+        name: 'rabbitmq',
+        type: 'topic'
       }],
-        uri: `${getAMQPConnectionString({
-          user: configService.get<string>(`${EnvRegisterAs.RabbitMQModule}.user`),
-          pass: configService.get<string>(`${EnvRegisterAs.RabbitMQModule}.pass`),
-          host: configService.get<string>(`${EnvRegisterAs.RabbitMQModule}.host`)
-        })}:5672`,
+      uri: configService.get<string>(`${EnvRegisterAs.RMQ}.uri`),
       prefetchCount: 1,
+      connectionInitOptions: { wait: false },
       enableControllerDiscovery: true,
       enableDirectReplyTo: true
     }},
-  inject: [ConfigService]
-})
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  })

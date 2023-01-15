@@ -15,12 +15,10 @@ export const getRMQConfig = (configService: ConfigService): RmqOptions => {
   return {
     transport: Transport.RMQ,
     options: {
-      urls: [
-        {
+      urls: [{
           username: configService.get<string>(`${EnvRegisterAs.RMQ}.user`),
           password: configService.get<string>(`${EnvRegisterAs.RMQ}.pass`),
           hostname: configService.get<string>(`${EnvRegisterAs.RMQ}.host`),
-          port: 5672
       }],
       queue: configService.get<string>(`${EnvRegisterAs.RMQ}.queue`),
       queueOptions: { durable: true },

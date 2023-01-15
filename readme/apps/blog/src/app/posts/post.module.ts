@@ -1,6 +1,6 @@
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
-import { getRabbitMQModuleConfig } from '@readme/core';
+import { getRMQModuleConfig } from '@readme/core';
+import { RMQModule } from 'nestjs-rmq';
 
 import { PostController } from './post.controller';
 import { PostRepository } from './post.repository';
@@ -8,7 +8,7 @@ import { PostService } from './post.service';
 
 @Module({
   imports: [
-    RabbitMQModule.forRootAsync(RabbitMQModule, getRabbitMQModuleConfig()),
+    RMQModule.forRootAsync(getRMQModuleConfig()),
   ],
   controllers: [
     PostController

@@ -1,6 +1,5 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { CommandEvent, ExistsErrorMessage, NotFoundErrorMessage, Service, UpdatePostsDTO, UserSubscribeDTO } from '@readme/core';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ExistsErrorMessage, NotFoundErrorMessage, UpdatePostsDTO, UserError, UserSubscribeQuery } from '@readme/core';
 import { UserCreateDTO } from './dto/user-create.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
@@ -11,7 +10,6 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    @Inject(Service.RMQService) private readonly rmqClient: ClientProxy,
   ) {}
 
   async getUsers() {
@@ -53,15 +51,6 @@ export class UserService {
 
     const createdUser = await this.userRepository.create(userEntity);
 
-    this.rmqClient.emit(
-      { cmd: CommandEvent.AddSubscriber },
-      {
-        email: createdUser.email,
-        name: createdUser.name,
-        userID: createdUser._id.toString(),
-      }
-    );
-
     return createdUser
   }
 
@@ -80,23 +69,17 @@ export class UserService {
     return await this.userRepository.update(userID, userEntity)
   }
 
-  async subscribe(dto: UserSubscribeDTO) {
+  async subscribe(dto: UserSubscribeQuery) {
     const {userID, subToID} = dto;
 
     await this.getUser(userID);
     await this.getUser(subToID);
 
-    const subscribed = await this.userRepository.subscribe(dto);
+    if (userID === subToID) {
+      throw new ConflictException(UserError.SelfSubscribe)
+    }
 
-    this.rmqClient.emit(
-      { cmd: CommandEvent.UserSubscribe },
-      {
-        userID,
-        subToID
-      }
-    );
-
-    return subscribed;
+    return await this.userRepository.subscribe(dto);
   }
 
   public async updatePosts(dto: UpdatePostsDTO) {

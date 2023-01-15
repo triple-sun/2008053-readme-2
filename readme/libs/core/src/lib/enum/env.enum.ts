@@ -26,7 +26,6 @@ export enum EnvRegisterAs {
   Mailer = 'mailer',
   JWT = 'jwt',
   RMQ = 'rmq',
-  RabbitMQModule = 'rabbitmqModule',
   RMQModule = 'rmqModule',
   Notify = 'notify',
   Users = 'users',

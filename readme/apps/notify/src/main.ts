@@ -12,10 +12,10 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const configService = app.get<ConfigService>(ConfigService);
-  app.connectMicroservice(getRMQConfig(configService));
+  //const configService = app.get<ConfigService>(ConfigService);
+  //app.connectMicroservice(getRMQConfig(configService));
 
-  await app.startAllMicroservices();
+  //await app.startAllMicroservices();
 
   const globalPrefix = Prefix.Global;
   app.setGlobalPrefix(globalPrefix);

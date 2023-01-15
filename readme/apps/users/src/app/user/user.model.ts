@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Collection, MinMax } from '@readme/core';
@@ -31,7 +31,7 @@ export class UserModel extends mongoose.Document implements IUser {
     default: [],
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: UserModel.name }]
   })
-  public subscribers: string[]
+  public subscriptions: Types.ObjectId[]
 
   @Prop({
     default: [],
