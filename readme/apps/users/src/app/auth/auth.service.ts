@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '@readme/shared-types';
+import { IUser } from '@readme/shared-types';
 import { AuthError } from '@readme/core';
 
 import { UserEntity } from '../user/user.entity';
@@ -58,7 +58,7 @@ export class AuthService {
     return userEntity.toObject();
   }
 
-  async loginUser(user: User) {
+  async loginUser(user: IUser) {
     const payload = {
       sub: user._id,
       email: user.email,

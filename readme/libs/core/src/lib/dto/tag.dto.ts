@@ -4,7 +4,6 @@ import { IsString, Length } from "class-validator";
 import { ContentAPIProp } from "../api-props/post/content.api-prop";
 import { MinMax } from "../enum/utils.enum";
 
-
 export class TagDTO {
   @Expose()
   @IsString()

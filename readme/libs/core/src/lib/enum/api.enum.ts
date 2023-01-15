@@ -3,7 +3,7 @@ export enum UserAPIDesc {
   AvatarUrl = 'User avatar path',
   Email = 'Unique user email address',
   ID = 'Unique user ID',
-  Name = 'Username',
+  Name = 'User name',
   Pass = 'User password',
   Subs = 'Subscribers',
   Token = 'User JWT access token',

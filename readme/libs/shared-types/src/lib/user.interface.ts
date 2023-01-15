@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-export interface User {
+export interface IUser {
   _id?: mongoose.Types.ObjectId;
   email: string;
   name: string;
   avatarUrl: string;
-  subscriptions: User[];
+  subscriptions: IUser[];
   passwordHash: string;
 }

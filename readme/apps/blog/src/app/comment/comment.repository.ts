@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Comment, CRUDRepo } from '@readme/shared-types';
+import { IComment, ICRUDRepo } from '@readme/shared-types';
 
 import { CommentEntity } from './comment.entity';
 import { CommentQuery } from './query/comment.query';
 
 @Injectable()
-export class CommentRepository implements CRUDRepo<CommentEntity, number, Comment> {
+export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComment> {
   constructor(
     private readonly prisma: PrismaService
     ) {}
 
-  async findAllByPostID({postID, limit}: CommentQuery): Promise<Comment[]> {
+  async findAllByPostID({postID, limit}: CommentQuery): Promise<IComment[]> {
     const comments = this.prisma.comment.findMany({
       where: {
         postID
@@ -31,7 +31,7 @@ export class CommentRepository implements CRUDRepo<CommentEntity, number, Commen
     return comments
   }
 
-  public async create(item: CommentEntity): Promise<Comment> {
+  public async create(item: CommentEntity): Promise<IComment> {
     const entityData = item.toObject();
     const {postID, userID, text} = entityData;
 
@@ -63,7 +63,7 @@ export class CommentRepository implements CRUDRepo<CommentEntity, number, Commen
     });
   }
 
-  public async findOne(id: number): Promise<Comment | null> {
+  public async findOne(id: number): Promise<IComment | null> {
     return await this.prisma.comment.findFirst({
       where: {id},
       include: {
