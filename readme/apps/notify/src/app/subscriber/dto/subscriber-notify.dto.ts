@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { FieldName, User, UserError, UsersAPIProp } from "@readme/core";
+import { FieldName, UserID, UserError, UsersAPIProp } from "@readme/core";
 import { Expose } from "class-transformer";
 import { IsEmail, IsMongoId, Validate } from "class-validator";
 import { SubExistsEmail, SubExistsID } from "../validators/sub-exists.validator";
@@ -19,6 +19,6 @@ class SubBase {
 }
 
 export class SubscriberNotifyDTO extends IntersectionType(
-  PickType(User, ['name'] as const),
+  PickType(UserID, ['name'] as const),
   SubBase
 ) {}

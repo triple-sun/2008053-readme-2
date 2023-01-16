@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, Req, UseGua
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 
-import { fillObject, MinMax, FieldName, Path, Prefix, UserInfo, RPC, User, JwtAuthGuard } from '@readme/core';
+import { fillObject, MinMax, FieldName, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard } from '@readme/core';
 import { UserService } from './user.service';
 import { UserRDO } from './rdo/user.rdo';
 import { UserUpdateDTO } from './dto/user-update.dto';
@@ -76,7 +76,7 @@ export class UserController {
   })
   async update(
     @Body() dto: UserUpdateDTO,
-    @User() {userID}: UserDTO,
+    @UserID() {userID}: UserDTO,
     @Req() req
   ) {
     console.log(dto, req.user)
@@ -93,7 +93,7 @@ export class UserController {
    description: UserInfo.Updated
   })
   async subscribe(
-    @User() {userID}: UserDTO,
+    @UserID() {userID}: UserDTO,
     @Body(FieldName.SubToID) query: UserSubscribeDTO
   ) {
     const update = await this.userService.subscribe(query, userID);

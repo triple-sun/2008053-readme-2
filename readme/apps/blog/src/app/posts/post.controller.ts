@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, U
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { fillObject, Prefix, PostInfo, Path, MongoIDValidationPipe, UserIDQuery, MinMax, getImageUploadPipe, PostCreateDTO, getStorageOptions, UploadType, handlePostDTO, FieldName, TagsValidationPipe, User, PostTypeParamValidationPipe, JwtAuthGuard } from '@readme/core';
+import { fillObject, Prefix, PostInfo, Path, MongoIDValidationPipe, MinMax, getImageUploadPipe, PostCreateDTO, getStorageOptions, UploadType, handlePostDTO, FieldName, TagsValidationPipe, UserID, PostTypeParamValidationPipe, JwtAuthGuard, User } from '@readme/core';
 
 import { PostService } from './post.service';
 import { PostRDO } from './rdo/post.rdo';
@@ -49,7 +49,7 @@ export class PostController {
     description: PostInfo.Loaded
   })
   async getFeed(
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getFeed(userID, query)
@@ -109,7 +109,7 @@ export class PostController {
     description: PostInfo.Loaded
   })
   async getDrafts(
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getDrafts(query, userID)
@@ -125,7 +125,7 @@ export class PostController {
     description: PostInfo.Created
   })
   async create(
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
     @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostCreateDTO,
     @UploadedFile(getImageUploadPipe(MinMax.Photo)) file: Express.Multer.File,
   ) {
@@ -145,7 +145,7 @@ export class PostController {
    description: PostInfo.Updated
   })
   async update(
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
     @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostUpdateDTO,
     @UploadedFile(getImageUploadPipe(MinMax.Photo)) file: Express.Multer.File,
   ) {
@@ -162,7 +162,7 @@ export class PostController {
   })
   async destroy(
     @Body() dto: PostDeleteDTO,
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
   ) {
     await this.postService.deletePost(userID, dto)
   }
@@ -175,7 +175,7 @@ export class PostController {
   })
   async repost(
     @Param(FieldName.PostID) postID: number,
-    @Query(FieldName.UserID, MongoIDValidationPipe) {userID}: UserIDQuery
+    @Query(FieldName.UserID) {userID}: User
   ) {
     const post = await this.postService.repost(postID, userID);
 
@@ -190,7 +190,7 @@ export class PostController {
   })
   async like(
     @Param(FieldName.PostID) postID: number,
-    @User(MongoIDValidationPipe) userID: string,
+    @UserID(MongoIDValidationPipe) userID: string,
   ) {
     const post = await this.postService.likePost(postID, userID);
 
@@ -200,7 +200,7 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Post(Path.Notify)
   async notify(
-    @User() userID: string
+    @UserID(MongoIDValidationPipe) userID: string,
   ) {
     return this.postService.notify(userID)
   }

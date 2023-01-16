@@ -23,6 +23,7 @@ export enum MinMax {
   CommentMax = 300,
   CommentsLimit = 50,
   PostsLimit = 25,
+  PostsSearch = 20,
   PortMin = 0,
   PortMax = 65535,
 }

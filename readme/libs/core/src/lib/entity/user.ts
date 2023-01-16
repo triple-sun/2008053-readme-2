@@ -7,8 +7,7 @@ import { MinMax } from "../enum/minmax.enum";
 import { UserError } from "../enum/users.enum";
 import { ValidationErrorMessage } from "../utils/error.utils";
 
-
-export class UserData {
+export class User {
   @Expose()
   @IsMongoId()
   @ApiProperty(UsersAPIProp[FieldName.UserID])

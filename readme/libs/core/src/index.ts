@@ -7,18 +7,14 @@ export * from '../../../apps/blog/src/app/posts/dto/notify.dto'
 export * from './lib/dto/post-create.dto'
 export * from './lib/dto/upload-file.dto'
 
-export * from './lib/entity/user-data'
+export * from './lib/entity/user'
 export * from './lib/entity/post'
 
 export * from './lib/decorators/user-id.decorator'
 
-export * from './lib/message/notify-new.message'
-export * from './lib/message/update-user-posts.message'
-
 export * from './lib/query/email.query'
 export * from './lib/query/page.query'
 export * from './lib/query/post-id.query'
-export * from './lib/query/user-id.query'
 
 export * from './lib/api-props/api-prop'
 export * from './lib/api-props/comment/comment.api-prop'

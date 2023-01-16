@@ -73,3 +73,8 @@ Content-Type: application/json
 }
 
 ###
+
+# Send unread posts to email
+GET http://localhost:3333/api/posts/notify HTTP/1.1
+
+###

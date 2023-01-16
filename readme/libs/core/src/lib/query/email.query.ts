@@ -1,4 +1,4 @@
 import { PickType } from "@nestjs/swagger";
-import { UserData } from "../entity/user-data";
+import { User } from "../entity/user";
 
-export class EmailQuery extends PickType(UserData, ['email'] as const) {}
+export class EmailQuery extends PickType(User, ['email'] as const) {}

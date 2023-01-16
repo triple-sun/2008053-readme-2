@@ -40,6 +40,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     const query = subs && !authorID
       ? { userID: { in: subs }}
       : { authorID }
+    const limit = title ? MinMax.PostsSearch : MinMax.PostsLimit
 
     const posts = await this.prisma.post.findMany({
       where: {
@@ -58,7 +59,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
         },
         isDraft: isDraft ?? false
       },
-      take: MinMax.PostsLimit,
+      take: limit,
       include: {
         ...PostInclude,
         _count:{ select: { comments: true }}
@@ -68,7 +69,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           ? { [sortBy]: {_count: sort}}
           : {[sortBy]: sort}
       ],
-      skip: page > 0 ? MinMax.PostsLimit * (page - 1) : undefined,
+      skip: page > 0 && title ? limit * (page - 1) : undefined,
     });
 
     return posts
