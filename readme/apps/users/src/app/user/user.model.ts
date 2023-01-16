@@ -12,7 +12,7 @@ export class UserModel extends mongoose.Document implements IUser {
   @Prop({
     default: ''
   })
-  public avatarUrl: string;
+  public avatar: string;
 
   @Prop({
     required: true,
@@ -34,14 +34,14 @@ export class UserModel extends mongoose.Document implements IUser {
   public subscriptions: Types.ObjectId[]
 
   @Prop({
-    default: [],
-  })
-  public posts: number[];
-
-  @Prop({
     required: true,
   })
   public passwordHash: string;
+
+  @Prop({
+    default: new Date()
+  })
+  public notifiedAt: Date
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

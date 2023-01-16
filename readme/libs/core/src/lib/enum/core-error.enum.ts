@@ -27,13 +27,14 @@ export enum CoreError {
   Validation = 'Validation error:',
   Subscriber = 'The subscriber with same email already exists',
   MongoID = 'Bad entity ID',
-  ContentType = 'Wrong dto content for post type',
+  DtoType = 'Wrong dto content for post type',
+  Type = 'Wrong post type',
   TagsLimit = 'Posts can only have 8 tags or less',
   ParamArg = 'This pipe must used only with params!',
   BodyArg = 'This pipe must used only with body!',
 }
 
-export enum ErrorSuffix {
+export enum Error {
   NotFound = 'was not found.',
   Exists = 'already exists.'
 }

@@ -23,7 +23,8 @@ export enum PostError {
   SelfRepost = 'You can`t repost your own posts.',
   DuplicateRepost = 'You can`t repost the same post twice',
   Published = 'This post is already published',
-  QueryType = 'Wrong type query'
+  QueryType = 'Wrong type query',
+  AuthorID = 'Post author ID is required'
 }
 
 export enum PostInfo {

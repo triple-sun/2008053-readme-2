@@ -1,11 +1,13 @@
-import { IsInt, IsNumber, IsString, Max, Min } from "class-validator";
+import { IsNumber, IsString, Max, Min } from "class-validator";
 import { ENVError } from "../enum/env.enum";
-import { Port } from "../enum/utils.enum";
+import { MinMax } from "../enum/minmax.enum";
 
 export class APIEnvConfig {
-  @IsInt({
+  @IsNumber({}, {
     message: ENVError.APIPort
   })
+  @Min(MinMax.PortMin)
+  @Max(MinMax.PortMax)
   public API_PORT: number;
 }
 
@@ -29,12 +31,19 @@ export class RMQEnvConfig {
     message: ENVError.RMQSubscriberQueue
   })
   public RMQ_QUEUE: string;
+
+    @IsString({
+    message: ENVError.RMQSubscriberQueue
+  })
+  public RMQ_EXCHANGE: string;
 }
 
 export class MailerEnvConfig {
-  @IsInt({
+  @IsNumber({}, {
     message: ENVError.SMTPPort
   })
+  @Min(MinMax.PortMin)
+  @Max(MinMax.PortMax)
   public MAILER_PORT: number;
 
   @IsString({
@@ -59,7 +68,7 @@ export class MailerEnvConfig {
 }
 
 export class MongoEnvConfig {
-    @IsString({
+  @IsString({
     message: ENVError.DBName
   })
   public MONGO_DB: string;
@@ -72,8 +81,8 @@ export class MongoEnvConfig {
   @IsNumber({}, {
     message: ENVError.DBPort
   })
-  @Min(Port.Min)
-  @Max(Port.Max)
+  @Min(MinMax.PortMin)
+  @Max(MinMax.PortMax)
   public MONGO_PORT: number;
 
   @IsString({

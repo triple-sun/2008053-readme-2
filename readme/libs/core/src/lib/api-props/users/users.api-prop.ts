@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import { FieldName } from "../../enum/field-name.enum";
 import { MinMax } from "../../enum/minmax.enum";
 import { UserAPIDesc, UserAPIExample } from "../../enum/users.enum";
@@ -19,13 +18,11 @@ export const UsersAPIProp: TAPIProp = {
   },
   [FieldName.UserID]: {
     required: true,
-    type: Types.ObjectId,
     description: UserAPIDesc.ID,
     example: UserAPIExample.ID,
   },
   [FieldName.SubToID]: {
     required: true,
-    type: Types.ObjectId,
     description: UserAPIDesc.SubTo,
     example: UserAPIExample.ID,
   },
@@ -39,7 +36,6 @@ export const UsersAPIProp: TAPIProp = {
     example: UserAPIExample.Token
   },
   [FieldName.Subscribers]: {
-    type: [Types.ObjectId],
     description: UserAPIDesc.Subscribers,
     example: UserAPIExample.Subscribers
   },

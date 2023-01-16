@@ -1,0 +1,43 @@
+# Login user by email and password
+POST http://localhost:3335/api/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "address@domain.domaim",
+  "password": "p4ssw0rdDd"
+}
+
+###
+
+# Get users
+GET http://localhost:3335/api/users
+
+
+###
+
+# Get user by ID with authenthication (auth token received via login in auth.http)
+GET http://localhost:3335/api/users/user?userID=638a5bbf4ca776bd324605df
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzliNTE4MzlmMWYwNmE3ZGRkOGQzYjgiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmRvbWFpbSIsImlhdCI6MTY3Mzg4ODQ3MSwiZXhwIjoxNjczODg5MDcxfQ.-FaUF2i0pEZbJ9audg2hOfakD0gjipOt0iQZbu-2eaQ
+
+###
+
+# Update user by ID
+PUT  http://localhost:3335/api/users/update
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzliNTE4MzlmMWYwNmE3ZGRkOGQzYjgiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmRvbWFpbSIsImlhdCI6MTY3Mzg4ODQ3MSwiZXhwIjoxNjczODg5MDcxfQ.-FaUF2i0pEZbJ9audg2hOfakD0gjipOt0iQZbu-2eaQ
+Content-Type: application/json
+
+{
+  "avatarUrl": "/upload/avatars/newAvatar2.jpg",
+  "password": "newPassw0rd"
+}
+
+###
+
+# Subscribe/unsubscribe by ID
+PATCH  http://localhost:3335/api/users/subscribe?subToID=638a5bc64ca776bd324605e5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzliNTE4MzlmMWYwNmE3ZGRkOGQzYjgiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmRvbWFpbSIsImlhdCI6MTY3Mzg4MTc5OSwiZXhwIjoxNjczODgxODU5fQ.NaV7v4BAM77kZA7SUfKHkbRfOnmr0F97Fas14hSxUgw
+
+###
+
+
+

@@ -18,16 +18,6 @@ export enum ENVError {
   RMQHost = 'RabbitMQ host is required',
   RMQUser = 'RabbitMQ user is required',
   RMQPass = 'RabbitMQ password is required',
-  RMQSubscriberQueue = 'RabbitMQ Subscribers Queue is required',
-}
-
-export enum EnvRegisterAs {
-  Blog = 'blog',
-  Mailer = 'mailer',
-  JWT = 'jwt',
-  RMQ = 'rmq',
-  RMQModule = 'rmqModule',
-  Notify = 'notify',
-  Users = 'users',
-  Mongo = 'mongo'
+  RMQSubscriberQueue = 'RabbitMQ service queue is required',
+  RMQExchange = 'RabbitMQ exchange name is required',
 }

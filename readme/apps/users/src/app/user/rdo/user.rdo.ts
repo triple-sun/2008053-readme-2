@@ -1,7 +1,7 @@
 import { IsDate, IsMongoId } from 'class-validator';
 import { Expose, Transform } from 'class-transformer';
 import { ApiProperty, IntersectionType, OmitType, PickType } from '@nestjs/swagger';
-import { FieldName, UserDTO, UsersAPIProp } from '@readme/core';
+import { FieldName, UserData, UsersAPIProp } from '@readme/core';
 import { Types } from 'mongoose';
 
 class UserBaseRDO {
@@ -20,7 +20,7 @@ class UserBaseRDO {
 export class UserRDO extends IntersectionType(
   UserBaseRDO,
   IntersectionType(
-    PickType(UserDTO, ['posts', 'subscribers'] as const),
-    OmitType(UserDTO, ['password', 'token'] as const))
+    PickType(UserData, ['posts', 'subscribers'] as const),
+    OmitType(UserData, ['password', 'token'] as const))
 ) {}
 

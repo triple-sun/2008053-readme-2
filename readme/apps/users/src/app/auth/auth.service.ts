@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { IUser } from '@readme/shared-types';
-import { AuthError, ExistsErrorMessage, NotFoundErrorMessage } from '@readme/core';
+import { AuthError, ErrorMessage } from '@readme/core';
 
 import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +20,7 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email)
 
     if (!user) {
-      throw new NotFoundException(NotFoundErrorMessage.UserNotFoundEmail);
+      throw new NotFoundException(ErrorMessage.User.Email.NotFound(email));
     }
 
     const userEntity = new UserEntity(user);

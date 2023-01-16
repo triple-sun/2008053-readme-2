@@ -5,7 +5,7 @@ import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UpdatePostsDTO, UserSubscribeQuery } from '@readme/core';
+import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -44,21 +44,11 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .exec();
   }
 
-  public async subscribe({userID, subToID}: UserSubscribeQuery): Promise<IUser> {
+  public async subscribe({subToID}: UserSubscribeDTO, userID: string): Promise<IUser> {
     const isSubscribed = await this.userModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
-
-    console.log({isSubscribed});
 
     return await this.userModel
       .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: userID }}, { new: true })
-      .exec()
-  }
-
-  public async updatePosts({userID, postID}: UpdatePostsDTO): Promise<IUser> {
-    const isInPosts = await this.userModel.findOne({ _id: userID, posts: { '$in': [postID] }})
-
-    return await this.userModel
-      .findByIdAndUpdate(userID, {[isInPosts ? '$pull' : '$addToSet']: { postIDs: postID }}, { new: true })
       .exec()
   }
 }

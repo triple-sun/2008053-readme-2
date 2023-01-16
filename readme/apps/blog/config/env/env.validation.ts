@@ -16,10 +16,7 @@ class BlogEnvConfig {
 
 class EnvConfig extends IntersectionType(
   APIEnvConfig,
-  IntersectionType(
-    RMQEnvConfig,
-    BlogEnvConfig
-  )
+  IntersectionType(BlogEnvConfig, RMQEnvConfig)
 ) {}
 
 export default validateEnv(EnvConfig)

@@ -12,8 +12,8 @@ export enum MinMax {
   QuoteMax = 300,
   AuthorMin = 3,
   AuthorMax = 50,
-  AvatarMaxBytes = 500000,
-  PhotoMaxBytes = 1000000,
+  Avatar = 500000,
+  Photo = 1000000,
   DescMax = 300,
   UserNameMin = 3,
   UserNameMax = 50,
@@ -22,5 +22,7 @@ export enum MinMax {
   CommentMin = 10,
   CommentMax = 300,
   CommentsLimit = 50,
-  PostsLimit = 25
+  PostsLimit = 25,
+  PortMin = 0,
+  PortMax = 65535,
 }

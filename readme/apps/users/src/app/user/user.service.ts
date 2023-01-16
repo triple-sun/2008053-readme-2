@@ -1,65 +1,56 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { ExistsErrorMessage, NotFoundErrorMessage, UpdatePostsDTO, UserError, UserSubscribeQuery } from '@readme/core';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { UserError, validateUserAlreadyExists, validateUserExists } from '@readme/core';
 import { UserCreateDTO } from './dto/user-create.dto';
+import { UserDTO } from './dto/user.dto';
+import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
+
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
   ) {}
-
   async getUsers() {
     return await this.userRepository.find()
   }
 
   async getUser(userID: string) {
-    const user = await this.userRepository.findOne(userID);
+    const user = await this.userRepository.findOne(userID)
 
-    if (!user) {
-      throw new NotFoundException(
-        NotFoundErrorMessage.UserNotFoundID(userID)
-      )
-    }
+    validateUserExists(userID, user)
 
     return user;
   }
 
   async registerUser(dto: UserCreateDTO) {
     const {email, name, password} = dto;
+
+    validateUserAlreadyExists(await this.userRepository.findByEmail(dto.email))
+
     const user = {
       email,
       name,
-      avatarUrl: '',
+      avatar: dto.avatar.path ?? '',
+      notifiedAt: new Date(),
       subscribers: [],
       passwordHash: '',
-      accessToken: ''
     };
-
-    const exists = await this.userRepository.findByEmail(email);
-
-    if (exists) {
-      throw new ConflictException(
-        ExistsErrorMessage.UserExitsEmail
-      );
-    }
 
     const userEntity = await new UserEntity(user).setPassword(password)
 
-    const createdUser = await this.userRepository.create(userEntity);
-
-    return createdUser
+    return await this.userRepository.create(userEntity);
   }
 
-  async updateUser(userID: string, { avatarUrl, password }: UserUpdateDTO) {
+  async updateUser(userID: string, { avatar, password }: UserUpdateDTO) {
     const user = await this.getUser(userID)
 
     const update = {
       ...user,
-      avatarUrl: avatarUrl ?? user.avatarUrl,
+      avatarUrl: avatar ? avatar.path : user.avatar
     }
 
     const userEntity = password
@@ -69,22 +60,24 @@ export class UserService {
     return await this.userRepository.update(userID, userEntity)
   }
 
-  async subscribe(dto: UserSubscribeQuery) {
-    const {userID, subToID} = dto;
-
-    await this.getUser(userID);
-    await this.getUser(subToID);
-
-    if (userID === subToID) {
+  async subscribe(dto: UserSubscribeDTO, userID: string) {
+    if (userID === dto.subToID) {
       throw new ConflictException(UserError.SelfSubscribe)
     }
 
-    return await this.userRepository.subscribe(dto);
+    return await this.userRepository.subscribe(dto, userID);
   }
 
-  public async updatePosts(dto: UpdatePostsDTO) {
-    await this.getUser(dto.userID);
+  async setNotified({userID}: UserDTO) {
+    const user = await this.getUser(userID)
 
-    return await this.userRepository.updatePosts(dto)
+    const update = {
+      ...user,
+      notifiedAt: new Date(),
+    }
+
+    const userEntity = new UserEntity(update)
+
+    return await this.userRepository.update(userID, userEntity)
   }
 }

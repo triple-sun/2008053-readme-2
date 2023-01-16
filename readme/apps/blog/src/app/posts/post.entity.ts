@@ -2,6 +2,7 @@ import { ContentType } from "@prisma/client";
 import { IEntity, IPost } from "@readme/shared-types";
 
 export class PostEntity implements IEntity<PostEntity>, IPost {
+  public id?: number;
   public type: ContentType;
   public title?: string;
   public link?: string;
@@ -40,6 +41,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
 
     this.publishAt = entity.publishAt ?? new Date();
 
+    this.id = entity.id;
     this.type = entity.type;
 
     this.tags = [...entity.tags]

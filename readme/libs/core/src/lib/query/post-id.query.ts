@@ -1,4 +1,4 @@
 import { PickType } from "@nestjs/swagger";
-import { PostDTO } from "../dto/post.dto";
+import { Post } from "../entity/post";
 
-export class PostIDQuery extends PickType(PostDTO, ['postID'] as const) {}
+export class PostIDQuery extends PickType(Post, ['postID'] as const) {}

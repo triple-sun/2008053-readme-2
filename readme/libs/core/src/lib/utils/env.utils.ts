@@ -1,7 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { APIEnvConfig } from '../config/env.config';
 import { validateSync } from 'class-validator';
-
 import { Prefix } from '../enum/utils.enum';
 
 export const getMongoConnectionString = ({user, pass, host, port, database, authBase}): string => {
@@ -13,7 +12,7 @@ export const getAMQPConnectionString = ({user, pass, host}): string => {
 }
 
 export const getAppRunningString = (appName: string, port: number | string) => {
-  return `🚀 ${appName} REST API is running on:  http://localhost:${port}/${Prefix.Global}`
+  return `🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`
 }
 
 export const validateEnv = (envConfig: typeof APIEnvConfig) => (

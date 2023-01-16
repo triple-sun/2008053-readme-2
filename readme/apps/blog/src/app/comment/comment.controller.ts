@@ -49,6 +49,6 @@ export class CommentController {
    description: CommentInfo.Deleted
   })
   async delete(@Param(FieldName.CommentID) commentID: number) {
-    return this.commentService.deleteComment(commentID);
+    await this.commentService.deleteComment(commentID);
   }
 }

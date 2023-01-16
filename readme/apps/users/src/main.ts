@@ -2,34 +2,22 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { APIConfig, getAppRunningString, Path, Port, Prefix } from '@readme/core';
-
+import { SwaggerModule } from '@nestjs/swagger';
+import { APIConfig, APIPort, getAppRunningString, Path, Prefix, SwaggerConfig } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix(Prefix.Global);
 
-  const config = new DocumentBuilder()
-    .setTitle(APIConfig.UsersTitle)
-    .setDescription(APIConfig.UsersDesc)
-    .setVersion(APIConfig.Version)
-    .addBearerAuth()
-    .build();
+  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, SwaggerConfig.Users))
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(Path.Spec, app, document)
-
-  app.useGlobalPipes(new ValidationPipe());
-
-  const port = process.env.API_PORT || Port.UsersAPIDefault;
-  await app.listen(port);
+  await app.listen(APIPort.Users);
 
   Logger.log(
-    getAppRunningString(APIConfig.UsersTitle, port)
+    getAppRunningString(APIConfig.UsersTitle, APIPort.Users)
   );
 }
 

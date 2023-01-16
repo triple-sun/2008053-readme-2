@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PostInclude, SortByType } from '@readme/core';
+import { MinMax, PostInclude, SortByType } from '@readme/core';
 import { ICRUDRepo, IPost,  } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostFeedQuery } from './query/post-feed.query';
+import { PostsFindQuery } from './query/posts.query.dto';
 
 @Injectable()
 export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
@@ -36,14 +36,19 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return exists
   }
 
-  public async find({from, limit, type, sortBy, tag, sort, isDraft: draft, page, since, userID}: PostFeedQuery) {
+  public async find({sortBy, sort, page, isDraft, subs, authorID, type, tag, since, title}: PostsFindQuery) {
+    const query = subs && !authorID
+      ? { userID: { in: subs }}
+      : { authorID }
+
     const posts = await this.prisma.post.findMany({
       where: {
-        userID: {
-          in: from.includes(userID) ? from : [userID, ...from]
+        ...query,
+        title: {
+          contains: title
         },
         type: {
-          equals: type ?? undefined
+          equals: type
         },
         tags: {
           has: tag
@@ -51,9 +56,9 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
         createdAt: {
           gt: since
         },
-        isDraft: draft
+        isDraft: isDraft ?? false
       },
-      take: limit,
+      take: MinMax.PostsLimit,
       include: {
         ...PostInclude,
         _count:{ select: { comments: true }}
@@ -63,7 +68,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           ? { [sortBy]: {_count: sort}}
           : {[sortBy]: sort}
       ],
-      skip: page > 0 ? limit * (page - 1) : undefined,
+      skip: page > 0 ? MinMax.PostsLimit * (page - 1) : undefined,
     });
 
     return posts
@@ -81,18 +86,22 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return await this.prisma.post.update({
       where: { id },
       data: {
-        likes
+        likes: {
+          set: likes
+        }
       },
       include: PostInclude
     })
   }
 
-  public async publish(id: number) {
+  public async publish(id: number, publishAt: Date) {
     return await this.prisma.post.update({
       where: { id },
       data: {
         isDraft: false,
-        publishAt: new Date()
+        publishAt: {
+          set: publishAt
+        }
       },
       include: PostInclude
     })

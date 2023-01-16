@@ -1,5 +1,6 @@
 export enum FieldName {
   ID = 'id',
+  Avatar = 'avatar',
   ObjectID = '_id',
   Email = 'email',
   UserID = 'userID',

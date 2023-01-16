@@ -7,7 +7,8 @@ import { MinMax } from "../enum/minmax.enum";
 import { UserError } from "../enum/users.enum";
 import { ValidationErrorMessage } from "../utils/error.utils";
 
-export class UserDTO {
+
+export class UserData {
   @Expose()
   @IsMongoId()
   @ApiProperty(UsersAPIProp[FieldName.UserID])
@@ -50,5 +51,5 @@ export class UserDTO {
   @IsString()
   @IsOptional()
   @ApiProperty(UsersAPIProp[FieldName.AvatarUrl])
-  public avatarUrl: string;
+  public avatarUrl?: string;
 }

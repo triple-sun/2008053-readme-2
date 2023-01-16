@@ -1,9 +1,8 @@
-import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
-import { Controller } from '@nestjs/common';
-import { CommandEvent, CommandMessage, UpdatePostsDTO, UserSubscribeQuery } from '@readme/core';
+import { Controller, UseGuards } from '@nestjs/common';
+import {  JwtAuthGuard, NotifyDTO, RPC } from '@readme/core';
 import { SubscriberService } from './subscriber.service';
+import { RMQRoute } from 'nestjs-rmq';
 import { SubscriberCreateDTO } from './dto/subscriber-create.dto';
-import { SubscriberNotifyDTO } from './dto/subscriber-notify.dto';
 
 @Controller()
 export class SubscriberController {
@@ -11,33 +10,14 @@ export class SubscriberController {
     private readonly subscriberService: SubscriberService,
   ) {}
 
-  @EventPattern({ cmd: CommandEvent.AddSubscriber})
+  @RMQRoute(RPC.NewSub)
   public async create(subscriber: SubscriberCreateDTO) {
     return this.subscriberService.addSubscriber(subscriber);
   }
 
-  @EventPattern({ cmd: CommandEvent.UpdatePosts})
-  public async updatePosts(dto: UpdatePostsDTO) {
-    return this.subscriberService.updatePosts(dto)
-  }
-
-  @EventPattern({ cmd: CommandEvent.UserSubscribe})
-  public async subscribe(dto: UserSubscribeQuery) {
-    return this.subscriberService.updateSubscriptions(dto)
-  }
-
-  @EventPattern({ cmd: CommandEvent.NewPosts})
-  public async notify(dto: SubscriberNotifyDTO) {
+  @UseGuards(JwtAuthGuard)
+  @RMQRoute(RPC.GetSub)
+  async getSubscriber(dto: NotifyDTO) {
     return this.subscriberService.notify(dto)
   }
-
-  @MessagePattern({ cmd: CommandMessage.GetSub })
-  async getSub(@Payload() userID: string, @Ctx() context: RmqContext) {
-    const channel = context.getChannelRef();
-
-    const sub = await this.subscriberService.getSubscriber({userID})
-
-    return channel.ack(sub)
-  }
-
 }

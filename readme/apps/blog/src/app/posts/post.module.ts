@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { getRMQModuleConfig } from '@readme/core';
+import { EntityName, getRMQModuleConfig } from '@readme/core';
 import { RMQModule } from 'nestjs-rmq';
 
 import { PostController } from './post.controller';
@@ -8,7 +8,7 @@ import { PostService } from './post.service';
 
 @Module({
   imports: [
-    RMQModule.forRootAsync(getRMQModuleConfig()),
+    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.Post)),
   ],
   controllers: [
     PostController

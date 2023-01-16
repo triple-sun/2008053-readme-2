@@ -10,17 +10,8 @@ class UsersEnvConfig {
 }
 
 class EnvConfig extends IntersectionType(
-  APIEnvConfig,
-  IntersectionType(
-    JWTEnvConfig,
-    IntersectionType(
-      MongoEnvConfig,
-      IntersectionType(
-        RMQEnvConfig,
-        UsersEnvConfig
-      )
-    )
-  )
+  IntersectionType(APIEnvConfig, UsersEnvConfig),
+  IntersectionType(RMQEnvConfig, IntersectionType(MongoEnvConfig, JWTEnvConfig))
 ) {}
 
 export default validateEnv(EnvConfig)

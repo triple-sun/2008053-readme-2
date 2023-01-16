@@ -9,10 +9,10 @@ import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(blogConfig),
     PrismaModule,
     PostModule,
     CommentModule,
-    ConfigModule.forRoot(blogConfig),
   ],
   controllers: [
     PostController
@@ -21,6 +21,5 @@ import { PrismaModule } from './prisma/prisma.module';
     PostModule,
     CommentModule
   ],
-  exports: []
 })
 export class AppModule {}

@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { NotFoundErrorMessage, PostCreateDTO, PostError, PostUpdateDTO, toggleArrElement, UserIDQuery } from '@readme/core';
-import { IPost } from '@readme/shared-types';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { NotifyDTO, PostCreateDTO, PostError, RPC, toggleArrElement, validatePostUserID, validateRepost } from '@readme/core';
+import { IPost, IUser } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { PostFeedQuery } from './query/post-feed.query';
-import { PostsNotifyQuery } from './query/posts-notify.query';
 import { RMQService } from 'nestjs-rmq';
+import { PostsQuery } from './query/posts.query.dto';
+import { ContentType } from '@prisma/client';
+import { PostDeleteDTO } from './query/post-delete.dto';
+import { PostUpdateDTO } from './query/post-update.dto';
 
 @Injectable()
 export class PostService {
@@ -14,28 +16,44 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly rmqService: RMQService
   ) {}
+  async getPostsByAuthor(query: PostsQuery, authorID: string) {
+    return await this.postRepository.find({...query, authorID})
+  }
 
-  async getPosts(query: PostFeedQuery) {
-    const subscriptions = await this.rmqService.send<string, string[]>('rpc-users', query.userID)
-    console.log(subscriptions)
-    //const posts = await this.postRepository.find(query)
+  async getPostsByTag(query: PostsQuery, tag: string) {
+    return await this.postRepository.find({...query, tag})
+  }
 
-    //return posts
+  async getPostsByType(query: PostsQuery, type: ContentType) {
+    return await this.postRepository.find({...query, type})
+  }
+
+  async getPostsByTitle(query: PostsQuery, title: string) {
+    return await this.postRepository.find({...query, title})
+  }
+
+  async getDrafts(query: PostsQuery, userID: string) {
+    return await this.postRepository.find({...query, authorID: userID, isDraft: true})
+  }
+
+  async getPosts(query: PostsQuery) {
+    return await this.postRepository.find(query)
+  }
+
+  async getFeed(userID: string, query?: PostsQuery) {
+    const user = await this.rmqService.send<string, IUser>(RPC.GetSub, userID)
+    const subs = [...user.subscriptions.map((sub) => sub.toString()), userID]
+
+    return await this.postRepository.find({...query, subs})
   }
 
   async getPost(postID: number): Promise<IPost> {
     const post = await this.postRepository.findOne(postID);
 
-    if (!post) {
-      throw new Error(
-        NotFoundErrorMessage.PostNotFoundID(postID)
-      );
-    }
-
     return post
   }
 
-  async createPost({userID}: UserIDQuery, dto: PostCreateDTO) {
+  async createPost(userID: string, dto: PostCreateDTO) {
     const contentType = dto.type.toLowerCase()
 
     const post = {
@@ -54,19 +72,16 @@ export class PostService {
     return newPost
   }
 
-  async updatePost(postID: number, {userID}: UserIDQuery, dto: PostUpdateDTO) {
-    const {type, tags, publishAt} = dto
+  async updatePost(userID: string, dto: PostUpdateDTO) {
+    const {tags, publishAt, postID} = dto
     const post = await this.getPost(postID);
+    const type = dto.type ?? post.type
 
-    const contentType = type ? type.toLowerCase() : post.type.toLowerCase()
-
-    if (post.userID !== userID) {
-      throw new Error(PostError.Permission)
-    }
+    validatePostUserID(post, userID)
 
     const update = {
       ...post,
-      ...dto[contentType],
+      ...dto[type.toLowerCase()],
       type,
       publishAt,
       tags
@@ -79,73 +94,42 @@ export class PostService {
     return updatedPost
   }
 
-  async deletePost(postID: number, userID: string) {
-    const post = await this.postRepository.findOne(postID);
-
-    if (!post) {
-      throw new Error(PostError.NotFound)
-    }
-
-    if (post.userID !== userID) {
-      throw new Error(PostError.Permission)
-    }
-
+  async deletePost(userID: string, {postID}: PostDeleteDTO) {
     await this.postRepository.destroy(postID)
   }
 
   async repost(postID: number, userID: string): Promise<IPost> {
     const origin = await this.getPost(postID);
 
-    if (origin.authorID === userID) {
-      throw new Error(PostError.SelfRepost)
-    }
+    validateRepost(origin, userID)
 
-    if (origin.userID === userID) {
-      throw new Error(PostError.DuplicateRepost)
-    }
+    const repostEntity = new PostEntity({...origin, isRepost: true})
 
-    const {authorID, ...postBase} = origin
-
-    const repostEntity = new PostEntity({...postBase, isRepost: true, authorID: authorID ?? origin.userID })
-
-    const repost = await this.postRepository.create(repostEntity);
-
-    return {
-      ...repost,
-    };
+    return await this.postRepository.create(repostEntity);
   }
 
-  async likePost(postID: number, query: UserIDQuery): Promise<IPost> {
+  async likePost(postID: number, userID: string): Promise<IPost> {
     const post = await this.getPost(postID);
 
-    const likes = toggleArrElement(post.likes, query.userID);
+    const likes = toggleArrElement(post.likes, userID);
 
-    const updatedPost = await this.postRepository.like(postID, likes)
-
-    return updatedPost
+    return await this.postRepository.like(postID, likes)
   }
 
-  async publishPost(postID: number, query: UserIDQuery): Promise<IPost> {
-    const post = await this.postRepository.findOne(postID);
+  async publishPost(postID: number, userID: string, publishAt?: Date): Promise<IPost> {
+    const post = await this.getPost(postID);
 
-    if (!post) {
-      throw new Error(PostError.NotFound);
+    if (post.userID !== userID) {
+      throw new ForbiddenException(PostError.Permission)
     }
 
-    if (post.userID !== query.userID) {
-      throw new Error(PostError.Permission)
-    }
-
-    if (!post.isDraft) {
-      throw new Error(PostError.Published)
-    }
-
-    const updatedPost = await this.postRepository.publish(postID)
-
-    return updatedPost
+    return await this.postRepository.publish(postID, publishAt ?? new Date())
   }
 
-  async notify({email, userID}: PostsNotifyQuery) {
-    return await this.getPosts({userID})
+  async notify(userID: string) {
+    const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
+    const posts = await this.getFeed(userID, {since: user.notifiedAt})
+
+    return await this.rmqService.notify<NotifyDTO>(RPC.Notify, {userID, posts})
   }
 }

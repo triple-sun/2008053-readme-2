@@ -2,16 +2,14 @@ import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from
 import { CoreError, PostCreateDTO } from '@readme/core';
 
 @Injectable()
-export class ContentTypeValidationPipe implements PipeTransform {
+export class PostTypeDTOValidationPipe implements PipeTransform {
   transform(dto: PostCreateDTO, { type }: ArgumentMetadata) {
     if (type !== 'body') {
       throw new Error(CoreError.BodyArg)
     }
 
-    const contentType = dto.type.toLowerCase();
-
-    if (!dto[contentType]) {
-      throw new BadRequestException(CoreError.MongoID);
+    if (!dto[dto.type.toLowerCase()]) {
+        throw new BadRequestException(CoreError.DtoType);
     }
 
     return dto;

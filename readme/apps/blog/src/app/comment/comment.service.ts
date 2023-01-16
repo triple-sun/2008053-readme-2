@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CommentInfo, NotFoundErrorMessage } from "@readme/core";
+import { CommentInfo, ErrorMessage } from "@readme/core";
 
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
@@ -33,12 +33,10 @@ export class CommentService {
 
     if (!comment) {
       throw new Error(
-        NotFoundErrorMessage.CommentNotFoundID(commentID)
+        ErrorMessage.Comment.NotFound(commentID)
       )
     }
 
     await this.commentRepository.destroy(commentID)
-
-    return CommentInfo.Deleted
   }
 }

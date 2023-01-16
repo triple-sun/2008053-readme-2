@@ -1,8 +1,12 @@
 import { Expose } from "class-transformer";
 import { ValidateNested } from "class-validator";
 import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
+import { Link } from "../entity/content/link";
+import { Video } from "../entity/content/video";
+import { Quote } from "../entity/content/quote";
+import { Post } from "../entity/post";
+import { Text } from "../entity/content/text";
 
-import { Link, PostDTO, Quote, Text, Video } from "@readme/core";
 
 class PostContent {
   @Expose()
@@ -27,6 +31,6 @@ class PostContent {
 }
 
 export class PostCreateDTO extends IntersectionType(
-  PickType(PostDTO, ['tags', 'type'] as const),
+  PickType(Post, ['tags', 'type'] as const),
   PostContent,
 ) {}

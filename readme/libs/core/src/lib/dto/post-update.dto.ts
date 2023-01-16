@@ -3,14 +3,19 @@ import { Expose } from "class-transformer";
 import { IsDate, IsOptional } from "class-validator";
 import { PostCreateDTO } from "./post-create.dto";
 
-class PublishAt {
+class PostUpdateBase {
   @Expose()
   @IsDate()
   @IsOptional()
   publishAt?: Date;
+
+  @Expose()
+  @IsDate()
+  @IsOptional()
+  postID?: number;
 }
 
 export class PostUpdateDTO extends IntersectionType(
-  PublishAt,
+  PostUpdateBase,
   PartialType(PostCreateDTO)
 ) {}

@@ -1,30 +1,30 @@
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
-import { EnvRegisterAs } from "../enum/env.enum";
 import { IRMQServiceAsyncOptions } from 'nestjs-rmq'
+import { Token } from "../enum/token.enum";
 
-export const rmqModuleOptions = registerAs('rmq', () => ({
+export const rmqModuleConfig = registerAs(Token.RMQ, () => ({
   user: process.env.RMQ_USER,
   pass: process.env.RMQ_PASS,
   host: process.env.RMQ_HOST,
   queue: process.env.RMQ_QUEUE,
   exchange: process.env.RMQ_EXCHANGE,
-  topic: process.env.RMQ_EXCHANGE_TYPE
 }))
 
-export const getRMQModuleConfig = (): IRMQServiceAsyncOptions => ({
+export const getRMQModuleConfig = (serviceName: string): IRMQServiceAsyncOptions => ({
   imports: [ConfigModule],
 	inject: [ConfigService],
 	useFactory: async (configService: ConfigService) => {
 				return {
-					exchangeName: configService.get<string>(`${EnvRegisterAs.RMQ}.exchange`),
+					exchangeName: configService.get<string>(`${Token.RMQ}.exchange`),
 					connections: [
 						{
-							login: configService.get<string>(`${EnvRegisterAs.RMQ}.user`),
-							password: configService.get<string>(`${EnvRegisterAs.RMQ}.pass`),
-							host: configService.get<string>(`${EnvRegisterAs.RMQ}.host`),
+							login: configService.get<string>(`${Token.RMQ}.user`),
+							password: configService.get<string>(`${Token.RMQ}.pass`),
+							host: configService.get<string>(`${Token.RMQ}.host`),
 						},
 					],
-					queueName: configService.get<string>(`${EnvRegisterAs.RMQ}.queue`),
+					queueName: configService.get<string>(`${Token.RMQ}.queue`),
+          serviceName
 				};
 			},
 })

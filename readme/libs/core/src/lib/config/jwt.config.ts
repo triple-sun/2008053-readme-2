@@ -1,15 +1,15 @@
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
-import { EnvRegisterAs } from '../enum/env.enum';
+import { Token } from '../enum/token.enum';
 
-export const jwtOptions = registerAs(EnvRegisterAs.JWT, () => ({
+export const jwtConfig = registerAs(Token.JWT, () => ({
   secret: process.env.JWT_SECRET,
 }));
 
 export const getJwtConfig = async (configService: ConfigService): Promise<JwtModuleOptions> => {
   return {
-    secret: configService.get<string>(`${EnvRegisterAs.JWT}.secret`),
-    signOptions: { expiresIn: '60s', algorithm: 'HS256' }
+    secret: configService.get<string>(`${Token.JWT}.secret`),
+    signOptions: { expiresIn: '600s', algorithm: 'HS256' }
   }
 }
 

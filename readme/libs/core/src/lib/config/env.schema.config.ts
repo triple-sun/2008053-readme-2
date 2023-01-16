@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import { Port } from '../enum/utils.enum';
+import { PortDefault } from '../enum/utils.enum';
 
 export const apiEnvSchema = {
   API_PORT: Joi
@@ -12,7 +12,7 @@ export const mailerEnvSchema = {
   MAILER_PORT: Joi
     .number()
     .port()
-    .default(Port.MailDefault)
+    .default(PortDefault.Mailer)
     .required(),
   MAILER_HOST: Joi
     .string()
@@ -40,13 +40,14 @@ export const mongoDbEnvSchema = {
   MONGO_PORT: Joi
     .number()
     .port()
-    .default(Port.DBDefault)
+    .default(PortDefault.Mongo)
     .required(),
   MONGO_USER: Joi
     .string()
     .required(),
   MONGO_PASS: Joi
-    .string(),
+    .string()
+    .required(),
   MONGO_AUTH_BASE: Joi
     .string()
     .required(),
@@ -70,6 +71,9 @@ export const rmqEnvSchema = {
     .hostname()
     .required(),
   RMQ_QUEUE: Joi
+    .string()
+    .required(),
+  RMQ_EXCHANGE: Joi
     .string()
     .required()
 }

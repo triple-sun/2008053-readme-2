@@ -14,7 +14,6 @@ import { UserModule } from '../user/user.module';
   providers: [
     AuthService
   ],
-  exports: []
 })
 
 export class AuthModule {}

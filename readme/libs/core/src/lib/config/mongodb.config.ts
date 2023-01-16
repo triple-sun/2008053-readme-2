@@ -1,29 +1,29 @@
 import { ConfigService, registerAs } from "@nestjs/config"
 import { MongooseModuleAsyncOptions } from "@nestjs/mongoose"
+import { Token } from "../enum/token.enum"
 
-import { EnvRegisterAs } from "../enum/env.enum"
 import { getMongoConnectionString } from "../utils/env.utils"
 
-export const mongoDbOptions = registerAs(EnvRegisterAs.Mongo, () => ({
+export const mongoConfig = registerAs(Token.Mongo, () => ({
   database: process.env.MONGO_DB,
   host: process.env.MONGO_HOST,
-  port: parseInt(process.env.MONGO_PORT, 10),
+  port: process.env.MONGO_PORT,
   user: process.env.MONGO_USER,
   pass: process.env.MONGO_PASS,
   authBase: process.env.MONGO_AUTH_BASE,
 }))
 
-export const getMongoDbConfig = (): MongooseModuleAsyncOptions => {
+export const getMongoConfig = (): MongooseModuleAsyncOptions => {
   return {
     useFactory: async (configService: ConfigService) => {
       return {
         uri: getMongoConnectionString({
-          user: configService.get<string>(`${EnvRegisterAs.Mongo}.user`),
-          pass: configService.get<string>(`${EnvRegisterAs.Mongo}.pass`),
-          host: configService.get<string>(`${EnvRegisterAs.Mongo}.host`),
-          port: configService.get<number>(`${EnvRegisterAs.Mongo}.port`),
-          authBase: configService.get<string>(`${EnvRegisterAs.Mongo}.authBase`),
-          database: configService.get<string>(`${EnvRegisterAs.Mongo}.database`),
+          user: configService.get<string>(`${Token.Mongo}.user`),
+          pass: configService.get<string>(`${Token.Mongo}.pass`),
+          host: configService.get<string>(`${Token.Mongo}.host`),
+          port: configService.get<number>(`${Token.Mongo}.port`),
+          authBase: configService.get<string>(`${Token.Mongo}.authBase`),
+          database: configService.get<string>(`${Token.Mongo}.database`),
         })
       }
     },

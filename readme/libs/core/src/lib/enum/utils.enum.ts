@@ -1,11 +1,9 @@
-export enum Port {
-  Min = 0,
-  Max = 65535,
-  DBDefault = 27017,
-  BlogAPIDefault = 3333,
-  NotifyAPIDefault = 3334,
-  UsersAPIDefault = 3335,
-  MailDefault = 5025
+export enum PortDefault {
+  Mongo = 27017,
+  Mailer = 5025,
+  BlogAPI = 3333,
+  NotifyAPI = 3334,
+  UsersAPI = 3335,
 }
 
 export enum UploadType {
@@ -30,21 +28,31 @@ export enum Prefix {
 }
 
 export enum Path {
+  Author = 'author',
   Avatar = 'avatar',
+  Drafts = 'drafts',
   Blog = 'blog',
   Posts = 'posts',
   Comments = 'comments',
+  Delete = 'delete',
   Register = 'register',
   Spec = 'spec',
   Login = 'login',
   Upload = 'upload',
   Photo = 'photo',
+  Like = 'like',
   Link = 'link',
+  Search = 'search',
+  Tag = 'tag',
+  Title = 'title',
+  Type = 'type',
+  Feed = 'feed',
   Subscribe = 'subscribe',
   Subscriptions = 'subs',
   Users = 'users',
+  User = 'user',
   Repost = 'repost',
-  SendNewPosts = 'send-new',
+  Notify = 'notify',
   Update = 'update'
 }
 
