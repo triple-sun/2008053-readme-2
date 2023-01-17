@@ -5,7 +5,8 @@ import { CoreError } from '@readme/core';
 @Injectable()
 export class MongoIDValidationPipe implements PipeTransform {
   transform(value: string, { type }: ArgumentMetadata) {
-    if (type !== 'param' && type !== 'query') {
+    console.log(type)
+    if (type !== 'param' && type !== 'query' && type !== 'custom') {
       throw new Error(CoreError.ParamArg)
     }
 

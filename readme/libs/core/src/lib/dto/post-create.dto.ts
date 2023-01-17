@@ -1,36 +1,42 @@
 import { Expose } from "class-transformer";
+import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 import { ValidateNested } from "class-validator";
-import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { Link } from "../entity/content/link";
-import { Video } from "../entity/content/video";
-import { Quote } from "../entity/content/quote";
-import { Post } from "../entity/post";
-import { Text } from "../entity/content/text";
-
+import { PostTypeDTO } from "./post-type.dto";
+import { PostTagsDTO } from "./post-tags.dto";
+import { LinkDTO } from "./content/link.dto";
+import { VideoDTO } from "./content/video.dto";
+import { QuoteDTO } from "./content/quote.dto";
+import { TextDTO } from "./content/text.dto";
+import { PhotoDTO } from "./content/photo.dto";
 
 class PostContent {
   @Expose()
   @ValidateNested()
   @ApiProperty()
-  public link?: Link;
+  public link?: LinkDTO;
 
   @Expose()
   @ValidateNested()
   @ApiProperty()
-  public video?: Video;
+  public video?: VideoDTO;
 
   @Expose()
   @ValidateNested()
   @ApiProperty()
-  public quote?: Quote;
+  public quote?: QuoteDTO;
 
   @Expose()
   @ValidateNested()
   @ApiProperty()
-  public text?: Text;
+  public text?: TextDTO;
+
+  @Expose()
+  @ApiProperty()
+  @ValidateNested()
+  public photo?: PhotoDTO
 }
 
 export class PostCreateDTO extends IntersectionType(
-  PickType(Post, ['tags', 'type'] as const),
+  IntersectionType(PostTypeDTO, PostTagsDTO),
   PostContent,
 ) {}

@@ -6,7 +6,7 @@ class UsersEnvConfig {
   @IsString({
     message: ENVError.AvatarDir
   })
-  public AVATAR_DIR: string;
+  public UPLOAD_DIR: string;
 }
 
 class EnvConfig extends IntersectionType(

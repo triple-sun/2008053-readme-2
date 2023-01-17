@@ -13,7 +13,7 @@ import { SubscriberService } from './subscriber.service';
   imports: [
     MongooseModule.forFeature([{ name: SubscriberModel.name, schema: SubscriberSchema }]),
     JwtModule.registerAsync(jwtModuleConfig),
-    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.User)),
+    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.Subscriber)),
     MailModule
   ],
   controllers: [

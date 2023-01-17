@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { UserError, validateUserAlreadyExists, validateUserExists } from '@readme/core';
+import { RPC, UserError, validateUserAlreadyExists, validateUserExists } from '@readme/core';
+import { RMQService } from 'nestjs-rmq';
 import { UserCreateDTO } from './dto/user-create.dto';
-import { UserDTO } from './dto/user.dto';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
@@ -13,6 +13,7 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly rmqService: RMQService
   ) {}
   async getUsers() {
     return await this.userRepository.find()
@@ -26,6 +27,16 @@ export class UserService {
     return user;
   }
 
+  async getUserData(userID: string) {
+    const user = await this.getUser(userID)
+    const subscribers = (await this.userRepository.findSubscribers(userID)).length
+    const posts = await this.rmqService.send<string, number>(RPC.GetPosts, userID)
+
+    console.log ({user})
+
+    return {...user, posts, subscribers}
+  }
+
   async registerUser(dto: UserCreateDTO) {
     const {email, name, password} = dto;
 
@@ -34,7 +45,7 @@ export class UserService {
     const user = {
       email,
       name,
-      avatar: dto.avatar.path ?? '',
+      avatar: dto.avatar ?? '',
       notifiedAt: new Date(),
       subscribers: [],
       passwordHash: '',
@@ -50,7 +61,7 @@ export class UserService {
 
     const update = {
       ...user,
-      avatarUrl: avatar ? avatar.path : user.avatar
+      avatarUrl: avatar ?? user.avatar
     }
 
     const userEntity = password
@@ -68,7 +79,7 @@ export class UserService {
     return await this.userRepository.subscribe(dto, userID);
   }
 
-  async setNotified({userID}: UserDTO) {
+  async setNotified(userID: string) {
     const user = await this.getUser(userID)
 
     const update = {

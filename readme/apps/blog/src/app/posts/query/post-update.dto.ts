@@ -1,23 +1,16 @@
 import { IntersectionType, PartialType } from "@nestjs/swagger";
 import { PostCreateDTO } from "@readme/core";
 import { Expose } from "class-transformer";
-import { IsDate, IsOptional, Validate } from "class-validator";
-import { PostExistsRule } from "../validators/post-exists.validator";
+import { IsDate, IsOptional } from "class-validator";
 
-class PostUpdateBase {
+class PublishAtDTO {
   @Expose()
   @IsDate()
   @IsOptional()
   publishAt?: Date;
-
-  @Expose()
-  @IsDate()
-  @IsOptional()
-  @Validate(PostExistsRule)
-  postID?: number;
 }
 
 export class PostUpdateDTO extends IntersectionType(
-  PostUpdateBase,
+  PublishAtDTO,
   PartialType(PostCreateDTO)
 ) {}

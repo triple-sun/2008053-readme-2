@@ -5,7 +5,7 @@ import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 import { FieldName } from "../../enum/field-name.enum";
 import { MinMax } from "../../enum/minmax.enum";
 
-export class Title {
+export class TitleDTO {
   @Expose()
   @IsString()
   @Length(MinMax.TitleMin, MinMax.TitleMax)

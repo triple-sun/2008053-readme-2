@@ -1,16 +1,12 @@
-import { extname } from 'path';
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { ConflictException, ForbiddenException, NotFoundException, ParseFilePipeBuilder } from '@nestjs/common';
-import { ContentType } from '@prisma/client';
-import { Photo } from '../entity/content/photo';
-import { UploadType } from '../enum/utils.enum';
-import { diskStorage } from 'multer';
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { APIConfig } from '../enum/api.enum';
-import { IPost, IUser } from '@readme/shared-types';
+import { IComment, IPost, IUser } from '@readme/shared-types';
 import { PostError } from '../enum/post.enum';
 import { ErrorMessage } from './error.utils';
-import { PostCreateDTO } from '../dto/post-create.dto';
+import { ContentType } from '@prisma/client';
+import { PostLinkRDO, PostPhotoRDO, PostQuoteRDO, PostTextRDO, PostVideoRDO } from '../rdo/post.rdo';
 
 export const getDocument = (title: string, desc: string) => {
   return new DocumentBuilder()
@@ -39,8 +35,8 @@ export const validatePostExists = (post: IPost, postID: number) => {
 }
 
 export const validatePostUserID = (post: IPost, userID: string) => {
-  if (post.userID === userID) {
-    throw new ForbiddenException(PostError.Permission)
+  if (post.userID !== userID) {
+    throw new ForbiddenException(ErrorMessage.Post.Forbidden)
   }
 }
 
@@ -54,13 +50,21 @@ export const validateRepost = (origin: IPost, userID: string) => {
     }
 }
 
+export const validateCommentUserID = (comment: IComment, userID: string) => {
+    if (comment.userID === userID) {
+      throw new ForbiddenException(ErrorMessage.Comment.Forbidden)
+    }
+}
+
+export const validateCommentExists = (commentID: number, comment?: IComment) => {
+  if (!comment) {
+    throw new NotFoundException(ErrorMessage.Comment.NotFound(commentID))
+  }
+}
+
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
 }
-
-export const getIdArray = (arr: {id?: number}[]) => arr.map(({id}) => id);
-
-export const imageExtRegExp = (/[/.](jpe?g|png)$/i)
 
 export const toggleArrElement = (array: string[], value: string) => {
   const result = [...array]
@@ -75,28 +79,17 @@ export const toggleArrElement = (array: string[], value: string) => {
   return result
 }
 
-export const getStorageOptions = (type: UploadType) => {
-  const filename = ({params}, {originalname}, cb) => {
-    const id = type === UploadType.Avatar
-      ? crypto.randomUUID()
-      : params.userID
-
-    cb(null, `${id}-${type}${extname(originalname)}`)
+export const fillPostRDO = (post: IPost) => {
+    switch(post.type) {
+      case ContentType.PHOTO:
+        return fillObject(PostPhotoRDO, post);
+      case ContentType.LINK:
+        return fillObject(PostLinkRDO, post);
+      case ContentType.QUOTE:
+        return fillObject(PostQuoteRDO, post);
+      case ContentType.TEXT:
+        return fillObject(PostTextRDO, post);
+      case ContentType.VIDEO:
+        return fillObject(PostVideoRDO, post);
+    }
   }
-
-  const destination = type === UploadType.Avatar
-    ? process.env.AVATAR_DIR
-    : process.env.UPLOAD_DIR
-
-
-  return {storage: diskStorage({ destination, filename })}
-}
-
-export const getImageUploadPipe = (maxSize: number) => new ParseFilePipeBuilder()
-  .addFileTypeValidator({fileType: imageExtRegExp})
-  .addMaxSizeValidator({maxSize})
-  .build()
-
-export const handlePostDTO = <T extends PostCreateDTO>(dto: T, photoLink?: string): T => dto.type === ContentType.PHOTO
-      ? {...dto, photo: new Photo(photoLink)}
-      : dto

@@ -34,7 +34,8 @@ export enum CoreError {
   BodyArg = 'This pipe must used only with body!',
 }
 
-export enum Error {
+export enum ErrorSuffix {
   NotFound = 'was not found.',
-  Exists = 'already exists.'
+  Exists = 'already exists.',
+  NotValid = 'is not valid'
 }

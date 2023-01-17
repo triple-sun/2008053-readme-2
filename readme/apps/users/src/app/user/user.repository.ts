@@ -32,6 +32,12 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .exec();
   }
 
+  public async findSubscribers(id: string): Promise<IUser[]> {
+    return await this.userModel
+      .find({ subscriptions: { '$elemMatch': {'$eq': id } }})
+      .exec();
+  }
+
   public async findByEmail(email: string): Promise<IUser | null> {
     return await this.userModel
       .findOne({email})

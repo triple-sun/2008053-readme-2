@@ -1,15 +1,13 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-
-import { fillObject, MinMax, FieldName, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard } from '@readme/core';
+import { fillObject, MinMax, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard } from '@readme/core';
 import { UserService } from './user.service';
 import { UserRDO } from './rdo/user.rdo';
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { RMQRoute } from 'nestjs-rmq';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
-import { UserDTO } from './dto/user.dto';
 import { UserQuery } from './query/user.query';
 import { FileSystemStoredFile, FormDataRequest } from 'nestjs-form-data';
 
@@ -42,7 +40,7 @@ export class UserController {
   async show(
     @Query() {userID}: UserQuery,
   ) {
-    const user = await this.userService.getUser(userID);
+    const user = await this.userService.getUserData(userID);
 
     return fillObject(UserRDO, user);
   }
@@ -76,10 +74,8 @@ export class UserController {
   })
   async update(
     @Body() dto: UserUpdateDTO,
-    @UserID() {userID}: UserDTO,
-    @Req() req
+    @UserID() userID: string,
   ) {
-    console.log(dto, req.user)
     const update = await this.userService.updateUser(userID, dto);
 
     return fillObject(UserRDO, update);
@@ -93,8 +89,8 @@ export class UserController {
    description: UserInfo.Updated
   })
   async subscribe(
-    @UserID() {userID}: UserDTO,
-    @Body(FieldName.SubToID) query: UserSubscribeDTO
+    @UserID() userID: string,
+    @Query() query: UserSubscribeDTO
   ) {
     const update = await this.userService.subscribe(query, userID);
 
@@ -106,8 +102,8 @@ export class UserController {
     return await this.userService.getUser(userID)
   }
 
-  @RMQRoute(RPC.Notify)
-  public async setNotified(dto: UserDTO) {
-    return await this.userService.setNotified(dto)
+  @RMQRoute(RPC.Notified)
+  public async setNotified(userID: string) {
+    return await this.userService.setNotified(userID)
   }
 }

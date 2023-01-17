@@ -33,6 +33,7 @@ export enum Path {
   Drafts = 'drafts',
   Blog = 'blog',
   Posts = 'posts',
+  Post = 'post',
   Comments = 'comments',
   Delete = 'delete',
   Register = 'register',

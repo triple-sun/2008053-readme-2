@@ -6,7 +6,7 @@ import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 import { MinMax } from "../../enum/minmax.enum";
 import { FieldName } from "../../enum/field-name.enum";
 
-export class Link {
+export class LinkDTO {
   @Expose()
   @IsUrl()
   @ApiProperty(ContentAPIProp[FieldName.Url])

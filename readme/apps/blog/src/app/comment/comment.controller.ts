@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FieldName, fillObject, Prefix, CommentInfo } from '@readme/core';
+import { FieldName, fillObject, Prefix, CommentInfo, UserID, Path, JwtAuthGuard } from '@readme/core';
 
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
@@ -29,26 +29,32 @@ export class CommentController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     type: [CommentRDO],
     status: HttpStatus.CREATED,
     description: CommentInfo.Created
   })
   async create(
-    @Query() {postID, userID}: CommentCreateQuery,
+    @UserID() userID: string,
+    @Query() query: CommentCreateQuery,
     @Body() dto: CommentCreateDTO
     ) {
-    const comment = await this.commentService.createComment(postID, userID, dto);
+    const comment = await this.commentService.createComment(userID, query, dto);
 
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`:${FieldName.CommentID}`)
+  @Delete(`${Path.Delete}/:${FieldName.CommentID}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
-  async delete(@Param(FieldName.CommentID) commentID: number) {
-    await this.commentService.deleteComment(commentID);
+  async delete(
+    @Param(FieldName.CommentID) commentID: number,
+    @UserID() userID: string
+    ) {
+    await this.commentService.deleteComment(commentID, userID);
   }
 }

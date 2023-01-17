@@ -4,7 +4,7 @@ import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 import { FieldName } from "../../enum/field-name.enum";
-import { Title } from "./title";
+import { TitleDTO } from "./title.dto";
 
 class VideoContent {
   @Expose()
@@ -13,8 +13,8 @@ class VideoContent {
   public videoLink?: string;
 }
 
-export class Video extends IntersectionType(
-  Title,
+export class VideoDTO extends IntersectionType(
+  TitleDTO,
   VideoContent
 ) {}
 

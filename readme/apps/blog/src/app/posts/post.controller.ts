@@ -1,15 +1,15 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FormDataRequest } from 'nestjs-form-data';
 
-import { fillObject, Prefix, PostInfo, Path, MongoIDValidationPipe, MinMax, getImageUploadPipe, PostCreateDTO, getStorageOptions, UploadType, handlePostDTO, FieldName, TagsValidationPipe, UserID, PostTypeParamValidationPipe, JwtAuthGuard, User } from '@readme/core';
+import { fillObject, Prefix, PostInfo, Path, PostCreateDTO, FieldName, UserID, JwtAuthGuard, PostBaseRDO, fillPostRDO, MongoIDValidationPipe, RPC } from '@readme/core';
 
 import { PostService } from './post.service';
-import { PostRDO } from './rdo/post.rdo';
 import { PostsQuery } from './query/posts.query.dto';
-import { ContentType } from '@prisma/client';
 import { PostUpdateDTO } from './query/post-update.dto';
-import { PostDeleteDTO } from './query/post-delete.dto';
+import { PostTypeDTO } from 'libs/core/src/lib/dto/post-type.dto';
+import { RMQRoute } from 'nestjs-rmq';
+
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -18,9 +18,8 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
-  @Get(`:${FieldName.PostID}`)
+  @Get(`${Path.Post}/:${FieldName.PostID}`)
   @ApiResponse({
-   type: PostRDO,
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
@@ -29,7 +28,7 @@ export class PostController {
   ) {
     const post = await this.postService.getPost(postID);
 
-    return fillObject(PostRDO, post);
+    return fillPostRDO(post)
   }
 
   @Get()
@@ -44,14 +43,16 @@ export class PostController {
   }
 
   @Get(`${Path.Feed}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getFeed(
-    @UserID(MongoIDValidationPipe) userID: string,
+    @UserID() userID: string,
     @Query() query: PostsQuery,
   ) {
+    console.log({userID}, {query})
     return this.postService.getFeed(userID, query)
   }
 
@@ -64,7 +65,7 @@ export class PostController {
     @Param(FieldName.Tag) tag: string,
     @Query() query: PostsQuery,
   ) {
-    return this.postService.getPostsByTag(query,tag)
+    return this.postService.getPostsByTag(query, tag)
   }
 
   @Get(`${Path.Type}/:${FieldName.Type}`)
@@ -73,7 +74,7 @@ export class PostController {
     description: PostInfo.Loaded
   })
   async getPostsByType(
-    @Param(FieldName.Type, PostTypeParamValidationPipe) type: ContentType,
+    @Param() {type}: PostTypeDTO,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getPostsByType(query, type)
@@ -104,104 +105,113 @@ export class PostController {
   }
 
   @Get(`${Path.Drafts}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getDrafts(
-    @UserID(MongoIDValidationPipe) userID: string,
+    @UserID() userID: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getDrafts(query, userID)
   }
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', getStorageOptions(UploadType.Photo))
-  )
+  @UseGuards(JwtAuthGuard)
+  @FormDataRequest()
   @ApiResponse({
-    type: PostRDO,
+    type: PostBaseRDO,
     status: HttpStatus.CREATED,
     description: PostInfo.Created
   })
   async create(
-    @UserID(MongoIDValidationPipe) userID: string,
-    @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostCreateDTO,
-    @UploadedFile(getImageUploadPipe(MinMax.Photo)) file: Express.Multer.File,
+    @UserID() userID: string,
+    @Body() dto: PostCreateDTO,
   ) {
-    const dto = handlePostDTO<PostCreateDTO>(rawDTO, file.path)
+    console.log({dto})
     const post = await this.postService.createPost(userID, dto)
 
-    return fillObject(PostRDO, post);
+
+    return fillObject(PostBaseRDO, post);
   }
 
-  @Patch(Path.Update)
-  @UseInterceptors(
-    FileInterceptor('file', getStorageOptions(UploadType.Photo))
-  )
+  @Patch(`${Path.Update}/:${FieldName.PostID}`)
+  @UseGuards(JwtAuthGuard)
+  @FormDataRequest()
   @ApiResponse({
-   type: PostRDO,
+   type: PostBaseRDO,
    status: HttpStatus.OK,
    description: PostInfo.Updated
   })
   async update(
-    @UserID(MongoIDValidationPipe) userID: string,
-    @Body(FieldName.Tags, TagsValidationPipe) rawDTO: PostUpdateDTO,
-    @UploadedFile(getImageUploadPipe(MinMax.Photo)) file: Express.Multer.File,
+    @Param(FieldName.PostID) postID: number,
+    @UserID() userID: string,
+    @Body() dto: PostUpdateDTO,
   ) {
-    const dto = handlePostDTO<PostUpdateDTO>(rawDTO, file.path)
-    const post = await this.postService.updatePost(userID, dto);
+    console.log({dto})
+    const post = await this.postService.updatePost(userID, postID, dto);
 
-    return fillObject(PostRDO, post);
+    return fillObject(PostBaseRDO, post);
   }
 
-  @Delete(Path.Delete)
+  @Delete(`${Path.Delete}/:${FieldName.PostID}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
   async destroy(
-    @Body() dto: PostDeleteDTO,
-    @UserID(MongoIDValidationPipe) userID: string,
+    @Param(FieldName.PostID) postID: number,
+    @UserID() userID: string,
   ) {
-    await this.postService.deletePost(userID, dto)
+    await this.postService.deletePost(userID, postID)
   }
 
   @Post(`${Path.Repost}/:${FieldName.PostID}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
-   type: PostRDO,
+   type: PostBaseRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
   async repost(
     @Param(FieldName.PostID) postID: number,
-    @Query(FieldName.UserID) {userID}: User
+    @UserID() userID: string,
   ) {
     const post = await this.postService.repost(postID, userID);
 
-    return fillObject(PostRDO, post);
+    return fillObject(PostBaseRDO, post);
   }
 
   @Post(`${Path.Like}/:${FieldName.PostID}`)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({
-   type: PostRDO,
+   type: PostBaseRDO,
    status: HttpStatus.OK,
    description: PostInfo.Reposted
   })
   async like(
     @Param(FieldName.PostID) postID: number,
-    @UserID(MongoIDValidationPipe) userID: string,
+    @UserID() userID: string,
   ) {
     const post = await this.postService.likePost(postID, userID);
 
-    return fillObject(PostRDO, post);
+    return fillObject(PostBaseRDO, post);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(Path.Notify)
   async notify(
-    @UserID(MongoIDValidationPipe) userID: string,
+    @UserID() userID: string,
   ) {
-    return this.postService.notify(userID)
+    return await this.postService.notify(userID)
+  }
+
+  @RMQRoute(RPC.GetPosts)
+  async getPostsByUser(
+    @UserID() userID: string,
+  ) {
+    return (await this.postService.getPostsByUser(userID)).length
   }
 }

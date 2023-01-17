@@ -2,7 +2,7 @@ import { Expose } from "class-transformer";
 import { IsString, Length } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
-import { Title } from "./title";
+import { TitleDTO } from "./title.dto";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 import { MinMax } from "../../enum/minmax.enum";
 import { FieldName } from "../../enum/field-name.enum";
@@ -21,7 +21,7 @@ class TextContent {
   public text?: string;
 }
 
-export class Text extends IntersectionType(
-  Title,
+export class TextDTO extends IntersectionType(
+  TitleDTO,
   TextContent
 ) {}

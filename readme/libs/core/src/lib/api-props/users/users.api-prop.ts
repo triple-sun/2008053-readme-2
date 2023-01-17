@@ -1,51 +1,49 @@
-import { FieldName } from "../../enum/field-name.enum";
 import { MinMax } from "../../enum/minmax.enum";
 import { UserAPIDesc, UserAPIExample } from "../../enum/users.enum";
-import { TAPIProp } from "../api-prop";
 
-export const UsersAPIProp: TAPIProp = {
-  [FieldName.Email]: {
+export const UsersAPIProp = {
+  Email: {
     required: true,
     description: UserAPIDesc.Email,
     example: UserAPIExample.Email
   },
-  [FieldName.Name]: {
+  Name: {
     required: true,
     description: UserAPIDesc.Name,
     example: UserAPIExample.Name,
     maxLength: MinMax.UserNameMax,
     minLength: MinMax.UserNameMin
   },
-  [FieldName.UserID]: {
+  UserID: {
     required: true,
     description: UserAPIDesc.ID,
     example: UserAPIExample.ID,
   },
-  [FieldName.SubToID]: {
+  SubToID: {
     required: true,
     description: UserAPIDesc.SubTo,
     example: UserAPIExample.ID,
   },
-  [FieldName.Posts]: {
+  Posts: {
     required: true,
     description: UserAPIDesc.PostIDs,
     example: UserAPIExample.PostIDs
   },
-  [FieldName.Token]: {
+  Token: {
     description: UserAPIDesc.Token,
     example: UserAPIExample.Token
   },
-  [FieldName.Subscribers]: {
+  Subscribers: {
     description: UserAPIDesc.Subscribers,
     example: UserAPIExample.Subscribers
   },
-  [FieldName.Password]: {
+  Password: {
     description: UserAPIDesc.Pass,
     example: UserAPIExample.Pass,
     maxLength: MinMax.UserPassMax,
     minLength: MinMax.UserPassMin
   },
-  [FieldName.AvatarUrl]: {
+  AvatarUrl: {
     description: UserAPIDesc.AvatarUrl,
     example: UserAPIExample.FilePath
   }

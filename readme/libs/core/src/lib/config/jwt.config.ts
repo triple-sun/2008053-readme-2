@@ -9,7 +9,7 @@ export const jwtConfig = registerAs(Token.JWT, () => ({
 export const getJwtConfig = async (configService: ConfigService): Promise<JwtModuleOptions> => {
   return {
     secret: configService.get<string>(`${Token.JWT}.secret`),
-    signOptions: { expiresIn: '600s', algorithm: 'HS256' }
+    signOptions: { expiresIn: '6000s', algorithm: 'HS256' }
   }
 }
 

@@ -1,5 +1,6 @@
 import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { FieldName, User, UserError, UsersAPIProp } from "@readme/core";
+import { FieldName, UserDTO, UserError, UsersAPIProp } from "@readme/core";
+import { Transform } from "class-transformer";
 import { IsEmail, IsOptional, IsString, Validate } from "class-validator";
 import { UserAlreadyExistsRule } from "../validators/user-exists.validator";
 
@@ -11,11 +12,12 @@ class UserCreateEmail {
 
   @IsString()
   @IsOptional()
+  @Transform(({ obj }) => obj ? obj.path : '')
   @ApiProperty(UsersAPIProp[FieldName.Avatar])
-  public avatar?: Express.Multer.File
+  public avatar?: string
 }
 
 export class UserCreateDTO extends IntersectionType(
-  PickType(User, ['email', 'name', 'password'] as const),
+  PickType(UserDTO, ['email', 'name', 'password'] as const),
   UserCreateEmail
 ) {}

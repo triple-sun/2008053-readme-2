@@ -1,9 +1,6 @@
 import { ContentType } from "@prisma/client";
 
-export enum SortType {
-  Asc = 'asc',
-  Desc = 'desc',
-}
+
 
 export enum SortByType {
   Date = 'createdAt',
@@ -11,9 +8,8 @@ export enum SortByType {
   Comm = 'comments',
 }
 
-export const Sort = {
-  PostSort: SortType.Desc,
-  PotSortBy: SortByType.Date,
+export const SortDefault = {
+  PostSortBy: SortByType.Date,
 }
 
 export enum PostError {

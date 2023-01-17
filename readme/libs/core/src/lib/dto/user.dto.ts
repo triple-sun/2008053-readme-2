@@ -7,7 +7,7 @@ import { MinMax } from "../enum/minmax.enum";
 import { UserError } from "../enum/users.enum";
 import { ValidationErrorMessage } from "../utils/error.utils";
 
-export class User {
+export class UserDTO {
   @Expose()
   @IsMongoId()
   @ApiProperty(UsersAPIProp[FieldName.UserID])
@@ -30,15 +30,15 @@ export class User {
   public email: string;
 
   @Expose()
-  @IsArray({each: true})
-  @IsInt()
+  @IsArray()
+  @IsInt({each: true})
   @ApiProperty(UsersAPIProp[FieldName.Posts])
   public posts: number[];
 
   @Expose()
-  @IsArray({each: true})
-  @IsMongoId()
-  @ApiProperty(UsersAPIProp[FieldName.Subscribers])
+  @IsArray()
+  @IsMongoId({each: true})
+  @ApiProperty(UsersAPIProp.Subscribers)
   public subscribers: string[];
 
   @IsString()

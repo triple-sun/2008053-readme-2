@@ -6,7 +6,7 @@ import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 import { MinMax } from "../../enum/minmax.enum";
 import { FieldName } from "../../enum/field-name.enum";
 
-export class Quote {
+export class QuoteDTO {
   @Expose()
   @IsString()
   @Length(MinMax.QuoteMin, MinMax.QuoteMax)

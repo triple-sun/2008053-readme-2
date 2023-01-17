@@ -1,15 +1,15 @@
 import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { FieldName, UserID, UserError, UsersAPIProp } from "@readme/core";
+import { Post } from "@prisma/client";
+import { FieldName, UserError, UsersAPIProp, UserDTO } from "@readme/core";
 import { Expose } from "class-transformer";
 import { IsEmail, IsMongoId, Validate } from "class-validator";
-import { SubExistsEmail, SubExistsID } from "../validators/sub-exists.validator";
+import { SubExistsID } from "../validators/sub-exists.validator";
 
 class SubBase {
   @Expose()
   @IsEmail({},{message: UserError.Email})
   @ApiProperty(UsersAPIProp[FieldName.Email])
-  @Validate(SubExistsEmail)
-  public email: string;
+  public posts: Post[];
 
   @Expose()
   @IsMongoId()
@@ -19,6 +19,6 @@ class SubBase {
 }
 
 export class SubscriberNotifyDTO extends IntersectionType(
-  PickType(UserID, ['name'] as const),
+  PickType(UserDTO, ['name'] as const),
   SubBase
 ) {}

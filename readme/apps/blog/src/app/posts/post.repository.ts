@@ -13,10 +13,15 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
   ) {}
 
   public async create(item: PostEntity): Promise<IPost> {
+    const {comments, ...data} = item.toObject()
+    console.log({data}, {item})
     return await this.prisma.post.create({
       data: {
-        ...item.toObject(),
-        },
+        ...data,
+        comments: {
+          create: comments
+        }
+      },
       include: PostInclude
     })
   }
@@ -28,6 +33,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
   }
 
   public async findOne(id: number): Promise<IPost | null> {
+    console.log({id})
     const exists = await this.prisma.post.findUnique({
       where: { id },
       include: PostInclude
@@ -36,26 +42,34 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return exists
   }
 
-  public async find({sortBy, sort, page, isDraft, subs, authorID, type, tag, since, title}: PostsFindQuery) {
-    const query = subs && !authorID
-      ? { userID: { in: subs }}
-      : { authorID }
+  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
     const limit = title ? MinMax.PostsSearch : MinMax.PostsLimit
+    const sortByType = sortBy ?? SortByType.Date
+
+    const query = () => {
+      switch(true) {
+        case !!subs:
+          return { userID: { in: subs }}
+        case !!authorID:
+          return { authorID: { equals: authorID }}
+        case !!type:
+          return { type }
+        case !!tag:
+          return { tags: { has: tag }}
+        case !!title:
+          return { title: { contains: title }}
+        case !!userID:
+          return { userID: { equals: userID }}
+        default:
+          return {}
+      }
+    }
 
     const posts = await this.prisma.post.findMany({
       where: {
-        ...query,
-        title: {
-          contains: title
-        },
-        type: {
-          equals: type
-        },
-        tags: {
-          has: tag
-        },
+        ...query(),
         createdAt: {
-          gt: since
+          gt: since ?? undefined
         },
         isDraft: isDraft ?? false
       },
@@ -65,9 +79,9 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
         _count:{ select: { comments: true }}
       },
       orderBy: [
-        sortBy === SortByType.Comm
-          ? { [sortBy]: {_count: sort}}
-          : {[sortBy]: sort}
+        sortByType === SortByType.Comm
+          ? { [sortByType]: {_count: 'desc'}}
+          : { [sortByType]: 'desc' }
       ],
       skip: page > 0 && title ? limit * (page - 1) : undefined,
     });
@@ -75,10 +89,14 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return posts
   }
 
+
   public async update(id: number, item: PostEntity) {
+    const {comments, ...data} = item.toObject()
     return await this.prisma.post.update({
       where: { id },
-      data: item.toObject(),
+      data: {
+        ...data,
+      },
       include: PostInclude
     })
   }

@@ -9,11 +9,11 @@ export class UserDTO {
   @IsEmail({},{message: UserError.Email})
   @ApiProperty(UsersAPIProp[FieldName.Email])
   @Validate(UserExistEmailRule)
-  public email: string;
+  public email?: string;
 
   @Expose()
   @IsMongoId()
   @ApiProperty(UsersAPIProp[FieldName.UserID])
   @Validate(UserExistIDRule)
-  public userID: string;
+  public userID?: string;
 }

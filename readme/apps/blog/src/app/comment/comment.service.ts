@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { CommentInfo, ErrorMessage } from "@readme/core";
+import { validateCommentExists, validateCommentUserID } from "@readme/core";
 
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
 import { CommentListQuery } from "./query/comment-list.query";
 import { PostService } from "../posts/post.service";
+import { CommentCreateQuery } from "./query/comment-create.query";
 
 @Injectable()
 export class CommentService {
@@ -20,22 +21,19 @@ export class CommentService {
     return await this.commentRepository.findAllByPostID(query)
   }
 
-  async createComment(postID: number, userID: string, dto: CommentCreateDTO) {
-    const newComment = new CommentEntity({postID, userID, ...dto})
+  async createComment(userID: string, query: CommentCreateQuery, dto: CommentCreateDTO) {
+    const newComment = new CommentEntity({userID, ...dto, ...query})
 
-    await this.postService.getPost(postID)
+    await this.postService.getPost(query.postID)
 
     return await this.commentRepository.create(newComment);
   }
 
-  async deleteComment(commentID: number) {
+  async deleteComment(commentID: number, userID: string) {
     const comment = await this.commentRepository.findOne(commentID);
 
-    if (!comment) {
-      throw new Error(
-        ErrorMessage.Comment.NotFound(commentID)
-      )
-    }
+    validateCommentExists(commentID, comment)
+    validateCommentUserID(comment, userID)
 
     await this.commentRepository.destroy(commentID)
   }

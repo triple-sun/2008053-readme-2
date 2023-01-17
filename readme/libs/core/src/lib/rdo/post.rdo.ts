@@ -1,17 +1,17 @@
-import { Exclude, Expose, Transform } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Transform } from 'class-transformer';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ContentType } from '@prisma/client';
 
 import { IsArray, IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PostAPIProp } from '@readme/core';
+import { PostAPIProp } from '../api-props/post/post.api-prop';
 
-class PostRDOBase {
+export class PostBaseRDO {
   @Expose()
   @IsNumber()
   @ApiProperty(PostAPIProp.PostID)
   public id: number;
 
-  @Exclude()
+  @Expose()
   @ApiProperty(PostAPIProp.Type)
   public type: ContentType;
 
@@ -55,7 +55,7 @@ class PostRDOBase {
   public tags?: string[];
 }
 
-export class PostTextRDO extends PostRDOBase {
+export class PostTextRDO extends PostBaseRDO {
   @Expose()
   @IsString()
   public title: string;
@@ -69,7 +69,7 @@ export class PostTextRDO extends PostRDOBase {
   public ann: string;
 }
 
-export class PostVideoRDO extends PostRDOBase {
+export class PostVideoRDO extends PostBaseRDO {
   @Expose()
   @IsOptional()
   @IsString()
@@ -80,13 +80,13 @@ export class PostVideoRDO extends PostRDOBase {
   public videoLink: string;
 }
 
-export class PostPhotoRDO extends PostRDOBase {
+export class PostPhotoRDO extends PostBaseRDO {
   @Expose()
   @IsString()
   public photoLink: string;
 }
 
-export class PostQuoteRDO extends PostRDOBase {
+export class PostQuoteRDO extends PostBaseRDO {
   @Expose()
   @IsString()
   public author: string;
@@ -96,7 +96,7 @@ export class PostQuoteRDO extends PostRDOBase {
   public quote: string;
 }
 
-export class PostLinkRDO extends PostRDOBase {
+export class PostLinkRDO extends PostBaseRDO {
   @Expose()
   @IsString()
   public link: string;
@@ -106,3 +106,11 @@ export class PostLinkRDO extends PostRDOBase {
   @IsString()
   public desc?: string;
 }
+
+
+export class PostRDO extends IntersectionType(
+  IntersectionType(PostVideoRDO, PostQuoteRDO),
+  IntersectionType(PostTextRDO, IntersectionType(PostPhotoRDO, PostLinkRDO))
+) {}
+
+export type TPostRDO = (PostVideoRDO | PostQuoteRDO | PostTextRDO | PostPhotoRDO | PostLinkRDO)
