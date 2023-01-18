@@ -87,7 +87,6 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     });
 
     return posts
-    return posts
   }
 
 

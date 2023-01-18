@@ -15,7 +15,6 @@ services:
       timeout: 5s
       retries: 5
 
-
   fakesmtp:
     image: gessnerfl/fake-smtp-server
     container_name: readme.notify.fakesmtp
