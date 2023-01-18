@@ -50,11 +50,19 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .exec();
   }
 
+<<<<<<< HEAD
   public async subscribe({subToID}: UserSubscribeDTO, userID: string): Promise<IUser> {
     const isSubscribed = await this.userModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
 
     return await this.userModel
       .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: userID }}, { new: true })
+=======
+  public async subscribe({_id}: IUser, {_id: subToID}: IUser): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id, subscriptions: { '$in': [subToID] }})
+
+    return await this.userModel
+      .findByIdAndUpdate( _id._id, { [`${isSubscribed ? '$pull' : '$addToSet'}`]: { subscriptions: subToID._id }}, { new: true })
+>>>>>>> d2da3d9bd2eb11aac2b98a3f3f758a45a069a342
       .exec()
   }
 }
