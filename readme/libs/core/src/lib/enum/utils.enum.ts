@@ -17,6 +17,12 @@ export enum EnvFilePath {
   Users = 'environments/users.env'
 }
 
+export enum EnvFilePath {
+  Blog = 'environments/blog.env',
+  Notify = 'environments/notify.env',
+  Users = 'environments/users.env'
+}
+
 export enum Prefix {
   Global = 'api',
   Auth = 'auth',
