@@ -1,0 +1,6 @@
+FROM node:lts-alpine
+WORKDIR /app
+COPY ./dist/apps/notify .
+RUN npm install --omit=dev
+RUN npm prune --production
+CMD ["node", "./main.js"]

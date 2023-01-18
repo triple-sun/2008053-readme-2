@@ -1,34 +1,27 @@
 import { Expose } from "class-transformer";
 import { IsString, Length } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { ContentType } from "@prisma/client";
+import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
-import { ContentDTOBase } from "./content.dto";
-import { MinMax } from "../../enum/utils.enum";
+import { TitleDTO } from "./title.dto";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
+import { MinMax } from "../../enum/minmax.enum";
+import { FieldName } from "../../enum/field-name.enum";
 
-export class TextDTO extends ContentDTOBase {
-  @Expose()
-  @IsString()
-  @Length(MinMax.TitleMin, MinMax.TitleMax)
-  @ApiProperty(ContentAPIProp.Title)
-  public title?: string;
-
+class TextContent {
   @Expose()
   @IsString()
   @Length(MinMax.AnnMin, MinMax.AnnMax)
-  @ApiProperty(ContentAPIProp.Ann)
+  @ApiProperty(ContentAPIProp[FieldName.Ann])
   public ann?: string;
 
   @Expose()
   @IsString()
   @Length(MinMax.TextMin, MinMax.TextMax)
-  @ApiProperty(ContentAPIProp.Text)
+  @ApiProperty(ContentAPIProp[FieldName.Text])
   public text?: string;
-
-
-  constructor() {
-    super()
-    this.type = ContentType.TEXT
-  }
 }
+
+export class TextDTO extends IntersectionType(
+  TitleDTO,
+  TextContent
+) {}

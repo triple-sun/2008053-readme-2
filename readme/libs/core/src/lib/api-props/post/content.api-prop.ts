@@ -1,75 +1,65 @@
-import { ContentType } from "@prisma/client";
-import { PostAPIDesc, PostAPIExample } from "../../enum/post.enum";
-import { MinMax } from "../../enum/utils.enum";
+import { FieldName } from "../../enum/field-name.enum";
+import { MinMax } from "../../enum/minmax.enum";
+import { PostAPIExample } from "../../enum/post.enum";
+import { EntityName } from "../../enum/utils.enum";
+import { getDescForEntity, getDescForPost } from "../../utils/desc.utils";
 import { TAPIProp } from "../api-prop";
 
 export const ContentAPIProp: TAPIProp = {
-  Base: {
+  [FieldName.LinkUrl]: {
     required: true,
-    enum: ContentType,
-    description: PostAPIDesc.Type,
-    example: PostAPIExample.Type
-},
-  Link: {
-    required: true,
-    description: PostAPIDesc.Link,
-    example: PostAPIExample.Link
+    description: getDescForEntity(EntityName.Link, FieldName.LinkUrl),
+    example: PostAPIExample.LinkUrl
   },
-  Desc: {
-    description: PostAPIDesc.Desc,
-    example: PostAPIExample.Desc
+  [FieldName.Desc]: {
+    description: getDescForEntity(EntityName.Link, FieldName.Desc),
+    example: PostAPIExample.Desc,
+    maxLength: MinMax.DescMax
   },
-  Photo: {
+  [FieldName.PhotoUrl]: {
     required: true,
-    description: PostAPIDesc.Photo,
+    description: getDescForEntity(EntityName.Photo, FieldName.PhotoUrl),
     example: PostAPIExample.Photo
   },
-  Quote: {
+  [FieldName.Quote]: {
     required: true,
     minLength: MinMax.QuoteMin,
     maxLength: MinMax.QuoteMax,
-    description: PostAPIDesc.Quote,
+    description: getDescForEntity(EntityName.Quote, FieldName.Quote),
     example: PostAPIExample.Quote
   },
-  Author: {
+  [FieldName.Author]: {
     required: true,
     minLength: MinMax.AuthorMin,
     maxLength: MinMax.AuthorMax,
-    description: PostAPIDesc.Author,
+    description: getDescForEntity(EntityName.Quote, FieldName.Author),
     example: PostAPIExample.Author
   },
-  Title: {
+  [FieldName.Title]: {
     required: true,
     minLength: MinMax.TitleMin,
     maxLength: MinMax.TitleMax,
-    description: PostAPIDesc.Title,
+    description: getDescForPost(FieldName.Title),
     example: PostAPIExample.Title
   },
-  Ann: {
+  [FieldName.Ann]: {
     required: true,
     minLength: MinMax.AnnMin,
     maxLength: MinMax.AnnMax,
-    description: PostAPIDesc.Ann,
+    description: getDescForEntity(EntityName.Text, FieldName.Ann),
     example: PostAPIExample.Ann
   },
-  Text: {
+  [FieldName.Text]: {
     required: true,
     minLength: MinMax.TextMin,
     maxLength: MinMax.TextMax,
-    description: PostAPIDesc.Text,
+    description: getDescForEntity(EntityName.Text, FieldName.Text),
     example: PostAPIExample.Text
   },
-  VideoTitle: {
+  [FieldName.VideoUrl]: {
     required: true,
-    minLength: MinMax.TitleMin,
-    maxLength: MinMax.TitleMax,
-    description: PostAPIDesc.Title,
-    example: PostAPIExample.Title
-  },
-  VideoUrl: {
-    required: true,
-    description: PostAPIDesc.Video,
-    example: PostAPIExample.Video
+    description: getDescForEntity(EntityName.Video, FieldName.VideoUrl),
+    example: PostAPIExample.VideoUrl
   }
 }
 

@@ -3,15 +3,15 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config'
 import { MongooseModule } from '@nestjs/mongoose';
-import { usersConfigModuleConfig } from '../config/config.module.config';
-import { getMongoDbConfig } from '../config/mongodb.config';
+import { usersConfig } from '../../config/users.config';
+import { getMongoConfig } from '@readme/core';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(usersConfigModuleConfig),
-    MongooseModule.forRootAsync(getMongoDbConfig()),
+    ConfigModule.forRoot(usersConfig),
+    MongooseModule.forRootAsync(getMongoConfig()),
     AuthModule,
-    UserModule
+    UserModule,
   ],
   controllers: [],
   providers: [],

@@ -4,13 +4,13 @@ import { genSalt, hash, compare } from 'bcrypt';
 import { Types } from 'mongoose';
 
 export class UserEntity implements IUser {
-  public _id: Types.ObjectId;
-  public avatarUrl: string;
+  public _id: string;
+  public avatar?: string;
   public email: string;
   public name: string;
-  public subscriptions: IUser[];
+  public subscriptions?: Types.ObjectId[];
   public passwordHash: string;
-  public accessToken: string;
+  public notifiedAt?: Date;
 
   constructor(user: IUser) {
     this.fillEntity(user);
@@ -33,9 +33,10 @@ export class UserEntity implements IUser {
   public fillEntity(user: IUser) {
     this._id = user._id;
     this.name = user.name;
-    this.avatarUrl = user.avatarUrl;
+    this.avatar = user.avatar;
     this.email = user.email;
     this.subscriptions = user.subscriptions;
     this.passwordHash = user.passwordHash;
+    this.notifiedAt = user.notifiedAt;
   }
 }

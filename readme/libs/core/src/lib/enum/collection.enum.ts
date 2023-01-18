@@ -1,5 +1,6 @@
 export enum Collection {
   Users = 'users',
   Posts = 'posts',
-  Comments = 'comments'
+  Comments = 'comments',
+  Subscribers = 'subscribers'
 }

@@ -1,39 +1,25 @@
-import { APIDesc, APIExample } from "../../enum/comment.enum";
-import { MinMax } from "../../enum/utils.enum";
+import { CommentAPIDesc, CommentAPIExample } from "../../enum/comment.enum";
+import { FieldName } from "../../enum/field-name.enum";
+import { MinMax } from "../../enum/minmax.enum";
+import { getDescForComment } from "../../utils/desc.utils";
 import { TAPIProp } from "../api-prop";
 
 export const CommentAPIProp: TAPIProp = {
-  Text: {
+  [FieldName.ID]: {
+    description: getDescForComment(FieldName.ID),
+    example: CommentAPIExample.ID
+  },
+  [FieldName.Text]: {
     required: true,
-    description: APIDesc.Text,
-    example: APIExample.Text,
+    description: getDescForComment(FieldName.Text),
+    example: CommentAPIExample.Text,
     minLength: MinMax.CommentMin,
     maxLength: MinMax.CommentMax
   },
-  UserID: {
-    required: true,
-    description: APIDesc.UserID,
-    example: APIExample.ID,
-  },
-  CommentID: {
-      description: APIDesc.CommentID,
-      example: APIExample.ID,
-      required: true
-    },
-  Post: {
-    description: APIDesc.Post,
-    required: true,
-    type: 'Post'
-  },
-  PostID: {
-    required: true,
-    description: APIDesc.PostID,
-    example: APIExample.ID
-  },
-  Limit: {
+  [FieldName.Limit]: {
     default: MinMax.CommentsLimit,
     maximum: MinMax.CommentsLimit,
-    description: APIDesc.Limit,
-    example: APIExample.ID
+    description: CommentAPIDesc.Limit,
+    example: CommentAPIExample.ID
   }
 }

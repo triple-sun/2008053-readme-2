@@ -1,27 +1,20 @@
 import { Expose } from "class-transformer";
-import { IsString, IsUrl, Length } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { ContentType } from "@prisma/client";
+import { IsUrl } from "class-validator";
+import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
-import { ContentDTOBase } from "./content.dto";
-import { MinMax } from "../../enum/utils.enum";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
+import { FieldName } from "../../enum/field-name.enum";
+import { TitleDTO } from "./title.dto";
 
-export class VideoDTO extends ContentDTOBase {
-  @Expose()
-  @IsString()
-  @Length(MinMax.TitleMin, MinMax.TitleMax)
-  @ApiProperty(ContentAPIProp.VideoTitle)
-  title?: string;
-
+class VideoContent {
   @Expose()
   @IsUrl()
-  @ApiProperty(ContentAPIProp.VideoUrl)
-  videoUrl?: string;
-
-  constructor() {
-    super()
-    this.type = ContentType.VIDEO
-  }
+  @ApiProperty(ContentAPIProp[FieldName.VideoUrl])
+  public videoLink?: string;
 }
+
+export class VideoDTO extends IntersectionType(
+  TitleDTO,
+  VideoContent
+) {}
 

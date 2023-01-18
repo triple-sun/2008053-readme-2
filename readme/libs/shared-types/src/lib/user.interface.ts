@@ -1,10 +1,12 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 
 export interface IUser {
-  _id?: mongoose.Types.ObjectId;
-  email: string;
-  name: string;
-  avatarUrl: string;
-  subscriptions: IUser[];
-  passwordHash: string;
+  _id?: string;
+  id?: string;
+  email?: string;
+  name?: string;
+  avatar?: string;
+  subscriptions?: Types.ObjectId[];
+  passwordHash?: string;
+  notifiedAt?: Date;
 }

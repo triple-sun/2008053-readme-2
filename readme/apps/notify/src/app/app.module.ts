@@ -2,16 +2,17 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { notifyConfigModuleConfig } from '../config/config.module.config';
-import { getMailerConfig } from '../config/mail.config';
+import { getMailConfig } from '../config/mail.config';
 import { MailModule } from './mail/mail.module';
+import { SubscriberModule } from './subscriber/subscriber.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(notifyConfigModuleConfig),
+    ConfigModule.forRoot(notifyConfig),
     MailerModule.forRootAsync(getMailerConfig()),
-    MailModule
+    MongooseModule.forRootAsync(getMongoConfig()),
+    MailModule,
+    SubscriberModule
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

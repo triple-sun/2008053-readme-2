@@ -1,27 +1,21 @@
 import { Expose } from "class-transformer";
 import { IsString, Length } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { ContentType } from "@prisma/client";
 
-import { ContentDTOBase } from "./content.dto";
-import { MinMax } from "../../enum/utils.enum";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
+import { MinMax } from "../../enum/minmax.enum";
+import { FieldName } from "../../enum/field-name.enum";
 
-export class QuoteDTO extends ContentDTOBase {
+export class QuoteDTO {
   @Expose()
   @IsString()
   @Length(MinMax.QuoteMin, MinMax.QuoteMax)
-  @ApiProperty(ContentAPIProp.Quote)
-  text?: string;
+  @ApiProperty(ContentAPIProp[FieldName.Quote])
+  public quote?: string;
 
   @Expose()
   @IsString()
   @Length(MinMax.AuthorMin, MinMax.AuthorMax)
-  @ApiProperty(ContentAPIProp.Author)
-  author?: string;
-
-  constructor() {
-    super()
-    this.type = ContentType.QUOTE
-  }
+  @ApiProperty(ContentAPIProp[FieldName.Author])
+  public author?: string;
 }

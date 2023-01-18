@@ -1,21 +1,31 @@
 import { ContentType } from "@prisma/client";
-import { ContentDTO, TagDTO } from "@readme/core";
-import { IEntity, IPost, IPostBase } from "@readme/shared-types";
+import { IComment, IEntity, IPost } from "@readme/shared-types";
 
-export class PostEntity implements IEntity<PostEntity>, IPostBase {
-  public isDraft: boolean;
-  public isRepost: boolean;
-  public tags: TagDTO[]
-  public commentIDs: number[]
-  public likes: string[]
+export class PostEntity implements IEntity<PostEntity>, IPost {
+  public id?: number;
+  public type: ContentType;
+  public title?: string;
+  public link?: string;
+  public desc?: string;
+  public text?: string;
+  public ann?: string;
+  public quote?: string;
+  public author?: string;
+  public videoLink?: string;
+  public photoLink?: string;
+
+  public tags?: string[]
+  public likes?: string[]
+  public comments?: IComment[]
+
+  public isDraft?: boolean;
+  public isRepost?: boolean;
+
   public userID: string;
-  public createdAt?: Date;
-  public publishAt?: Date;
-  public type?: ContentType;
-  public content: ContentDTO;
   public authorID?: string;
   public originID?: number;
-  public origin?: IPost;
+
+  public publishAt?: Date;
 
   constructor(post: IPost) {
     this.fillEntity(post);
@@ -25,30 +35,29 @@ export class PostEntity implements IEntity<PostEntity>, IPostBase {
     return {...this};
   }
 
-  public toUpdate(): IPostBase {
-    return {...this}
-  }
-
-  public toCreate() {
-    return {
-      ...this,
-      [this.content.type.toLowerCase()]: this.content
-    }
-  }
-
   public fillEntity(entity: IPost) {
-    this.isRepost = entity.isRepost;
-    this.publishAt = new Date();
+    this.isRepost = entity.isRepost ?? false
+    this.isDraft = entity.isDraft ?? false;
 
-    this.type = entity.type;
-    this.content = {...entity.content}
+    this.publishAt = entity.publishAt ?? new Date();
 
-    this.isDraft = entity.isDraft;
-    this.userID = entity.userID;
-    this.tags = entity.tags ?? []
-    this.likes = entity.likes ?? []
-
-    this.authorID = entity.userID
     this.originID = entity.id
+    this.type = entity.type;
+
+    this.tags = [...entity.tags]
+    this.likes = [...entity.likes]
+    this.comments = entity.comments
+
+    this.userID = entity.userID;
+    this.authorID = entity.authorID ?? entity.userID
+
+    this.link = entity.link
+    this.desc = entity.desc
+    this.quote = entity.quote
+    this.text = entity.text
+    this.author = entity.author
+    this.ann = entity.ann
+    this.photoLink = entity.photoLink
+    this.videoLink = entity.videoLink
   }
 }

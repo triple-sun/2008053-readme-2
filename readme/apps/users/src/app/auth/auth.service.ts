@@ -1,12 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { IUser } from '@readme/shared-types';
-import { AuthError } from '@readme/core';
+import { AuthError, ErrorMessage } from '@readme/core';
 
 import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
-import { UserCreateDTO } from '../user/dto/user-create.dto';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
@@ -15,38 +14,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(dto: UserCreateDTO) {
-    const {email, name, password} = dto;
-    const user = {
-      email,
-      name,
-      avatarUrl: '',
-      subscriptions: [],
-      passwordHash: '',
-      accessToken: ''
-    };
-
-    const existUser = await this.userRepository
-      .findByEmail(email);
-
-    if (existUser) {
-      throw new Error(AuthError.Email);
-    }
-
-    const userEntity = await new UserEntity(user)
-      .setPassword(password)
-
-    return this.userRepository
-      .create(userEntity);
-  }
-
   async verifyUser(dto: UserLoginDTO) {
     const {email, password} = dto;
 
     const user = await this.userRepository.findByEmail(email)
 
     if (!user) {
-      throw new UnauthorizedException(AuthError.Login);
+      throw new NotFoundException(ErrorMessage.User.Email.NotFound(email));
     }
 
     const userEntity = new UserEntity(user);

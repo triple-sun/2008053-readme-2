@@ -1,76 +1,58 @@
-import { getSchemaPath } from "@nestjs/swagger";
 import { ContentType } from "@prisma/client";
-import { LinkDTO } from "../../dto/content/link.dto";
-import { PhotoDTO } from "../../dto/content/photo.dto";
-import { QuoteDTO } from "../../dto/content/quote.dto";
-import { TextDTO } from "../../dto/content/text.dto";
-import { VideoDTO } from "../../dto/content/video.dto";
-import { TagDTO } from "../../dto/tag.dto";
-import { APIDesc, APIExample } from "../../enum/comment.enum";
+import { CommentAPIDesc, CommentAPIExample } from "../../enum/comment.enum";
+import { FieldName } from "../../enum/field-name.enum";
+import { MinMax } from "../../enum/minmax.enum";
 import { PostAPIDesc, PostAPIExample } from "../../enum/post.enum";
-import { MinMax } from "../../enum/utils.enum";
-import { TAPIProp } from "../api-prop";
+import { UserAPIExample } from "../../enum/users.enum";
+import { getDescForPost } from "../../utils/desc.utils";
 
-export const PostAPIProp: TAPIProp = {
-  Content: {
-    description: PostAPIDesc.Content,
-    oneOf: [
-      {$ref: getSchemaPath(LinkDTO)},
-      {$ref: getSchemaPath(PhotoDTO)},
-      {$ref: getSchemaPath(QuoteDTO)},
-      {$ref: getSchemaPath(TextDTO)},
-      {$ref: getSchemaPath(VideoDTO)},
-    ],
-    discriminator: { propertyName: 'type' }
-  },
-  Tags: {
-    description: PostAPIDesc.Tags,
-    example: PostAPIExample.Tags,
-    default: [],
-    maxItems: MinMax.TagsLimit,
-    type: [TagDTO]
-  },
-  UserID: {
-    required: true,
-    description: PostAPIDesc.UserID,
-    example: PostAPIExample.ID,
-  },
+export const PostAPIProp = {
   PostID: {
     required: true,
-    description: PostAPIDesc.ID,
+    description: getDescForPost(FieldName.ID),
     example: PostAPIExample.ID,
   },
   Type: {
-    description: PostAPIDesc.Type,
-    example: PostAPIExample.Type,
+    required: true,
     enum: ContentType,
-    required: true
+    description: getDescForPost(FieldName.Type),
+    example: PostAPIExample.Type,
   },
   IsRepost: {
+    default: false,
     description: PostAPIDesc.Repost,
     example: PostAPIExample.Bool
   },
   IsDraft: {
+    default: false,
     description: PostAPIDesc.Draft,
     example: PostAPIExample.Bool
   },
   AuthorID: {
-    description: PostAPIDesc.AuthorID,
+    description: getDescForPost(FieldName.AuthorID),
+    example: UserAPIExample.ID
+  },
+  UserID: {
+    description: getDescForPost(FieldName.UserID),
+    example: UserAPIExample.ID
+  },
+  OriginID: {
+    description: getDescForPost(FieldName.OriginID),
     example: PostAPIExample.ID
   },
-  Origin: {
-    description: PostAPIDesc.Origin,
+  Tags: {
+    maxItems: MinMax.TagsLimit,
+    description: getDescForPost(FieldName.Tags),
+    example: PostAPIExample.Tags,
   },
   Tag: {
-    description: PostAPIDesc.Tag,
+    description: getDescForPost(FieldName.Tag),
     example: PostAPIExample.Tag,
-    minLength: MinMax.TagMin,
-    maxLength: MinMax.TagMax,
   },
   Limit: {
     default: MinMax.PostsLimit,
     maximum: MinMax.PostsLimit,
-    description: APIDesc.Limit,
-    example: APIExample.ID
+    description: CommentAPIDesc.Limit,
+    example: CommentAPIExample.ID
   }
 }

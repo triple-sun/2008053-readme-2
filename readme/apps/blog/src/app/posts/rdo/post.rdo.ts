@@ -1,32 +1,32 @@
-import { Exclude, Expose } from 'class-transformer';
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { ContentType, Post } from '@prisma/client';
+import { Exclude, Expose, Transform } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { ContentType } from '@prisma/client';
 
-import { PostCreateDTO } from '../dto/post-create.dto';
-import { IsArray, IsBoolean, IsEnum, IsMongoId, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { PostAPIProp } from '@readme/core';
 
 class PostRDOBase {
   @Expose()
-  @IsString()
+  @IsNumber()
   @ApiProperty(PostAPIProp.PostID)
-  public id: string;
+  public id: number;
 
   @Exclude()
-  @IsEnum(ContentType)
   @ApiProperty(PostAPIProp.Type)
   public type: ContentType;
 
   @Expose()
   @IsArray()
+  @Transform(({value}) => value.length)
   @ApiProperty()
   public comments: Comment[];
 
   @Expose()
-  @IsMongoId()
-  @IsArray({each: true})
+  @IsMongoId({each: true})
+  @Transform(({value}) => value.length)
+  @IsArray()
   @ApiProperty()
-  public likes: string[];
+  public likes: number;
 
   @Expose()
   @IsBoolean()
@@ -44,12 +44,65 @@ class PostRDOBase {
   public authorID: string;
 
   @Expose()
-  @ValidateNested()
-  @ApiProperty(PostAPIProp.Origin)
-  public origin: Post;
+  @IsNumber()
+  @ApiProperty(PostAPIProp.OriginID)
+  public originID: number;
+
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @ApiProperty(PostAPIProp.Tags)
+  public tags?: string[];
 }
 
-export class PostRDO extends IntersectionType(
-  PostCreateDTO,
-  PostRDOBase,
-) {}
+export class PostTextRDO extends PostRDOBase {
+  @Expose()
+  @IsString()
+  public title: string;
+
+  @Expose()
+  @IsString()
+  public text: string;
+
+  @Expose()
+  @IsString()
+  public ann: string;
+}
+
+export class PostVideoRDO extends PostRDOBase {
+  @Expose()
+  @IsOptional()
+  @IsString()
+  public title?: string;
+
+  @Expose()
+  @IsString()
+  public videoLink: string;
+}
+
+export class PostPhotoRDO extends PostRDOBase {
+  @Expose()
+  @IsString()
+  public photoLink: string;
+}
+
+export class PostQuoteRDO extends PostRDOBase {
+  @Expose()
+  @IsString()
+  public author: string;
+
+  @Expose()
+  @IsString()
+  public quote: string;
+}
+
+export class PostLinkRDO extends PostRDOBase {
+  @Expose()
+  @IsString()
+  public link: string;
+
+  @Expose()
+  @IsOptional()
+  @IsString()
+  public desc?: string;
+}

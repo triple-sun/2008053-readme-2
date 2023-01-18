@@ -1,0 +1,54 @@
+version: '3.5'
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: test
+      MONGO_INITDB_DATABASE: readme-users
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db:/data/db
+      - ./upload:/upload
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/readme-users --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  mongodb-express:
+    image: mongo-express
+    restart: always
+    container_name: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: test
+      ME_CONFIG_MONGODB_URL: mongodb://admin:test@mongodb:27017/
+
+  readme.users:
+    image: readme.users
+    depends_on:
+      - mongodb
+    restart: always
+    container_name: readme.users
+    ports:
+      - 3335:3333
+    environment:
+      API_PORT: 3335
+      MONGO_DB: readme-users
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USER: admin
+      MONGO_PASS: test
+      MONGO_AUTH_BASE: admin
+      JWT_SECRET: secret
+      AVATAR_DIR: /avatars
+      RMQ_USER: admin
+      RMQ_PASS: test
+      RMQ_HOST: rabbitmq:5672
+      RMQ_QUEUE: readme.subscribers

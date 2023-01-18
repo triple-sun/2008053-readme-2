@@ -1,19 +1,14 @@
-import { Expose } from "class-transformer";
-import { IsString } from "class-validator";
-import { ContentType } from "@prisma/client";
+import { Expose, Transform } from "class-transformer";
+import { IsDefined, IsString } from "class-validator";
 
-import { ContentDTOBase } from "./content.dto";
 import { ApiProperty } from "@nestjs/swagger";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
 
-export class PhotoDTO extends ContentDTOBase {
+export class PhotoDTO {
   @Expose()
+  @IsDefined()
+  @Transform(({ obj }) => obj.path)
   @IsString()
   @ApiProperty(ContentAPIProp.Photo)
-  public photo?: string;
-
-  constructor() {
-    super()
-    this.type = ContentType.PHOTO
-  }
+  public photo: string;
 }

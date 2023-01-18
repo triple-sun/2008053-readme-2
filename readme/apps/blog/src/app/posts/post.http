@@ -1,45 +1,46 @@
-# Create a new post
-POST http://localhost:3333/api/posts?type=LINK HTTP/1.1
+# Create a new link post
+POST http://localhost:3333/api/posts HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTU2OTc3LCJleHAiOjE2NzM5NjI5Nzd9.8P72ylxSHcrgIM91DEZ-82uuJAlNMeocBA2exkRf4d4
 Content-Type: application/json
 
 {
+  "type": "link",
   "content": {
-    "type": "LINK",
     "url": "http://test.link.com",
     "desc": "test link description"
   },
-  "isDraft": false,
-  "tags": [
-    { "title": "tag" }
-  ],
-  "userID": "639e73981ca903a10ea63fa3"
+  "tags": [ "tag", "tag", "anotherTag" ]
 }
 
 ###
 
-# Delete the post by id
-DELETE http://localhost:3333/api/posts/38 HTTP/1.1
+# Delete the post by its id
+DELETE http://localhost:3333/api/posts/delete/13 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzllNzM5ODFjYTkwM2ExMGVhNjNmYTMiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLm9iZWJhcyIsImlhdCI6MTY3Mzk0NzA2OCwiZXhwIjoxNjczOTUzMDY4fQ.e8DOgRZ5hn3tTyyu5QWd1ryhrQGMrkyXHpJTQsjI7hM
 
 ###
 
-# Get post by id
-GET http://localhost:3333/api/posts/5 HTTP/1.1
+# Get post by postid
+GET http://localhost:3333/api/posts/post/9 HTTP/1.1
 
 ###
 
-# Get posts
-GET http://localhost:3333/api/posts/ HTTP/1.1
+# Get posts feed
+GET http://localhost:3333/api/posts/feed HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTU0MjI0LCJleHAiOjE2NzM5NjAyMjR9.nGJgl6CXK1Ouub-4Vex_hzbqfn4E65kLypPqW2WYvqY
 
 ###
 
-# Get posts by user id or ids
-GET http://localhost:3333/api/posts?users=639e73981ca903a10ea63fa3
+# Get posts by tag
+GET http://localhost:3333/api/posts/tag/anothertag
+###
 
 ###
 
 # Get posts by type
-GET http://localhost:3333/api/posts?type=LINK
+GET http://localhost:3333/api/posts/type/link
 ###
+
 
 # Sort posts by likes
 GET http://localhost:3333/api/posts?sortBy=likes
@@ -50,17 +51,15 @@ GET http://localhost:3333/api/posts?sortBy=comments
 ###
 
 # Repost post by id
-POST http://localhost:3333/api/posts/6/repost HTTP/1.1
+POST http://localhost:3333/api/posts/repost/9 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTUwOTA5LCJleHAiOjE2NzM5NTY5MDl9.7ro3iSsrZG0WWoDjzyNeKoxpuc9RWHHsZQh2wbZ_vo4
+
 
 ###
 
 # Like post by id
-POST http://localhost:3333/api/posts/6/like HTTP/1.1
-Content-Type: application/json
-
-{
-  "userID": "639e73981ca903a10ea63fa3"
-}
+POST http://localhost:3333/api/posts/like/6 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTUwOTA5LCJleHAiOjE2NzM5NTY5MDl9.7ro3iSsrZG0WWoDjzyNeKoxpuc9RWHHsZQh2wbZ_vo4
 
 ###
 
@@ -69,17 +68,25 @@ GET http://localhost:3333/api/posts HTTP/1.1
 
 ###
 
-PATCH http://localhost:3333/api/posts/31 HTTP/1.1
+#Update post by id
+PATCH  http://localhost:3333/api/posts/update/57 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTUwOTA5LCJleHAiOjE2NzM5NTY5MDl9.7ro3iSsrZG0WWoDjzyNeKoxpuc9RWHHsZQh2wbZ_vo4
 Content-Type: application/json
 
 {
-  "content": {
-    "type": "PHOTO",
-    "photo": "dir/dir/photo.jpg"
+  "type": "quote",
+  "quote": {
+    "author": "John Doe",
+    "quote": "Lorem ipsum dolor set amet"
   },
   "isDraft": true,
-  "tags": [{"title": "tag"}],
-  "userID": "639e73981ca903a10ea63fa3"
+  "tags": ["tag"]
 }
+
+###
+
+# Send unread posts to email
+POST http://localhost:3333/api/posts/notify/ HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTU2OTc3LCJleHAiOjE2NzM5NjI5Nzd9.8P72ylxSHcrgIM91DEZ-82uuJAlNMeocBA2exkRf4d4
 
 ###

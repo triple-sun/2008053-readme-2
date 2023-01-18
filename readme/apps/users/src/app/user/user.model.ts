@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { Collection, MinMax } from '@readme/core';
@@ -6,10 +6,13 @@ import { IUser } from '@readme/shared-types';
 
 @Schema({
   collection: Collection.Users,
+  timestamps: true
 })
 export class UserModel extends mongoose.Document implements IUser {
-  @Prop()
-  public avatarUrl: string;
+  @Prop({
+    default: ''
+  })
+  public avatar: string;
 
   @Prop({
     required: true,
@@ -28,12 +31,17 @@ export class UserModel extends mongoose.Document implements IUser {
     default: [],
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: UserModel.name }]
   })
-  public subscriptions: IUser[]
+  public subscriptions: Types.ObjectId[]
 
   @Prop({
     required: true,
   })
   public passwordHash: string;
+
+  @Prop({
+    default: new Date()
+  })
+  public notifiedAt: Date
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

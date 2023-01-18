@@ -2,34 +2,24 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
-
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { APIConfig, getAppRunningString, Path, Port, Prefix } from '@readme/core';
+import { SwaggerModule } from '@nestjs/swagger';
+import { APIConfig, getAppRunningString, Path, Prefix, APIPort, SwaggerConfig } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = Prefix.Global;
+  app.setGlobalPrefix(Prefix.Global);
 
-  app.setGlobalPrefix(globalPrefix);
+  await app.startAllMicroservices();
+  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, SwaggerConfig.Notify))
 
-  const config = new DocumentBuilder()
-    .setTitle(APIConfig.NotifyTitle)
-    .setDescription(APIConfig.NotifyDesc)
-    .setVersion(APIConfig.Version)
-    .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(Path.Spec, app, document)
-
-  const port = process.env.API_PORT || Port.NotifyAPIDefault;
-
-  await app.listen(port);
+  await app.listen(APIPort.Notify);
 
   Logger.log(
-    getAppRunningString(APIConfig.NotifyTitle, port)
+    getAppRunningString(APIConfig.NotifyTitle, APIPort.Notify)
   );
 }
 

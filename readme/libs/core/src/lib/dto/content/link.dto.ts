@@ -1,27 +1,21 @@
 import { Expose } from "class-transformer";
 import { IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
-import { ContentType } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
 
-import { ContentDTOBase } from "./content.dto";
-import { MinMax } from "../../enum/utils.enum";
 import { ContentAPIProp } from "../../api-props/post/content.api-prop";
+import { MinMax } from "../../enum/minmax.enum";
+import { FieldName } from "../../enum/field-name.enum";
 
-export class LinkDTO extends ContentDTOBase {
+export class LinkDTO {
   @Expose()
   @IsUrl()
-  @ApiProperty(ContentAPIProp.Link)
-  public url: string;
+  @ApiProperty(ContentAPIProp[FieldName.Url])
+  public link: string;
 
   @Expose()
   @IsString()
   @IsOptional()
   @MaxLength(MinMax.DescMax)
-  @ApiProperty(ContentAPIProp.Desc)
+  @ApiProperty(ContentAPIProp[FieldName.Desc])
   public desc?: string;
-
-  constructor() {
-    super()
-    this.type = ContentType.LINK
-  }
 }

@@ -1,11 +1,20 @@
-export enum Port {
-  Min = 0,
-  Max = 65535,
-  DBDefault = 27017,
-  BlogAPIDefault = 3333,
-  NotifyAPIDefault = 5555,
-  UsersAPIDefault = 4444,
-  MailDefault = 5025
+export enum PortDefault {
+  Mongo = 27017,
+  Mailer = 5025,
+  BlogAPI = 3333,
+  NotifyAPI = 3334,
+  UsersAPI = 3335,
+}
+
+export enum UploadType {
+  Photo = 'photo',
+  Avatar = 'avatar'
+}
+
+export enum EnvFilePath {
+  Blog = 'environments/blog.env',
+  Notify = 'environments/notify.env',
+  Users = 'environments/users.env'
 }
 
 export enum EnvFilePath {
@@ -24,73 +33,44 @@ export enum Prefix {
   User = 'users'
 }
 
-export enum ParamName {
-  UserID = 'userID',
-  PostID = 'postID',
-  CommentID = 'commentID',
-  ID = 'id',
-  Type = 'type'
-}
-
 export enum Path {
+  Author = 'author',
   Avatar = 'avatar',
+  Drafts = 'drafts',
   Blog = 'blog',
   Posts = 'posts',
+  Post = 'post',
   Comments = 'comments',
+  Delete = 'delete',
   Register = 'register',
   Spec = 'spec',
   Login = 'login',
   Upload = 'upload',
-  Subscribe = 'sub',
+  Photo = 'photo',
+  Like = 'like',
+  Link = 'link',
+  Search = 'search',
+  Tag = 'tag',
+  Title = 'title',
+  Type = 'type',
+  Feed = 'feed',
+  Subscribe = 'subscribe',
   Subscriptions = 'subs',
   Users = 'users',
-  Repost = 'repost'
+  User = 'user',
+  Repost = 'repost',
+  Notify = 'notify',
+  Update = 'update'
 }
 
 export enum EntityName {
   User = 'User',
   Post = 'Post',
-  Comment = 'Comment'
-}
-
-export enum KeyName {
-  ID = 'id',
-  ObjectID = '_id',
-}
-
-export enum APIConfig {
-  BlogDesc = 'Blog service API',
-  BlogTitle = 'Blog service',
-  NotifyDesc = 'Notification service API',
-  NotifyTitle = 'Notification service',
-  UsersDesc = 'Users service API',
-  UsersTitle = 'Users service',
-  Version = '1.0'
-}
-
-export enum MinMax {
-  TagMin = 3,
-  TagMax = 10,
-  TagsLimit = 8,
-  TitleMin = 20,
-  TitleMax = 50,
-  AnnMin = 50,
-  AnnMax = 255,
-  TextMin = 100,
-  TextMax = 1024,
-  QuoteMin = 20,
-  QuoteMax = 300,
-  AuthorMin = 3,
-  AuthorMax = 50,
-  PhotoMaxBytes = 1000000,
-  DescMax = 300,
-  UserNameMin = 3,
-  UserNameMax = 50,
-  UserPassMin = 6,
-  UserPassMax = 12,
-  AvatarMaxBytes = 500000,
-  CommentMin = 10,
-  CommentMax = 300,
-  CommentsLimit = 30,
-  PostsLimit = 25
+  Comment = 'Comment',
+  Subscriber = 'Subscriber',
+  Link = 'Link',
+  Photo = 'Photo',
+  Video = 'Video',
+  Quote = 'Quote',
+  Text = 'Text'
 }

@@ -1,42 +1,40 @@
 import { Injectable } from "@nestjs/common";
-import { CommentError, PostError } from "@readme/core";
+import { validateCommentExists, validateCommentUserID } from "@readme/core";
 
 import { CommentEntity } from "./comment.entity";
-import { PostRepository } from "../posts/post.repository";
 import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
-import { CommentQuery } from "./query/comment.query";
+import { CommentListQuery } from "./query/comment-list.query";
+import { PostService } from "../posts/post.service";
+import { CommentCreateQuery } from "./query/comment-create.query";
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
-    private readonly postRepository: PostRepository
+    private readonly postService: PostService
       ) {}
 
-  async getCommentsForPost(query: CommentQuery) {
+  async getCommentsForPost(query: CommentListQuery) {
+    await this.postService.getPost(query.postID)
+
     return await this.commentRepository.findAllByPostID(query)
   }
 
-  async createComment(postID: number, dto: CommentCreateDTO) {
-    const post = await this.postRepository.findOne(postID)
+  async createComment(userID: string, query: CommentCreateQuery, dto: CommentCreateDTO) {
+    const newComment = new CommentEntity({userID, ...dto, ...query})
 
-    if (!post) {
-      throw new Error(PostError.NotFound)
-    }
-
-    const newComment = new CommentEntity(postID, dto)
+    await this.postService.getPost(query.postID)
 
     return await this.commentRepository.create(newComment);
   }
 
-  async deleteComment(commentID: number) {
+  async deleteComment(commentID: number, userID: string) {
     const comment = await this.commentRepository.findOne(commentID);
 
-    if (!comment) {
-      throw new Error(CommentError.NotFound)
-    }
-    
+    validateCommentExists(commentID, comment)
+    validateCommentUserID(comment, userID)
+
     await this.commentRepository.destroy(commentID)
   }
 }

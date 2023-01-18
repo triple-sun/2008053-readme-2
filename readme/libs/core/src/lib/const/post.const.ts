@@ -1,14 +1,11 @@
-import { MinMax } from "../enum/utils.enum";
+import { MinMax } from "../enum/minmax.enum";
 
 export const PostInclude = {
   comments: {
-    take: MinMax.CommentsLimit
-  },
-  origin: true,
-  tags: true,
-  link: true,
-  photo: true,
-  quote: true,
-  text: true,
-  video: true
+    take: MinMax.CommentsLimit,
+  }
 }
+
+export const TagRegExp = /^[a-z]*[a-z][a-z0-9-._]*$/g
+export const imageExtRegExp = (/[/.](jpe?g|png)$/i)
+

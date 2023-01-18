@@ -1,44 +1,23 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { MinMax, UserAPIDesc, UserAPIExample, UserError, ValidationErrorMessage } from "@readme/core";
-import { Expose } from "class-transformer";
-import { IsEmail, IsOptional, IsString, Length } from "class-validator";
+import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
+import { FieldName, UserDTO, UserError, UsersAPIProp } from "@readme/core";
+import { Transform } from "class-transformer";
+import { IsEmail, IsOptional, IsString, Validate } from "class-validator";
+import { UserAlreadyExistsRule } from "../validators/user-exists.validator";
 
-export class UserCreateDTO {
-  @Expose()
+class UserCreateEmail {
   @IsEmail({},{message: UserError.Email})
-  @ApiProperty({
-    description: UserAPIDesc.Email,
-    example: UserAPIExample.Email
-  })
+  @ApiProperty(UsersAPIProp[FieldName.Email])
+  @Validate(UserAlreadyExistsRule)
   public email: string;
 
-  @Expose()
-  @IsString()
-  @Length(MinMax.UserNameMin, MinMax.UserNameMax, { message: ValidationErrorMessage.Length })
-  @ApiProperty({
-    description: UserAPIDesc.Name,
-    example: UserAPIExample.Name,
-    maxLength: MinMax.UserNameMax,
-    minLength: MinMax.UserNameMin
-  })
-  public name: string;
-
-  @IsString()
-  @Length(MinMax.UserPassMin, MinMax.UserPassMax,{ message: ValidationErrorMessage.Length })
-  @ApiProperty({
-    description: UserAPIDesc.Pass,
-    example: UserAPIExample.Pass,
-    maxLength: MinMax.UserPassMax,
-    minLength: MinMax.UserPassMin
-  })
-  public password: string;
-
-  @Expose()
   @IsString()
   @IsOptional()
-  @ApiProperty({
-    description: UserAPIDesc.AvatarUrl,
-    example: UserAPIExample.FilePath
-  })
-  public avatarUrl: string;
+  @Transform(({ obj }) => obj ? obj.path : '')
+  @ApiProperty(UsersAPIProp[FieldName.Avatar])
+  public avatar?: string
 }
+
+export class UserCreateDTO extends IntersectionType(
+  PickType(UserDTO, ['email', 'name', 'password'] as const),
+  UserCreateEmail
+) {}

@@ -1,42 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { connectOrCreateTags, PostInclude, SortByType } from '@readme/core';
-import { ICRUDRepo, IPostBase } from '@readme/shared-types';
+import { MinMax, PostInclude, SortByType } from '@readme/core';
+import { ICRUDRepo, IPost,  } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostQuery } from './query/post.query';
+import { PostsFindQuery } from './query/posts.query.dto';
 
 @Injectable()
-export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> {
+export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
   constructor(
     private readonly prisma: PrismaService
   ) {}
 
-  public async create(item: PostEntity): Promise<IPostBase> {
-    const entityData = item.toObject();
-
-    const { tags, originID, content: contentData, ...data } = entityData
-    const { type, postID, ...content } = contentData
-
-    const contentType = type ? type.toLowerCase() : entityData.type.toLowerCase()
-
-    const origin = postID ? { connect: { id: originID }} : undefined
-
-    const created = await this.prisma.post.create({
+  public async create(item: PostEntity): Promise<IPost> {
+    const {comments, ...data} = item.toObject()
+    console.log({data}, {item})
+    return await this.prisma.post.create({
       data: {
         ...data,
-        authorID: data.authorID ?? data.userID,
-        type: entityData.type,
-        tags: {
-          connectOrCreate: connectOrCreateTags(tags)
-        },
-        origin,
-        [contentType]: { create: {...content} }
-        },
+        comments: {
+          create: comments
+        }
+      },
       include: PostInclude
     })
-
-    return created
   }
 
   public async destroy(id: number): Promise<void> {
@@ -45,25 +32,46 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
     });
   }
 
-  public async findOne(id: number): Promise<IPostBase | null> {
-    const exists = await this.prisma.post.findUnique({ where: { id }, include: PostInclude})
+  public async findOne(id: number): Promise<IPost | null> {
+    console.log({id})
+    const exists = await this.prisma.post.findUnique({
+      where: { id },
+      include: PostInclude
+    })
 
     return exists
   }
 
-  public async find({users, limit, type, sortBy, tag, sort, draft, page}: PostQuery) {
+  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
+    const limit = title ? MinMax.PostsSearch : MinMax.PostsLimit
+    const sortByType = sortBy ?? SortByType.Date
+
+    const query = () => {
+      switch(true) {
+        case !!subs:
+          return { userID: { in: subs }}
+        case !!authorID:
+          return { authorID: { equals: authorID }}
+        case !!type:
+          return { type }
+        case !!tag:
+          return { tags: { has: tag }}
+        case !!title:
+          return { title: { contains: title }}
+        case !!userID:
+          return { userID: { equals: userID }}
+        default:
+          return {}
+      }
+    }
+
     const posts = await this.prisma.post.findMany({
       where: {
-        userID: {
-          in: users,
+        ...query(),
+        createdAt: {
+          gt: since ?? undefined
         },
-        type: {
-          equals: type
-        },
-        tags: {
-          some: tag ? { title: tag } : {}
-        },
-        isDraft: draft
+        isDraft: isDraft ?? false
       },
       take: limit,
       include: {
@@ -71,51 +79,53 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPostBase> 
         _count:{ select: { comments: true }}
       },
       orderBy: [
-        sortBy === SortByType.Comm
-          ? { [sortBy]: {_count: sort}}
-          : {[sortBy]: sort}
+        sortByType === SortByType.Comm
+          ? { [sortByType]: {_count: 'desc'}}
+          : { [sortByType]: 'desc' }
       ],
-      skip: page > 0 ? limit * (page - 1) : undefined,
+      skip: page > 0 && title ? limit * (page - 1) : undefined,
     });
 
     return posts
+    return posts
   }
 
+
   public async update(id: number, item: PostEntity) {
-    const entityData = item.toObject();
-
-    const type = entityData.type
-
-    const {originID, content, ...updateData} = entityData
-
-    const originType = (await this.prisma.post.findUnique({ where: { id }})).type
-
-    const handleContentTypeChange = () => {
-      if (originType !== type) {
-        return ({
-          [originType.toLowerCase()]: {delete: { where: { postID: id }}},
-          [type.toLowerCase()]: {create: content}
-        })
-      }
-
-      return ({
-        [type.toLowerCase()]: { connect: { postID: id }}
-      })
-    }
-
-    const update = await this.prisma.post.update({
+    const {comments, ...data} = item.toObject()
+    return await this.prisma.post.update({
       where: { id },
       data: {
-        ...updateData,
-        ...handleContentTypeChange(),
-        type,
-        tags: { connectOrCreate: connectOrCreateTags(entityData.tags) },
-        origin: originID ? { connect: { id: originID }} : undefined
+        ...data,
       },
       include: PostInclude
     })
-
-
-    return update
   }
+
+  public async like(id: number, likes: string[]) {
+    return await this.prisma.post.update({
+      where: { id },
+      data: {
+        likes: {
+          set: likes
+        }
+      },
+      include: PostInclude
+    })
+  }
+
+  public async publish(id: number, publishAt: Date) {
+    return await this.prisma.post.update({
+      where: { id },
+      data: {
+        isDraft: false,
+        publishAt: {
+          set: publishAt
+        }
+      },
+      include: PostInclude
+    })
+  }
+
+
 }
