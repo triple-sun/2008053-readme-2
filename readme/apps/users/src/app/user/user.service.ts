@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { RPC, UserError, validateUserAlreadyExists, validateUserExists } from '@readme/core';
+import { RPC, UserError, UserRDO, ValidateUser } from '@readme/core';
 import { RMQService } from 'nestjs-rmq';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
@@ -19,30 +19,32 @@ export class UserService {
     return await this.userRepository.find()
   }
 
-  async getUser(userID: string) {
-    const user = await this.userRepository.findOne(userID)
+  async getUser({id, email}: Partial<Pick<UserRDO, 'id' | 'email'>>) {
+    const user = email
+      ? await this.userRepository.findByEmail(email)
+      : await this.userRepository.findOne(id)
 
-    validateUserExists(userID, user)
+    ValidateUser.Exists(user, {id, email})
 
     return user;
   }
 
-  async getUserData(userID: string) {
-    const user = await this.getUser(userID)
-    const subscribers = (await this.userRepository.findSubscribers(userID)).length
-    const posts = await this.rmqService.send<string, number>(RPC.GetPosts, userID)
+  async getUserData(id: string) {
+    const user = await this.getUser({id})
+    const subscribers = (await this.userRepository.findSubscribers(id)).length
+    const posts = await this.rmqService.send<string, number>(RPC.GetPosts, id)
 
-    console.log ({user})
 
     return {...user, posts, subscribers}
   }
 
   async registerUser(dto: UserCreateDTO) {
     const {email, name, password} = dto;
+    const user = await this.getUser({email})
 
-    validateUserAlreadyExists(await this.userRepository.findByEmail(dto.email))
+    ValidateUser.AlreadyExists(user)
 
-    const user = {
+    const newUserData = {
       email,
       name,
       avatar: dto.avatar ?? '',
@@ -51,13 +53,13 @@ export class UserService {
       passwordHash: '',
     };
 
-    const userEntity = await new UserEntity(user).setPassword(password)
+    const userEntity = await new UserEntity(newUserData).setPassword(password)
 
     return await this.userRepository.create(userEntity);
   }
 
-  async updateUser(userID: string, { avatar, password }: UserUpdateDTO) {
-    const user = await this.getUser(userID)
+  async updateUser(id: string, { avatar, password }: UserUpdateDTO) {
+    const user = await this.getUser({id})
 
     const update = {
       ...user,
@@ -68,19 +70,21 @@ export class UserService {
       ? new UserEntity(update)
       : await new UserEntity(update).setPassword(password)
 
-    return await this.userRepository.update(userID, userEntity)
+    return await this.userRepository.update(id, userEntity)
   }
 
-  async subscribe(dto: UserSubscribeDTO, userID: string) {
-    if (userID === dto.subToID) {
+  async subscribe(dto: UserSubscribeDTO, id: string) {
+    await this.getUser({id})
+
+    if (id === dto.subToID) {
       throw new ConflictException(UserError.SelfSubscribe)
     }
 
-    return await this.userRepository.subscribe(dto, userID);
+    return await this.userRepository.subscribe(dto, id);
   }
 
-  async setNotified(userID: string) {
-    const user = await this.getUser(userID)
+  async setNotified(id: string) {
+    const user = await this.getUser({id})
 
     const update = {
       ...user,
@@ -89,6 +93,6 @@ export class UserService {
 
     const userEntity = new UserEntity(update)
 
-    return await this.userRepository.update(userID, userEntity)
+    return await this.userRepository.update(id, userEntity)
   }
 }

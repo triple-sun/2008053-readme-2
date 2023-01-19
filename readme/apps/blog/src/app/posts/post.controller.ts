@@ -2,14 +2,12 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, U
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FormDataRequest } from 'nestjs-form-data';
 
-import { fillObject, Prefix, PostInfo, Path, PostCreateDTO, FieldName, UserID, JwtAuthGuard, PostBaseRDO, fillPostRDO, MongoIDValidationPipe, RPC } from '@readme/core';
+import { fillObject, Prefix, PostInfo, Path, PostCreateDTO, Property, UserID, JwtAuthGuard, PostBaseRDO, fillPostRDO, MongoIDValidationPipe, RPC, PostTypeDTO } from '@readme/core';
 
 import { PostService } from './post.service';
 import { PostsQuery } from './query/posts.query.dto';
 import { PostUpdateDTO } from './query/post-update.dto';
-import { PostTypeDTO } from 'libs/core/src/lib/dto/post-type.dto';
 import { RMQRoute } from 'nestjs-rmq';
-
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -18,13 +16,15 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
-  @Get(`${Path.Post}/:${FieldName.PostID}`)
+  @Get(`${Path.Post}/:${Property
+.PostID}`)
   @ApiResponse({
    status: HttpStatus.OK,
    description: PostInfo.Found
   })
   async show(
-    @Param(FieldName.PostID) postID: number
+    @Param(Property
+  .PostID) postID: number
   ) {
     const post = await this.postService.getPost(postID);
 
@@ -56,19 +56,22 @@ export class PostController {
     return this.postService.getFeed(userID, query)
   }
 
-  @Get(`${Path.Tag}/:${FieldName.Tag}`)
+  @Get(`${Path.Tag}/:${Property
+.Tag}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getPostsByTag(
-    @Param(FieldName.Tag) tag: string,
+    @Param(Property
+  .Tag) tag: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getPostsByTag(query, tag)
   }
 
-  @Get(`${Path.Type}/:${FieldName.Type}`)
+  @Get(`${Path.Type}/:${Property
+.Type}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
@@ -80,25 +83,29 @@ export class PostController {
     return this.postService.getPostsByType(query, type)
   }
 
-  @Get(`${Path.Users}/:${FieldName.AuthorID}`)
+  @Get(`${Path.Users}/:${Property
+.AuthorID}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getPostsByAuthor(
-    @Param(FieldName.AuthorID, MongoIDValidationPipe) authorID: string,
+    @Param(Property
+  .AuthorID, MongoIDValidationPipe) authorID: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getPostsByAuthor(query, authorID)
   }
 
-  @Get(`${Path.Title}/:${FieldName.Title}`)
+  @Get(`${Path.Title}/:${Property
+.Title}`)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getPostsByTitle(
-    @Param(FieldName.Title) title: string,
+    @Param(Property
+  .Title) title: string,
     @Query() query: PostsQuery,
   ) {
     return this.postService.getPostsByTitle(query, title)
@@ -136,7 +143,8 @@ export class PostController {
     return fillObject(PostBaseRDO, post);
   }
 
-  @Patch(`${Path.Update}/:${FieldName.PostID}`)
+  @Patch(`${Path.Update}/:${Property
+.PostID}`)
   @UseGuards(JwtAuthGuard)
   @FormDataRequest()
   @ApiResponse({
@@ -145,7 +153,8 @@ export class PostController {
    description: PostInfo.Updated
   })
   async update(
-    @Param(FieldName.PostID) postID: number,
+    @Param(Property
+  .PostID) postID: number,
     @UserID() userID: string,
     @Body() dto: PostUpdateDTO,
   ) {
@@ -155,20 +164,23 @@ export class PostController {
     return fillObject(PostBaseRDO, post);
   }
 
-  @Delete(`${Path.Delete}/:${FieldName.PostID}`)
+  @Delete(`${Path.Delete}/:${Property
+.PostID}`)
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Deleted
   })
   async destroy(
-    @Param(FieldName.PostID) postID: number,
+    @Param(Property
+  .PostID) postID: number,
     @UserID() userID: string,
   ) {
     await this.postService.deletePost(userID, postID)
   }
 
-  @Post(`${Path.Repost}/:${FieldName.PostID}`)
+  @Post(`${Path.Repost}/:${Property
+.PostID}`)
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
    type: PostBaseRDO,
@@ -176,7 +188,8 @@ export class PostController {
    description: PostInfo.Reposted
   })
   async repost(
-    @Param(FieldName.PostID) postID: number,
+    @Param(Property
+  .PostID) postID: number,
     @UserID() userID: string,
   ) {
     const post = await this.postService.repost(postID, userID);
@@ -184,7 +197,8 @@ export class PostController {
     return fillObject(PostBaseRDO, post);
   }
 
-  @Post(`${Path.Like}/:${FieldName.PostID}`)
+  @Post(`${Path.Like}/:${Property
+.PostID}`)
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
    type: PostBaseRDO,
@@ -192,7 +206,8 @@ export class PostController {
    description: PostInfo.Reposted
   })
   async like(
-    @Param(FieldName.PostID) postID: number,
+    @Param(Property
+  .PostID) postID: number,
     @UserID() userID: string,
   ) {
     const post = await this.postService.likePost(postID, userID);

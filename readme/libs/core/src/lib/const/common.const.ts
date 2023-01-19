@@ -1,6 +1,8 @@
-import { APIConfig } from "../enum/api.enum";
+import { APIConfig } from "../enum/config.enum";
 import { PortDefault } from "../enum/utils.enum";
 import { getDocument } from "../utils/common.utils";
+
+const { BlogTitle, BlogDesc, NotifyTitle, NotifyDesc, UsersTitle, UsersDesc } = APIConfig
 
 export const APIPort = {
   Blog: process.env.API_PORT ?? PortDefault.BlogAPI,
@@ -9,7 +11,7 @@ export const APIPort = {
 }
 
 export const SwaggerConfig = {
-  Blog: getDocument(APIConfig.BlogTitle, APIConfig.BlogDesc),
-  Notify: getDocument(APIConfig.NotifyTitle, APIConfig.NotifyDesc),
-  Users: getDocument(APIConfig.UsersTitle, APIConfig.UsersDesc)
+  Blog: getDocument(BlogTitle, BlogDesc),
+  Notify: getDocument(NotifyTitle, NotifyDesc),
+  Users: getDocument(UsersTitle, UsersDesc)
 }

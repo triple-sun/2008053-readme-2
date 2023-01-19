@@ -1,5 +1,5 @@
 import { Controller, UseGuards } from '@nestjs/common';
-import {  JwtAuthGuard, RPC } from '@readme/core';
+import { JwtAuthGuard, RPC } from '@readme/core';
 import { SubscriberService } from './subscriber.service';
 import { RMQRoute } from 'nestjs-rmq';
 import { SubscriberCreateDTO } from './dto/subscriber-create.dto';

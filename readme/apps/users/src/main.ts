@@ -2,7 +2,7 @@
  * This is not a production server yet!
  * This is only a minimal backend to get started.
  */
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { APIConfig, APIPort, getAppRunningString, Path, Prefix, SwaggerConfig } from '@readme/core';
@@ -13,6 +13,8 @@ async function bootstrap() {
   app.setGlobalPrefix(Prefix.Global);
 
   SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, SwaggerConfig.Users))
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true, validateCustomDecorators: true }))
 
   await app.listen(APIPort.Users);
 

@@ -4,10 +4,10 @@ import { Expose } from "class-transformer";
 import { IsMongoId, Validate } from "class-validator";
 import { UserExistIDRule } from "../validators/user-exists.validator";
 
-export class UserSubscribeDTO {
+export class UserIDDTO {
   @Expose()
   @IsMongoId()
-  @ApiProperty(APIProp.Users(Property.SubToID))
+  @ApiProperty(APIProp.Users(Property.UserID))
   @Validate(UserExistIDRule)
-  public subToID: string;
+  public userID?: string;
 }

@@ -1,23 +1,21 @@
-import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { FieldName, UserDTO, UserError, UsersAPIProp } from "@readme/core";
+import { ApiProperty, PickType } from "@nestjs/swagger";
+import { APIProp, Property, Size, UserDTO, ValidationMessage } from "@readme/core";
 import { Transform } from "class-transformer";
-import { IsEmail, IsOptional, IsString, Validate } from "class-validator";
-import { UserAlreadyExistsRule } from "../validators/user-exists.validator";
+import { IsOptional, IsString, Length } from "class-validator";
 
-class UserCreateEmail {
-  @IsEmail({},{message: UserError.Email})
-  @ApiProperty(UsersAPIProp[FieldName.Email])
-  @Validate(UserAlreadyExistsRule)
-  public email: string;
+const { Max, Min } = Size
+const { Pass, Avatar } = Property
+const { Users } = APIProp
 
+export class UserCreateDTO extends PickType(UserDTO, ['email', 'name']) {
   @IsString()
   @IsOptional()
   @Transform(({ obj }) => obj ? obj.path : '')
-  @ApiProperty(UsersAPIProp[FieldName.Avatar])
+  @ApiProperty(Users(Avatar))
   public avatar?: string
-}
 
-export class UserCreateDTO extends IntersectionType(
-  PickType(UserDTO, ['email', 'name', 'password'] as const),
-  UserCreateEmail
-) {}
+  @IsString()
+  @Length(Min(Pass), Max(Pass), { message: ValidationMessage.Length })
+  @ApiProperty(Users(Pass))
+  public password: string;
+}

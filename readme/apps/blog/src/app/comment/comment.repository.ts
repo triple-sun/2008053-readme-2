@@ -4,7 +4,7 @@ import { IComment, ICRUDRepo } from '@readme/shared-types';
 
 import { CommentEntity } from './comment.entity';
 import { CommentListQuery } from './query/comment-list.query';
-import { MinMax } from '@readme/core';
+import { Property, Size } from '@readme/core';
 
 @Injectable()
 export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComment> {
@@ -40,8 +40,8 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
         postID: true,
         createdAt: true
       },
-      take: MinMax.CommentsLimit,
-      skip: page > 0 ? MinMax.CommentsLimit * (page - 1) : undefined
+      take: Size.Max(Property.Comments),
+      skip: page > 0 ? Size.Max(Property.Comments) * (page - 1) : undefined
     })
 
     return comments

@@ -1,9 +1,7 @@
 import { IntersectionType, PickType } from '@nestjs/swagger';
-import { UserDTO } from '@readme/core';
-
-import { UserRDO } from './user.rdo';
+import { UserRDO, UserTokenDTO } from '@readme/core';
 
 export class UserLoggedRDO extends IntersectionType(
-  PickType(UserDTO, ['token'] as const),
+  UserTokenDTO,
   PickType(UserRDO, ['id', 'email'] as const)
 ) {}

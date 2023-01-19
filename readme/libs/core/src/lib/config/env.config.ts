@@ -1,13 +1,16 @@
 import { IsNumber, IsString, Max, Min } from "class-validator";
-import { ENVError } from "../enum/env.enum";
-import { MinMax } from "../enum/minmax.enum";
+import { Size } from "../const/api-options.const";
+import { Property } from "../enum/property.enum";
+import { ENVError } from "../error/env.error.enum";
+
+const { Port } = Property
 
 export class APIEnvConfig {
   @IsNumber({}, {
     message: ENVError.APIPort
   })
-  @Min(MinMax.PortMin)
-  @Max(MinMax.PortMax)
+  @Min(Size.Min(Port))
+  @Max(Size.Max(Port))
   public API_PORT: number;
 }
 
@@ -42,8 +45,8 @@ export class MailerEnvConfig {
   @IsNumber({}, {
     message: ENVError.SMTPPort
   })
-  @Min(MinMax.PortMin)
-  @Max(MinMax.PortMax)
+  @Min(Size.Min(Port))
+  @Max(Size.Max(Port))
   public MAILER_PORT: number;
 
   @IsString({
@@ -81,8 +84,8 @@ export class MongoEnvConfig {
   @IsNumber({}, {
     message: ENVError.DBPort
   })
-  @Min(MinMax.PortMin)
-  @Max(MinMax.PortMax)
+  @Min(Size.Min(Port))
+  @Max(Size.Max(Port))
   public MONGO_PORT: number;
 
   @IsString({

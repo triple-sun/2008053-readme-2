@@ -2,20 +2,24 @@ import { Expose } from "class-transformer";
 import { IsString, Length } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-import { ContentAPIProp } from "../../api-props/post/content.api-prop";
-import { MinMax } from "../../enum/minmax.enum";
-import { FieldName } from "../../enum/field-name.enum";
+import { Property } from "../../enum/property.enum";
+import { Size } from "../../const/api-options.const";
+import { APIProp } from "../../utils/api.utils";
+
+const { Quote, Author } = Property;
+const { Min, Max } = Size;
+const { Post } = APIProp
 
 export class QuoteDTO {
   @Expose()
   @IsString()
-  @Length(MinMax.QuoteMin, MinMax.QuoteMax)
-  @ApiProperty(ContentAPIProp[FieldName.Quote])
+  @Length(Min(Quote), Max(Quote))
+  @ApiProperty(Post(Quote))
   public quote?: string;
 
   @Expose()
   @IsString()
-  @Length(MinMax.AuthorMin, MinMax.AuthorMax)
-  @ApiProperty(ContentAPIProp[FieldName.Author])
+  @Length(Min(Author), Max(Author))
+  @ApiProperty(Post(Author))
   public author?: string;
 }

@@ -2,14 +2,17 @@ import { Expose } from "class-transformer";
 import { IsUrl } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
-import { ContentAPIProp } from "../../api-props/post/content.api-prop";
-import { FieldName } from "../../enum/field-name.enum";
+import { Property } from "../../enum/property.enum";
 import { TitleDTO } from "./title.dto";
+import { APIProp } from "../../utils/api.utils";
+
+const { VideoLink } = Property;
+const { Post } = APIProp
 
 class VideoContent {
   @Expose()
   @IsUrl()
-  @ApiProperty(ContentAPIProp[FieldName.VideoUrl])
+  @ApiProperty(Post(VideoLink))
   public videoLink?: string;
 }
 

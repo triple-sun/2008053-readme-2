@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FieldName, fillObject, Prefix, CommentInfo, UserID, Path, JwtAuthGuard } from '@readme/core';
+import { fillObject, Prefix, CommentInfo, UserID, Path, JwtAuthGuard, Property } from '@readme/core';
 
 import { CommentService } from './comment.service';
 import { CommentCreateDTO } from './dto/comment-create.dto';
@@ -45,14 +45,14 @@ export class CommentController {
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`${Path.Delete}/:${FieldName.CommentID}`)
+  @Delete(`${Path.Delete}/:${Property.CommentID}`)
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
    status: HttpStatus.OK,
    description: CommentInfo.Deleted
   })
   async delete(
-    @Param(FieldName.CommentID) commentID: number,
+    @Param(Property.CommentID) commentID: number,
     @UserID() userID: string
     ) {
     await this.commentService.deleteComment(commentID, userID);

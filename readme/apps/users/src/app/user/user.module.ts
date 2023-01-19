@@ -1,7 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { EntityName, getRMQModuleConfig, jwtModuleConfig, JwtStrategy } from '@readme/core';
+import { Entity, getRMQModuleConfig, jwtModuleConfig, JwtStrategy, Property, Size } from '@readme/core';
 
 import { UserModel, UserSchema } from './user.model';
 import { UserController } from './user.controller';
@@ -9,14 +9,14 @@ import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { PassportModule } from '@nestjs/passport';
 import { RMQModule } from 'nestjs-rmq';
-import { NestjsFormDataModule } from 'nestjs-form-data';
+import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
     PassportModule,
     MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
-    NestjsFormDataModule,
-    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.User)),
+    NestjsFormDataModule.config({ storage: FileSystemStoredFile, fileSystemStoragePath: 'upload', limits: { fileSize: Size.Max(Property.Avatar)}, autoDeleteFile: false }),
+    RMQModule.forRootAsync(getRMQModuleConfig(Entity.User)),
     JwtModule.registerAsync(jwtModuleConfig),
   ],
   providers: [

@@ -57,7 +57,7 @@ export enum Path {
   Update = 'update'
 }
 
-export enum EntityName {
+export enum Entity {
   User = 'User',
   Post = 'Post',
   Comment = 'Comment',
