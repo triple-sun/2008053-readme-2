@@ -1,7 +1,7 @@
 import mongoose, { Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Collection, MinMax } from '@readme/core';
+import { Collection, Property, Size } from '@readme/core';
 import { IUser } from '@readme/shared-types';
 
 @Schema({
@@ -22,8 +22,8 @@ export class UserModel extends mongoose.Document implements IUser {
 
   @Prop({
     required: true,
-    maxlength: MinMax.UserNameMax,
-    minlength: MinMax.UserNameMin
+    maxlength: Size.Max(Property.Name),
+    minlength: Size.Min(Property.Name)
   })
   public name: string;
 

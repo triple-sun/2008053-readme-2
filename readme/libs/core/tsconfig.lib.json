@@ -7,5 +7,5 @@
     "types": ["node"]
   },
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"],
-  "include": ["**/*.ts", "../../apps/users/src/app/user/validators/user-already-exists.validator.ts", "../../apps/users/src/app/user/dto/user-subscribe.dto.ts", "src/lib/dto/notify.dto.ts"]
+  "include": ["**/*.ts"]
 }

@@ -1,12 +1,12 @@
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DocumentBuilder } from '@nestjs/swagger';
-import { APIConfig } from '../enum/api.enum';
-import { IComment, IPost, IUser } from '@readme/shared-types';
-import { PostError } from '../enum/post.enum';
-import { ErrorMessage } from './error.utils';
+import { APIConfig } from '../enum/config.enum';
+import { IPost } from '@readme/shared-types';
 import { ContentType } from '@prisma/client';
 import { PostLinkRDO, PostPhotoRDO, PostQuoteRDO, PostTextRDO, PostVideoRDO } from '../rdo/post.rdo';
+import { CommonError } from '../error/common.error.enum';
+import { UnsupportedMediaTypeException } from '@nestjs/common';
+import 'multer'
 
 export const getDocument = (title: string, desc: string) => {
   return new DocumentBuilder()
@@ -14,52 +14,6 @@ export const getDocument = (title: string, desc: string) => {
     .setDescription(desc)
     .setVersion(APIConfig.Version)
     .build()
-}
-
-export const validateUserAlreadyExists = (user?: IUser) => {
-  if (user) {
-    throw new ConflictException(ErrorMessage.User.Email.Exists(user.email))
-  }
-}
-
-export const validateUserExists = (userID: string, user?: IUser) => {
-  if (!user) {
-    throw new NotFoundException(ErrorMessage.User.ID.NotFound(userID))
-  }
-}
-
-export const validatePostExists = (post: IPost, postID: number) => {
-  if (!post) {
-    throw new NotFoundException(ErrorMessage.Post.NotFound(postID))
-  }
-}
-
-export const validatePostUserID = (post: IPost, userID: string) => {
-  if (post.userID !== userID) {
-    throw new ForbiddenException(ErrorMessage.Post.Forbidden)
-  }
-}
-
-export const validateRepost = (origin: IPost, userID: string) => {
-    if (origin.authorID === userID) {
-      throw new ConflictException(PostError.SelfRepost)
-    }
-
-    if (origin.userID === userID) {
-      throw new ConflictException(PostError.DuplicateRepost)
-    }
-}
-
-export const validateCommentUserID = (comment: IComment, userID: string) => {
-    if (comment.userID === userID) {
-      throw new ForbiddenException(ErrorMessage.Comment.Forbidden)
-    }
-}
-
-export const validateCommentExists = (commentID: number, comment?: IComment) => {
-  if (!comment) {
-    throw new NotFoundException(ErrorMessage.Comment.NotFound(commentID))
-  }
 }
 
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
@@ -93,3 +47,22 @@ export const fillPostRDO = (post: IPost) => {
         return fillObject(PostVideoRDO, post);
     }
   }
+
+export function fileMimetypeFilter(...mimetypes: string[]) {
+  return (
+    req,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
+    if (mimetypes.some((m) => file.mimetype.includes(m))) {
+      callback(null, true);
+    } else {
+      callback(
+        new UnsupportedMediaTypeException(
+          `${CommonError.FileType} ${mimetypes.join(', ')}`,
+        ),
+        false,
+      );
+    }
+  };
+}

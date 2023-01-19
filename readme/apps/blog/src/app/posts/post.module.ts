@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { EntityName, getRMQModuleConfig, jwtModuleConfig, JwtStrategy, MinMax, Token } from '@readme/core';
+import { Property, getRMQModuleConfig, jwtModuleConfig, JwtStrategy, Size, AppName } from '@readme/core';
 import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { RMQModule } from 'nestjs-rmq';
 
@@ -15,14 +15,14 @@ import { PostService } from './post.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService)  => ({
       storage: FileSystemStoredFile,
-      fileSystemStoragePath: configService.get<string>(`${Token.FormData}.upload`),
+      fileSystemStoragePath: configService.get<string>(`${AppName.FormData}.upload`),
       limits: {
-       fileSize: MinMax.Photo,
+       fileSize: Size.Max(Property.Photo),
       }
       }),
       inject: [ConfigService],
     }),
-    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.Post)),
+    RMQModule.forRootAsync(getRMQModuleConfig(Property.Post)),
     JwtModule.registerAsync(jwtModuleConfig),
   ],
   controllers: [

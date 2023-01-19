@@ -1,63 +1,54 @@
 import { Expose, Transform } from 'class-transformer';
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+import { IntersectionType } from '@nestjs/swagger';
 import { ContentType } from '@prisma/client';
 
 import { IsArray, IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PostAPIProp } from '../api-props/post/post.api-prop';
 
 export class PostBaseRDO {
   @Expose()
   @IsNumber()
-  @ApiProperty(PostAPIProp.PostID)
   public id: number;
 
   @Expose()
-  @ApiProperty(PostAPIProp.Type)
   public type: ContentType;
 
   @Expose()
   @IsArray()
   @Transform(({value}) => value.length)
-  @ApiProperty()
-  public comments: Comment[];
+  public comments: number;
 
   @Expose()
+  @IsArray()
   @IsMongoId({each: true})
   @Transform(({value}) => value.length)
-  @IsArray()
-  @ApiProperty()
   public likes: number;
 
   @Expose()
   @IsBoolean()
-  @ApiProperty(PostAPIProp.IsRepost)
   public isRepost: boolean;
 
   @Expose()
   @IsBoolean()
-  @ApiProperty(PostAPIProp.IsDraft)
   public isDraft: boolean;
 
   @Expose()
   @IsMongoId()
-  @ApiProperty(PostAPIProp.AuthorID)
   public authorID: string;
 
   @Expose()
   @IsNumber()
-  @ApiProperty(PostAPIProp.OriginID)
   public originID: number;
 
   @Expose()
   @IsOptional()
   @IsArray()
-  @ApiProperty(PostAPIProp.Tags)
   public tags?: string[];
 }
 
 export class PostTextRDO extends PostBaseRDO {
   @Expose()
   @IsString()
+
   public title: string;
 
   @Expose()

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MinMax, PostInclude, SortByType } from '@readme/core';
+import { PostInclude, Property, Size, SortByType } from '@readme/core';
 import { ICRUDRepo, IPost,  } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,7 +43,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
   }
 
   public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
-    const limit = title ? MinMax.PostsSearch : MinMax.PostsLimit
+    const limit = title ? Size.Max(Property.Search) : Size.Max(Property.Query)
     const sortByType = sortBy ?? SortByType.Date
 
     const query = () => {
@@ -96,6 +96,9 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
       where: { id },
       data: {
         ...data,
+        comments: {
+          connect: comments
+        }
       },
       include: PostInclude
     })

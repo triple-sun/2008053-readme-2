@@ -8,10 +8,9 @@ export enum APIConfig {
   Version = '1.0'
 }
 
-export enum APIDesc {
-  ID = 'Unique item ID',
-}
-
-export enum APIExample {
-  PostgresID = '22'
+export enum MailConfig {
+  NewPostsSubject = 'New posts in your feed',
+  NewSubSubject = '',
+  NewPostsTemplate = 'new-posts',
+  NewSubTemplate = 'new-sub'
 }

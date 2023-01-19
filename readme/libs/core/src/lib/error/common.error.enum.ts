@@ -1,4 +1,4 @@
-export enum CoreError {
+export enum CommonError {
   Fetch = 'Can\'t fetch data from',
   Env = 'Can\'t read .env file. Perhaps the file does not exist.',
   File = 'Can\'t read the file:',
@@ -32,10 +32,12 @@ export enum CoreError {
   TagsLimit = 'Posts can only have 8 tags or less',
   ParamArg = 'This pipe must used only with params!',
   BodyArg = 'This pipe must used only with body!',
+  FileType = 'File type is not matching:'
 }
 
-export enum ErrorSuffix {
-  NotFound = 'was not found.',
-  Exists = 'already exists.',
-  NotValid = 'is not valid'
+export enum ErrorType {
+  NotFound = 'NotFound',
+  Exists = 'Exists',
+  Invalid = 'Invalid',
+  Permission = 'Permission'
 }

@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { ErrorMessage, Constraint } from "@readme/core";
+import { EntityError } from "@readme/core";
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { UserRepository } from "../user.repository";
+
+const { User } = EntityError
 
 @ValidatorConstraint({ async: true })
 @Injectable()
@@ -15,11 +17,11 @@ export class UserAlreadyExistsRule implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.Email.Exists(value)
+    return User.Email.Exists(value)
   }
 }
 
-@ValidatorConstraint({ name: Constraint.UserExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class UserExistIDRule implements ValidatorConstraintInterface {
   constructor(private userRepository: UserRepository) {}
@@ -31,11 +33,11 @@ export class UserExistIDRule implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.ID.NotFound(value)
+    return User.ID.NotFound(value)
   }
 }
 
-@ValidatorConstraint({ name: Constraint.UserExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class UserExistEmailRule implements ValidatorConstraintInterface {
   constructor(private userRepository: UserRepository) {}
@@ -47,7 +49,7 @@ export class UserExistEmailRule implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.ID.NotFound(value)
+    return User.Email.NotFound(value)
   }
 }
 

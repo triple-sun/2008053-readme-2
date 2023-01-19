@@ -1,54 +1,37 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
-import { IsArray, IsEmail, IsInt, IsJWT, IsMongoId, IsOptional, IsString, Length } from "class-validator";
-import { UsersAPIProp } from "../api-props/users/users.api-prop";
-import { FieldName } from "../enum/field-name.enum";
-import { MinMax } from "../enum/minmax.enum";
-import { UserError } from "../enum/users.enum";
-import { ValidationErrorMessage } from "../utils/error.utils";
+import { IsEmail, IsJWT, IsMongoId, IsString, Length } from "class-validator";
+import { Size } from "../const/api-options.const";
+import { Property } from "../enum/property.enum";
+import { ValidationMessage } from "../error/validation.error";
+import { APIProp } from "../utils/api.utils";
+
+const { Min, Max } = Size
+const { Token, UserID, Name, Email } = Property
+const { Users } = APIProp
 
 export class UserDTO {
   @Expose()
-  @IsMongoId()
-  @ApiProperty(UsersAPIProp[FieldName.UserID])
-  public userID: string;
-
-  @Expose()
-  @IsJWT()
-  @ApiProperty(UsersAPIProp[FieldName.Token])
-  public token: string;
-
-  @Expose()
   @IsString()
-  @Length(MinMax.UserNameMin, MinMax.UserNameMax, { message: ValidationErrorMessage.Length })
-  @ApiProperty(UsersAPIProp[FieldName.Name])
+  @Length(Min(Name), Max(Name), { message: ValidationMessage.Length })
+  @ApiProperty(Users(Name))
   public name: string;
 
   @Expose()
-  @IsEmail({},{message: UserError.Email})
-  @ApiProperty(UsersAPIProp[FieldName.Email])
+  @IsEmail({},{ message: ValidationMessage.Email })
+  @ApiProperty(Users(Email))
   public email: string;
 
   @Expose()
-  @IsArray()
-  @IsInt({each: true})
-  @ApiProperty(UsersAPIProp[FieldName.Posts])
-  public posts: number[];
-
-  @Expose()
-  @IsArray()
-  @IsMongoId({each: true})
-  @ApiProperty(UsersAPIProp.Subscribers)
-  public subscribers: string[];
-
-  @IsString()
-  @Length(MinMax.UserPassMin, MinMax.UserPassMax,{ message: ValidationErrorMessage.Length })
-  @ApiProperty(UsersAPIProp[FieldName.Password])
-  public password: string;
-
-  @Expose()
-  @IsString()
-  @IsOptional()
-  @ApiProperty(UsersAPIProp[FieldName.AvatarUrl])
-  public avatarUrl?: string;
+  @IsMongoId()
+  @ApiProperty(Users(UserID))
+  public userID: string;
 }
+
+export class UserTokenDTO {
+  @Expose()
+  @IsJWT()
+  @ApiProperty(Users(Token))
+  public token: string;
+}
+

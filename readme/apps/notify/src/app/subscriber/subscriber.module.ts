@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { EntityName, getRMQModuleConfig, jwtModuleConfig } from '@readme/core';
+import { Entity, getRMQModuleConfig, jwtModuleConfig } from '@readme/core';
 import { RMQModule } from 'nestjs-rmq';
 import { MailModule } from '../mail/mail.module';
 import { SubscriberController } from './subscriber.controller';
@@ -13,7 +13,7 @@ import { SubscriberService } from './subscriber.service';
   imports: [
     MongooseModule.forFeature([{ name: SubscriberModel.name, schema: SubscriberSchema }]),
     JwtModule.registerAsync(jwtModuleConfig),
-    RMQModule.forRootAsync(getRMQModuleConfig(EntityName.Subscriber)),
+    RMQModule.forRootAsync(getRMQModuleConfig(Entity.Subscriber)),
     MailModule
   ],
   controllers: [

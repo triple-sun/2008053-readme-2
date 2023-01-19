@@ -1,15 +1,14 @@
 import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { fillObject, MinMax, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard } from '@readme/core';
+import { fillObject, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard, UserRDO } from '@readme/core';
 import { UserService } from './user.service';
-import { UserRDO } from './rdo/user.rdo';
 import { UserUpdateDTO } from './dto/user-update.dto';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { RMQRoute } from 'nestjs-rmq';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 import { UserQuery } from './query/user.query';
-import { FileSystemStoredFile, FormDataRequest } from 'nestjs-form-data';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -46,7 +45,7 @@ export class UserController {
   }
 
   @Post(Path.Register)
-  @FormDataRequest({ storage: FileSystemStoredFile, fileSystemStoragePath: 'upload', limits: { fileSize: MinMax.Avatar }, autoDeleteFile: false})
+  @FormDataRequest()
   @ApiBody({ type: UserCreateDTO})
   @ApiResponse({
     type: UserRDO,
@@ -63,7 +62,7 @@ export class UserController {
 
   @Put(`${Path.Update}`)
   @UseGuards(JwtAuthGuard)
-  @FormDataRequest({ storage: FileSystemStoredFile, fileSystemStoragePath: 'upload', limits: { fileSize: MinMax.Avatar }, autoDeleteFile: false})
+  @FormDataRequest()
   @ApiBody({
     type: UserUpdateDTO
   })
@@ -98,12 +97,12 @@ export class UserController {
   }
 
   @RMQRoute(RPC.GetUser)
-  public async getUser(userID: string) {
-    return await this.userService.getUser(userID)
+  public async getUser(id: string) {
+    return await this.userService.getUser({id})
   }
 
   @RMQRoute(RPC.Notified)
-  public async setNotified(userID: string) {
-    return await this.userService.setNotified(userID)
+  public async setNotified(id: string) {
+    return await this.userService.setNotified(id)
   }
 }

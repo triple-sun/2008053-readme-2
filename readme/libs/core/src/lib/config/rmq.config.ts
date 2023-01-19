@@ -1,8 +1,8 @@
 import { ConfigService, registerAs}  from '@nestjs/config';
 import { RmqOptions, Transport } from '@nestjs/microservices';
-import { Token } from '../enum/token.enum';
+import { AppName } from '../enum/app-name';
 
-export const rmqConfig = registerAs(Token.RMQ, () => ({
+export const rmqConfig = registerAs(AppName.RMQ, () => ({
   user: process.env.RMQ_USER,
   pass: process.env.RMQ_PASS,
   host: process.env.RMQ_HOST,
@@ -15,12 +15,12 @@ export function getRMQConfig(configService: ConfigService): RmqOptions {
     options: {
       urls: [
         {
-          username: configService.get<string>(`${Token.RMQ}.user`),
-          password: configService.get<string>(`${Token.RMQ}.pass`),
-          hostname: configService.get<string>(`${Token.RMQ}.host`)
+          username: configService.get<string>(`${AppName.RMQ}.user`),
+          password: configService.get<string>(`${AppName.RMQ}.pass`),
+          hostname: configService.get<string>(`${AppName.RMQ}.host`)
         }
       ],
-      queue: configService.get<string>(`${Token.RMQ}.queue`),
+      queue: configService.get<string>(`${AppName.RMQ}.queue`),
       persistent: true,
       noAck: true,
       queueOptions: {

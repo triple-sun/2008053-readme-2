@@ -1,4 +1,4 @@
-export enum Token {
+export enum AppName {
   Blog = 'blog',
   Mailer = 'mailer',
   JWT = 'jwt',

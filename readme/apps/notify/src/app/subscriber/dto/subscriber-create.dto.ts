@@ -1,24 +1,21 @@
-import { ApiProperty, IntersectionType, PickType } from "@nestjs/swagger";
-import { FieldName, UserDTO, UserError, UsersAPIProp } from "@readme/core";
+import { ApiProperty, PickType } from "@nestjs/swagger";
+import { APIProp, Property, UserDTO, ValidationMessage } from "@readme/core";
 import { Expose } from "class-transformer";
 import { IsEmail, IsMongoId, Validate } from "class-validator";
 import { SubAlreadyExistsEmail, SubAlreadyExistsUserID } from "../validators/sub-exists.validator";
 
-class SubBase {
+const { UserID, Email } = Property
+
+export class SubscriberCreateDTO extends PickType(UserDTO, ['email', 'name', 'userID'] as const) {
   @Expose()
-  @IsEmail({},{message: UserError.Email})
-  @ApiProperty(UsersAPIProp[FieldName.Email])
+  @IsEmail({},{message: ValidationMessage.Email})
+  @ApiProperty(APIProp.Users(Email))
   @Validate(SubAlreadyExistsEmail)
   public email: string;
 
   @Expose()
   @IsMongoId()
-  @ApiProperty(UsersAPIProp[FieldName.UserID])
+  @ApiProperty(APIProp.Users(UserID))
   @Validate(SubAlreadyExistsUserID)
   public userID: string;
 }
-
-export class SubscriberCreateDTO extends IntersectionType(
-  PickType(UserDTO, ['name'] as const),
-  SubBase
-) {}

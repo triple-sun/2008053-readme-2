@@ -1,6 +1,6 @@
 import { registerAs } from "@nestjs/config"
-import { Token } from "../enum/token.enum"
+import { AppName } from "../enum/app-name"
 
-export const formDataConfig = registerAs(Token.FormData, () => ({
+export const formDataConfig = registerAs(AppName.FormData, () => ({
   upload: process.env.UPLOAD_DIR,
 }))

@@ -2,13 +2,13 @@ import { ApiProperty } from "@nestjs/swagger";
 import { ContentType } from "@prisma/client";
 import { Expose, Transform } from "class-transformer";
 import { IsString } from "class-validator";
-import { PostAPIProp } from "../api-props/post/post.api-prop";
-import { FieldName } from "../enum/field-name.enum";
+import { Property } from "../../enum/property.enum";
+import { APIProp } from "../../utils/api.utils";
 
 export class PostTypeDTO {
   @Expose()
   @IsString()
   @Transform(({ value } ) => value.toString().toUpperCase())
-  @ApiProperty(PostAPIProp[FieldName.Type])
+  @ApiProperty(APIProp.Post(Property.Type))
   public type?: ContentType;
 }

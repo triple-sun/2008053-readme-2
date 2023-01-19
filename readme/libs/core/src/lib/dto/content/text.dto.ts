@@ -3,21 +3,25 @@ import { IsString, Length } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
 import { TitleDTO } from "./title.dto";
-import { ContentAPIProp } from "../../api-props/post/content.api-prop";
-import { MinMax } from "../../enum/minmax.enum";
-import { FieldName } from "../../enum/field-name.enum";
+import { Property } from "../../enum/property.enum";
+import { Size } from "../../const/api-options.const";
+import { APIProp } from "../../utils/api.utils";
+
+const { Ann, Text } = Property;
+const { Min, Max } = Size;
+const { Post } = APIProp
 
 class TextContent {
   @Expose()
   @IsString()
-  @Length(MinMax.AnnMin, MinMax.AnnMax)
-  @ApiProperty(ContentAPIProp[FieldName.Ann])
+  @Length(Min(Ann), Max(Ann))
+  @ApiProperty(Post(Ann))
   public ann?: string;
 
   @Expose()
   @IsString()
-  @Length(MinMax.TextMin, MinMax.TextMax)
-  @ApiProperty(ContentAPIProp[FieldName.Text])
+  @Length(Min(Text), Max(Text))
+  @ApiProperty(Post(Text))
   public text?: string;
 }
 

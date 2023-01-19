@@ -7,10 +7,6 @@ export const getMongoConnectionString = ({user, pass, host, port, database, auth
   return `mongodb://${user}:${pass}@${host}:${port}/${database}?authSource=${authBase}`;
 }
 
-export const getAMQPConnectionString = ({user, pass, host}): string => {
-  return `amqp://${user}:${pass}@${host}`;
-}
-
 export const getAppRunningString = (appName: string, port: number | string) => {
   return `🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`
 }

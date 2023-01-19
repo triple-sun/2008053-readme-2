@@ -1,18 +1,21 @@
-import { Expose } from "class-transformer";
-import { ApiProperty, IntersectionType } from "@nestjs/swagger";
+import { Expose, Transform } from "class-transformer";
 
+import { IsMongoId, IsNumber, IsString } from "class-validator";
 import { CommentCreateDTO } from "../dto/comment-create.dto";
-import { IsInt } from "class-validator";
-import { CommentAPIProp, FieldName } from "@readme/core";
+import { Property } from "@readme/core";
 
-class CommentRDOBase {
+export class CommentRDO extends CommentCreateDTO {
   @Expose()
-  @IsInt()
-  @ApiProperty(CommentAPIProp[FieldName.ID])
+  @IsNumber()
   public id: string;
-}
 
-export class CommentRDO extends IntersectionType (
-  CommentRDOBase,
-  CommentCreateDTO
-  ) {}
+  @Expose()
+  @IsString()
+  @IsMongoId()
+  public userID: string;
+
+  @Expose({ name: Property.Post })
+  @Transform(({ obj }) => +obj.id)
+  @IsNumber()
+  public postID: number
+}

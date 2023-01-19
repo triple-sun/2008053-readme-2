@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { ErrorMessage, Constraint } from "@readme/core";
+import { EntityError } from "@readme/core";
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { SubscriberRepository } from "../subscriber.repository";
 
-@ValidatorConstraint({ name: Constraint.EmailAlreadyExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class SubAlreadyExistsEmail implements ValidatorConstraintInterface {
   constructor(private subRepository: SubscriberRepository) {}
@@ -15,11 +15,11 @@ export class SubAlreadyExistsEmail implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.Email.Exists(value)
+    return EntityError.User.Email.Exists(value)
   }
 }
 
-@ValidatorConstraint({ name: Constraint.EmailAlreadyExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class SubAlreadyExistsUserID implements ValidatorConstraintInterface {
   constructor(private subRepository: SubscriberRepository) {}
@@ -31,11 +31,11 @@ export class SubAlreadyExistsUserID implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.Email.Exists(value)
+    return EntityError.User.Email.Exists(value)
   }
 }
 
-@ValidatorConstraint({ name: Constraint.UserExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class SubExistsID implements ValidatorConstraintInterface {
   constructor(private subRepository: SubscriberRepository) {}
@@ -47,11 +47,11 @@ export class SubExistsID implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.ID.NotFound(value)
+    return EntityError.User.ID.NotFound(value)
   }
 }
 
-@ValidatorConstraint({ name: Constraint.UserExists, async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class SubExistsEmail implements ValidatorConstraintInterface {
   constructor(private subRepository: SubscriberRepository) {}
@@ -63,7 +63,7 @@ export class SubExistsEmail implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return ErrorMessage.User.ID.NotFound(value)
+    return EntityError.User.Email.NotFound(value)
   }
 }
 

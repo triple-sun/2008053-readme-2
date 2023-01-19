@@ -3,9 +3,9 @@ import { MailerAsyncOptions } from "@nestjs-modules/mailer/dist/interfaces/maile
 import { ConfigService, registerAs } from "@nestjs/config";
 
 import { join } from "path";
-import { Token } from "../enum/token.enum";
+import { AppName } from "../enum/app-name";
 
-export const mailerConfig = registerAs(Token.Mailer, () => ({
+export const mailerConfig = registerAs(AppName.Mailer, () => ({
   port: process.env.MAILER_PORT,
   host: process.env.MAILER_HOST,
   user: process.env.MAILER_USER,
@@ -17,16 +17,16 @@ export const getMailerConfig = (): MailerAsyncOptions => ({
   useFactory: async (configService: ConfigService) => {
     return {
       transport: {
-        host: configService.get<string>(`${Token.Mailer}.host`),
-        port: configService.get<number>(`${Token.Mailer}.port`),
+        host: configService.get<string>(`${AppName.Mailer}.host`),
+        port: configService.get<number>(`${AppName.Mailer}.port`),
         secure: false,
         auth: {
-          user: configService.get<string>(`${Token.Mailer}.user`),
-          pass: configService.get<string>(`${Token.Mailer}.pass`)
+          user: configService.get<string>(`${AppName.Mailer}.user`),
+          pass: configService.get<string>(`${AppName.Mailer}.pass`)
         }
       },
       defaults: {
-        from: `${configService.get<number>(`${Token.Mailer}.from`)}`,
+        from: `${configService.get<number>(`${AppName.Mailer}.from`)}`,
       },
       template: {
         dir: join(__dirname, './assets/templates'),

@@ -1,21 +1,22 @@
-import { Expose } from "class-transformer";
 import { IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-import { ContentAPIProp } from "../../api-props/post/content.api-prop";
-import { MinMax } from "../../enum/minmax.enum";
-import { FieldName } from "../../enum/field-name.enum";
+import { Property } from "../../enum/property.enum";
+import { Size } from "../../const/api-options.const";
+import { APIProp } from "../../utils/api.utils";
+
+const { Link, Desc } = Property;
+const { Max } = Size;
+const { Post } = APIProp
 
 export class LinkDTO {
-  @Expose()
   @IsUrl()
-  @ApiProperty(ContentAPIProp[FieldName.Url])
+  @ApiProperty(Post(Link))
   public link: string;
 
-  @Expose()
   @IsString()
   @IsOptional()
-  @MaxLength(MinMax.DescMax)
-  @ApiProperty(ContentAPIProp[FieldName.Desc])
+  @MaxLength(Max(Desc))
+  @ApiProperty(Post(Link))
   public desc?: string;
 }
