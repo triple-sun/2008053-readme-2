@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PostInclude, Property, Size, SortByType } from '@readme/core';
-import { ICRUDRepo, IPost,  } from '@readme/shared-types';
+import { IncludeForPost, Size, SortByType } from '@readme/core';
+import { ICRUDRepo, IPost } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
@@ -22,7 +22,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           create: comments
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -36,14 +36,14 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     console.log({id})
     const exists = await this.prisma.post.findUnique({
       where: { id },
-      include: PostInclude
+      include: IncludeForPost
     })
 
     return exists
   }
 
   public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
-    const limit = title ? Size.Max(Property.Search) : Size.Max(Property.Query)
+    const limit = title ? Size.Search.Max : Size.Query.Max
     const sortByType = sortBy ?? SortByType.Date
 
     const query = () => {
@@ -75,7 +75,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
       },
       take: limit,
       include: {
-        ...PostInclude,
+        ...IncludeForPost,
         _count:{ select: { comments: true }}
       },
       orderBy: [
@@ -100,7 +100,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           connect: comments
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -112,7 +112,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           set: likes
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -125,7 +125,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           set: publishAt
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 

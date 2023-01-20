@@ -1,26 +1,25 @@
 import { Expose } from "class-transformer";
-import { IsString, Length } from "class-validator";
+import { IsString } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
 import { TitleDTO } from "./title.dto";
 import { Property } from "../../enum/property.enum";
-import { Size } from "../../const/api-options.const";
-import { APIProp } from "../../utils/api.utils";
+import { APIOption } from "../../utils/api.utils";
+import { ValidateLength } from "../../decorator/validate-length.decorator";
 
 const { Ann, Text } = Property;
-const { Min, Max } = Size;
-const { Post } = APIProp
+const { Post } = APIOption
 
 class TextContent {
   @Expose()
   @IsString()
-  @Length(Min(Ann), Max(Ann))
+  @ValidateLength()
   @ApiProperty(Post(Ann))
   public ann?: string;
 
   @Expose()
   @IsString()
-  @Length(Min(Text), Max(Text))
+  @ValidateLength()
   @ApiProperty(Post(Text))
   public text?: string;
 }

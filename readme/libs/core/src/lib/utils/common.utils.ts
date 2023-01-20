@@ -1,24 +1,24 @@
 import { plainToInstance, ClassConstructor } from 'class-transformer';
 import { DocumentBuilder } from '@nestjs/swagger';
-import { APIConfig } from '../enum/config.enum';
 import { IPost } from '@readme/shared-types';
-import { ContentType } from '@prisma/client';
-import { PostLinkRDO, PostPhotoRDO, PostQuoteRDO, PostTextRDO, PostVideoRDO } from '../rdo/post.rdo';
-import { CommonError } from '../error/common.error.enum';
-import { UnsupportedMediaTypeException } from '@nestjs/common';
+import { Logger, UnsupportedMediaTypeException } from '@nestjs/common';
 import 'multer'
+import { ErrorMessage } from '@readme/error';
+import { APIConfig } from '../const/api.const';
+import { AppName } from '../enum/app-name';
+import { Prefix } from '../enum/utils.enum';
+import { PostRDO } from '../dto/rdo/post.rdo';
 
-export const getDocument = (title: string, desc: string) => {
-  return new DocumentBuilder()
+export const getSwaggerDocument = (title: string, desc: string) => new DocumentBuilder()
     .setTitle(title)
     .setDescription(desc)
     .setVersion(APIConfig.Version)
     .build()
-}
 
-export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
-  return plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
-}
+
+export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
 
 export const toggleArrElement = (array: string[], value: string) => {
   const result = [...array]
@@ -33,24 +33,11 @@ export const toggleArrElement = (array: string[], value: string) => {
   return result
 }
 
-export const fillPostRDO = (post: IPost) => {
-    switch(post.type) {
-      case ContentType.PHOTO:
-        return fillObject(PostPhotoRDO, post);
-      case ContentType.LINK:
-        return fillObject(PostLinkRDO, post);
-      case ContentType.QUOTE:
-        return fillObject(PostQuoteRDO, post);
-      case ContentType.TEXT:
-        return fillObject(PostTextRDO, post);
-      case ContentType.VIDEO:
-        return fillObject(PostVideoRDO, post);
-    }
-  }
+export const mapPosts = (posts: IPost[]) => posts.map((post) => fillObject(PostRDO, post))
 
 export function fileMimetypeFilter(...mimetypes: string[]) {
   return (
-    req,
+    req: Request,
     file: Express.Multer.File,
     callback: (error: Error | null, acceptFile: boolean) => void,
   ) => {
@@ -58,11 +45,14 @@ export function fileMimetypeFilter(...mimetypes: string[]) {
       callback(null, true);
     } else {
       callback(
-        new UnsupportedMediaTypeException(
-          `${CommonError.FileType} ${mimetypes.join(', ')}`,
-        ),
+        new UnsupportedMediaTypeException(`${ErrorMessage.Common.FileType} ${mimetypes.join(', ')}`),
         false,
       );
     }
   };
 }
+
+export const getSize = (max: number, min?: number) => ({Max: max, Min: min ?? null})
+
+
+export const logStartup = (appName: AppName, port: number) => Logger.log(`🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`);

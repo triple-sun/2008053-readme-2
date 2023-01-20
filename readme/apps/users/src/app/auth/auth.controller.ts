@@ -1,10 +1,11 @@
 import { Body, Controller, HttpStatus, Post} from '@nestjs/common';
-import { AuthError, fillObject, Path, Prefix, UserInfo } from '@readme/core';
+import { fillObject, Path, Prefix, UserInfo } from '@readme/core';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserLoggedRDO } from '../user/rdo/user-logged.rdo';
 import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { AuthService } from './auth.service';
+import { ErrorMessage } from '@readme/error';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -21,7 +22,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: AuthError.Login,
+    description: ErrorMessage.Common.Unauthorized,
   })
   async login(
     @Body() dto: UserLoginDTO

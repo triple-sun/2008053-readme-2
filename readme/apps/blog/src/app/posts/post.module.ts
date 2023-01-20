@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { Property, getRMQModuleConfig, jwtModuleConfig, JwtStrategy, Size, AppName } from '@readme/core';
 import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { RMQModule } from 'nestjs-rmq';
@@ -11,13 +12,14 @@ import { PostService } from './post.service';
 
 @Module({
   imports: [
+    PassportModule,
     NestjsFormDataModule.configAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService)  => ({
       storage: FileSystemStoredFile,
       fileSystemStoragePath: configService.get<string>(`${AppName.FormData}.upload`),
       limits: {
-       fileSize: Size.Max(Property.Photo),
+       fileSize: Size.Photo.Max,
       }
       }),
       inject: [ConfigService],
@@ -36,7 +38,6 @@ import { PostService } from './post.service';
   exports: [
     PostRepository,
     PostService,
-    JwtModule,
     NestjsFormDataModule
   ]
 })

@@ -1,13 +1,14 @@
 import { IsArray, IsDate, IsEmail, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Expose, Transform, Type } from 'class-transformer';
-import { Property } from '../enum/property.enum';
+import { Property } from '../../enum/property.enum';
+import { TransformOptions } from '../../utils/transform.utils';
 
 const { ObjectID, CreatedAt } = Property
 
 export class UserRDO {
   @Expose({ name: ObjectID})
   @IsMongoId()
-  @Transform(({ obj }) => obj._id)
+  @Transform(TransformOptions.ObjectID)
   public id: string
 
   @Expose()
@@ -26,14 +27,14 @@ export class UserRDO {
   @Expose()
   @IsArray()
   @IsNumber({}, {each: true})
-  @Transform(({ value }) => value.length)
+  @Transform(TransformOptions.Count)
   public posts: number;
 
   @Expose()
   @IsArray()
   @IsOptional({each: true})
   @IsMongoId({each: true})
-  @Transform(({ value }) => value.length)
+  @Transform(TransformOptions.Count)
   public subscribers: number;
 
   @Expose()

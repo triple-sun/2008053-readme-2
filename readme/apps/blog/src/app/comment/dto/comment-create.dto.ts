@@ -1,16 +1,12 @@
 import { Expose } from "class-transformer";
-import { IsString, MaxLength, MinLength } from "class-validator";
+import { IsString, } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { APIProp, Property, Size } from "@readme/core";
-
-const { Min, Max } = Size
-const { Comment, Text } = Property
+import { APIOption, Property, ValidateLength } from "@readme/core";
 
 export class CommentCreateDTO {
   @Expose()
   @IsString()
-  @MaxLength(Max(Comment))
-  @MinLength(Min(Comment))
-  @ApiProperty(APIProp.Comment(Text))
-  public text: string;
+  @ValidateLength()
+  @ApiProperty(APIOption.Comment(Property.Comment))
+  public comment: string;
 }

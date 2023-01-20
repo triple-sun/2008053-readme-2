@@ -34,8 +34,8 @@ model Post {
   photoLink String?
   tags      String[]    @default([])
   likes     String[]    @default([])
-  isDraft   Boolean     @default(false)
-  isRepost  Boolean     @default(false)
+  isDraft   Boolean?     @default(false)
+  isRepost  Boolean?     @default(false)
   createdAt DateTime    @default(now())
   publishAt DateTime    @default(now())
   userID    String
@@ -47,7 +47,7 @@ model Post {
 model Comment {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  text      String
+  comment   String
   userID    String
   post      Post     @relation(fields: [postID], references: [id], onDelete: Cascade)
   postID    Int

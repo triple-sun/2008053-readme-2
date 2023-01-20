@@ -1,112 +1,65 @@
-import { IsNumber, IsString, Max, Min } from "class-validator";
-import { Size } from "../const/api-options.const";
-import { Property } from "../enum/property.enum";
-import { ENVError } from "../error/env.error.enum";
-
-const { Port } = Property
+import { ValidateENVProp, ValidateENVPort } from "../decorator/validate-env.decorator";
 
 export class APIEnvConfig {
-  @IsNumber({}, {
-    message: ENVError.APIPort
-  })
-  @Min(Size.Min(Port))
-  @Max(Size.Max(Port))
+  @ValidateENVPort()
   public API_PORT: number;
 }
 
 export class RMQEnvConfig {
-  @IsString({
-    message: ENVError.RMQUser
-  })
+  @ValidateENVProp()
   public RMQ_USER: string;
 
-  @IsString({
-    message: ENVError.RMQPass
-  })
+  @ValidateENVProp()
   public RMQ_PASS: string;
 
-  @IsString({
-    message: ENVError.RMQHost
-  })
+  @ValidateENVProp()
   public RMQ_HOST: string;
 
-  @IsString({
-    message: ENVError.RMQSubscriberQueue
-  })
+  @ValidateENVProp()
   public RMQ_QUEUE: string;
 
-    @IsString({
-    message: ENVError.RMQSubscriberQueue
-  })
+  @ValidateENVProp()
   public RMQ_EXCHANGE: string;
 }
 
 export class MailerEnvConfig {
-  @IsNumber({}, {
-    message: ENVError.SMTPPort
-  })
-  @Min(Size.Min(Port))
-  @Max(Size.Max(Port))
+  @ValidateENVPort()
   public MAILER_PORT: number;
 
-  @IsString({
-    message: ENVError.SMTPHost
-  })
+  @ValidateENVProp()
   public MAILER_HOST: string;
 
-  @IsString({
-    message: ENVError.SMTPUser
-  })
+  @ValidateENVProp()
   public MAILER_USER: string;
 
-  @IsString({
-    message: ENVError.SMTPPass
-  })
+  @ValidateENVProp()
   public MAILER_PASS: string;
 
-  @IsString({
-    message: ENVError.MailFrom
-  })
+  @ValidateENVProp()
   public MAILER_FROM: string;
 }
 
 export class MongoEnvConfig {
-  @IsString({
-    message: ENVError.DBName
-  })
+  @ValidateENVProp()
   public MONGO_DB: string;
 
-  @IsString({
-    message: ENVError.DBHost
-  })
+  @ValidateENVProp()
   public MONGO_HOST: string;
 
-  @IsNumber({}, {
-    message: ENVError.DBPort
-  })
-  @Min(Size.Min(Port))
-  @Max(Size.Max(Port))
+  @ValidateENVPort()
   public MONGO_PORT: number;
 
-  @IsString({
-    message: ENVError.DBUser
-  })
+  @ValidateENVProp()
   public MONGO_USER: string;
 
-  @IsString({
-    message: ENVError.DBPass
-  })
+  @ValidateENVProp()
   public MONGO_PASS: string;
 
-  @IsString({
-    message: ENVError.DBAuthBase
-  })
+  @ValidateENVProp()
   public MONGO_AUTH_BASE: string;
 }
 
 export class JWTEnvConfig {
-  @IsString({
-    message: ENVError.JwtSecret
-  })
+  @ValidateENVProp()
   public JWT_SECRET: string;
 }

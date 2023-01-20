@@ -1,9 +1,9 @@
 export enum PortDefault {
   Mongo = 27017,
   Mailer = 5025,
-  BlogAPI = 3333,
-  NotifyAPI = 3334,
-  UsersAPI = 3335,
+  Blog = 3333,
+  Notify = 3334,
+  Users = 3335,
 }
 
 export enum UploadType {
@@ -27,41 +27,14 @@ export enum Prefix {
   User = 'users'
 }
 
-export enum Path {
-  Author = 'author',
-  Avatar = 'avatar',
-  Drafts = 'drafts',
-  Blog = 'blog',
-  Posts = 'posts',
-  Post = 'post',
-  Comments = 'comments',
-  Delete = 'delete',
-  Register = 'register',
-  Spec = 'spec',
-  Login = 'login',
-  Upload = 'upload',
-  Photo = 'photo',
-  Like = 'like',
-  Link = 'link',
-  Search = 'search',
-  Tag = 'tag',
-  Title = 'title',
-  Type = 'type',
-  Feed = 'feed',
-  Subscribe = 'subscribe',
-  Subscriptions = 'subs',
-  Users = 'users',
-  User = 'user',
-  Repost = 'repost',
-  Notify = 'notify',
-  Update = 'update'
-}
-
 export enum Entity {
   User = 'User',
   Post = 'Post',
   Comment = 'Comment',
   Subscriber = 'Subscriber',
+}
+
+export enum ContentEntity {
   Link = 'Link',
   Photo = 'Photo',
   Video = 'Video',

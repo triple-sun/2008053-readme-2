@@ -1,22 +1,22 @@
+import { APIOption } from "../../utils/api.utils";
 import { IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 import { Property } from "../../enum/property.enum";
-import { Size } from "../../const/api-options.const";
-import { APIProp } from "../../utils/api.utils";
+import { Size } from "../../const/size.const";
+import { ErrorMessage } from "@readme/error";
 
-const { Link, Desc } = Property;
-const { Max } = Size;
-const { Post } = APIProp
+
+const { Link } = Property;
 
 export class LinkDTO {
   @IsUrl()
-  @ApiProperty(Post(Link))
+  @ApiProperty(APIOption.Post(Link))
   public link: string;
 
   @IsString()
   @IsOptional()
-  @MaxLength(Max(Desc))
-  @ApiProperty(Post(Link))
+  @MaxLength(Size.Desc.Max, { message: ErrorMessage.Length })
+  @ApiPropertyOptional(APIOption.Post(Link))
   public desc?: string;
 }

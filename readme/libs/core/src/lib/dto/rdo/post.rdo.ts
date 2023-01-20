@@ -4,7 +4,7 @@ import { ContentType } from '@prisma/client';
 
 import { IsArray, IsBoolean, IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class PostBaseRDO {
+export class PostDataRDO {
   @Expose()
   @IsNumber()
   public id: number;
@@ -42,15 +42,16 @@ export class PostBaseRDO {
   @Expose()
   @IsOptional()
   @IsArray()
-  public tags?: string[];
+  public tags: string[];
 }
 
-export class PostTextRDO extends PostBaseRDO {
+export class TitleRDO {
   @Expose()
   @IsString()
-
   public title: string;
+}
 
+export class TextRDO extends IntersectionType(TitleRDO, PostDataRDO) {
   @Expose()
   @IsString()
   public text: string;
@@ -60,24 +61,19 @@ export class PostTextRDO extends PostBaseRDO {
   public ann: string;
 }
 
-export class PostVideoRDO extends PostBaseRDO {
-  @Expose()
-  @IsOptional()
-  @IsString()
-  public title?: string;
-
+export class VideoRDO extends IntersectionType(TitleRDO, PostDataRDO) {
   @Expose()
   @IsString()
   public videoLink: string;
 }
 
-export class PostPhotoRDO extends PostBaseRDO {
+export class PostPhotoRDO extends PostDataRDO {
   @Expose()
   @IsString()
   public photoLink: string;
 }
 
-export class PostQuoteRDO extends PostBaseRDO {
+export class QuoteRDO extends PostDataRDO {
   @Expose()
   @IsString()
   public author: string;
@@ -87,10 +83,10 @@ export class PostQuoteRDO extends PostBaseRDO {
   public quote: string;
 }
 
-export class PostLinkRDO extends PostBaseRDO {
+export class PostLinkRDO extends PostDataRDO {
   @Expose()
   @IsString()
-  public link: string;
+  public webLink: string;
 
   @Expose()
   @IsOptional()
@@ -98,10 +94,9 @@ export class PostLinkRDO extends PostBaseRDO {
   public desc?: string;
 }
 
-
 export class PostRDO extends IntersectionType(
-  IntersectionType(PostVideoRDO, PostQuoteRDO),
-  IntersectionType(PostTextRDO, IntersectionType(PostPhotoRDO, PostLinkRDO))
+  IntersectionType(VideoRDO, QuoteRDO),
+  IntersectionType(TextRDO, IntersectionType(PostPhotoRDO, PostLinkRDO))
 ) {}
 
-export type TPostRDO = (PostVideoRDO | PostQuoteRDO | PostTextRDO | PostPhotoRDO | PostLinkRDO)
+export type TPostRDO = VideoRDO | QuoteRDO | TextRDO | PostPhotoRDO | PostLinkRDO

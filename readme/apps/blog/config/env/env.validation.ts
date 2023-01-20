@@ -1,21 +1,13 @@
 import { IntersectionType } from '@nestjs/swagger';
-import { ENVError, APIEnvConfig, validateEnv, RMQEnvConfig } from '@readme/core';
-import { IsString } from 'class-validator';
+import { APIEnvConfig, validateEnv, RMQEnvConfig, ValidateENVProp, JWTEnvConfig } from '@readme/core';
 
 class BlogEnvConfig {
-  @IsString({
-    message: ENVError.DBUrl
-  })
-  public DATABASE_URL: string;
-
-  @IsString({
-    message: ENVError.UploadDir
-  })
+  @ValidateENVProp()
   public UPLOAD_DIR: string;
 }
 
 class EnvConfig extends IntersectionType(
-  APIEnvConfig,
+  IntersectionType(APIEnvConfig, JWTEnvConfig),
   IntersectionType(BlogEnvConfig, RMQEnvConfig)
 ) {}
 

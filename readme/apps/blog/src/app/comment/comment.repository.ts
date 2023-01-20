@@ -4,7 +4,7 @@ import { IComment, ICRUDRepo } from '@readme/shared-types';
 
 import { CommentEntity } from './comment.entity';
 import { CommentListQuery } from './query/comment-list.query';
-import { Property, Size } from '@readme/core';
+import { Size } from '@readme/core';
 
 @Injectable()
 export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComment> {
@@ -32,7 +32,7 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
       },
       select: {
         id: true,
-        text: true,
+        comment: true,
         post: {
           select: {id: true}
         },
@@ -40,8 +40,8 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
         postID: true,
         createdAt: true
       },
-      take: Size.Max(Property.Comments),
-      skip: page > 0 ? Size.Max(Property.Comments) * (page - 1) : undefined
+      take: Size.Comments.Max,
+      skip: page > 0 ? Size.Comments.Max * (page - 1) : undefined
     })
 
     return comments
@@ -49,12 +49,12 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
 
   public async create(item: CommentEntity): Promise<IComment> {
     const entityData = item.toObject();
-    const {postID, userID, text} = entityData;
+    const {postID, userID, comment} = entityData;
 
     return this.prisma.comment.create(
       {
         data: {
-          text,
+          comment,
           userID,
           post: {
             connect: {

@@ -1,8 +1,9 @@
-import { ContentType } from "@prisma/client";
-import { IComment, IEntity, IPost } from "@readme/shared-types";
+import { Comment, ContentType } from "@prisma/client";
+import { IEntity, IPost } from "@readme/shared-types";
 
 export class PostEntity implements IEntity<PostEntity>, IPost {
   public id?: number;
+
   public type: ContentType;
   public title?: string;
   public link?: string;
@@ -16,7 +17,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
 
   public tags?: string[]
   public likes?: string[]
-  public comments?: IComment[]
+  public comments?: Comment[]
 
   public isDraft?: boolean;
   public isRepost?: boolean;
@@ -26,6 +27,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
   public originID?: number;
 
   public publishAt?: Date;
+  public createdAt?: Date;
 
   constructor(post: IPost) {
     this.fillEntity(post);
@@ -40,6 +42,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
     this.isDraft = entity.isDraft ?? false;
 
     this.publishAt = entity.publishAt ?? new Date();
+    this.createdAt = !entity.createdAt || entity.isRepost ? new Date() : entity.createdAt;
 
     this.originID = entity.id
     this.type = entity.type;

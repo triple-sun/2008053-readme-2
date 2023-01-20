@@ -39,7 +39,7 @@ async function fillDb() {
     where: { id: 1 },
     update: {},
     create: {
-      text: 'test comment text',
+      comment: 'test comment text',
       userID: '54',
       post: {
         connect: {
@@ -52,7 +52,7 @@ async function fillDb() {
     where: { id: 2 },
     update: {},
     create: {
-      text: 'another test comment text',
+      comment: 'another test comment text',
       userID: '65',
       post: {
         connect: {

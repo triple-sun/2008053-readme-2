@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { RPC, UserError, UserRDO, ValidateUser } from '@readme/core';
+import { RPC, UserRDO, Validate } from '@readme/core';
+import { ErrorMessage } from '@readme/error';
 import { RMQService } from 'nestjs-rmq';
 import { UserCreateDTO } from './dto/user-create.dto';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
@@ -24,7 +25,7 @@ export class UserService {
       ? await this.userRepository.findByEmail(email)
       : await this.userRepository.findOne(id)
 
-    ValidateUser.Exists(user, {id, email})
+    Validate.User.Exists({id, email}, user)
 
     return user;
   }
@@ -42,7 +43,7 @@ export class UserService {
     const {email, name, password} = dto;
     const user = await this.getUser({email})
 
-    ValidateUser.AlreadyExists(user)
+    Validate.User.Registered(user)
 
     const newUserData = {
       email,
@@ -77,7 +78,7 @@ export class UserService {
     await this.getUser({id})
 
     if (id === dto.subToID) {
-      throw new ConflictException(UserError.SelfSubscribe)
+      throw new ConflictException(ErrorMessage.Common.SelfSubscribe)
     }
 
     return await this.userRepository.subscribe(dto, id);

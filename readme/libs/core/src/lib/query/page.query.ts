@@ -3,12 +3,12 @@ import { Transform } from "class-transformer";
 import { IsNumber, IsOptional } from "class-validator";
 
 import { Property } from "../enum/property.enum";
-import { APIProp } from "../utils/api.utils";
+import { APIOption } from "../utils/api.utils";
 
 export class PageQuery {
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) => +value)
-  @ApiProperty(APIProp.Post(Property.Page))
+  @ApiProperty(APIOption.Post(Property.Page))
   public page?: number;
 }

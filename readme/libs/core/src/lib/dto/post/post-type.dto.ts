@@ -3,12 +3,13 @@ import { ContentType } from "@prisma/client";
 import { Expose, Transform } from "class-transformer";
 import { IsString } from "class-validator";
 import { Property } from "../../enum/property.enum";
-import { APIProp } from "../../utils/api.utils";
+import { APIOption } from "../../utils/api.utils";
+import { TransformOptions } from "../../utils/transform.utils";
 
 export class PostTypeDTO {
   @Expose()
   @IsString()
-  @Transform(({ value } ) => value.toString().toUpperCase())
-  @ApiProperty(APIProp.Post(Property.Type))
+  @Transform(TransformOptions.Type)
+  @ApiProperty(APIOption.Post(Property.Type, { name: Property.Type, enum: ContentType }))
   public type?: ContentType;
 }

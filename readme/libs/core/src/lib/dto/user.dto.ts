@@ -1,37 +1,35 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { AppError } from "@readme/error";
 import { Expose } from "class-transformer";
-import { IsEmail, IsJWT, IsMongoId, IsString, Length } from "class-validator";
-import { Size } from "../const/api-options.const";
+import { IsEmail, IsJWT, IsMongoId, IsString } from "class-validator";
+import { ValidateLength } from "../decorator/validate-length.decorator";
 import { Property } from "../enum/property.enum";
-import { ValidationMessage } from "../error/validation.error";
-import { APIProp } from "../utils/api.utils";
+import { APIOption } from "../utils/api.utils";
 
-const { Min, Max } = Size
 const { Token, UserID, Name, Email } = Property
-const { Users } = APIProp
 
 export class UserDTO {
   @Expose()
   @IsString()
-  @Length(Min(Name), Max(Name), { message: ValidationMessage.Length })
-  @ApiProperty(Users(Name))
+  @ValidateLength()
+  @ApiProperty(APIOption.User(Name))
   public name: string;
 
   @Expose()
-  @IsEmail({},{ message: ValidationMessage.Email })
-  @ApiProperty(Users(Email))
+  @IsEmail({},{ message: AppError.User.Email.Invalid } )
+  @ApiProperty(APIOption.User(Email))
   public email: string;
 
   @Expose()
   @IsMongoId()
-  @ApiProperty(Users(UserID))
+  @ApiProperty(APIOption.User(UserID))
   public userID: string;
 }
 
 export class UserTokenDTO {
   @Expose()
   @IsJWT()
-  @ApiProperty(Users(Token))
+  @ApiProperty(APIOption.User(Token))
   public token: string;
 }
 

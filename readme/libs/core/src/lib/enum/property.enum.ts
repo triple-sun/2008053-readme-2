@@ -1,5 +1,5 @@
- export enum Property {
-  ID = 'id',
+export enum Property {
+  ID = 'ID',
   Port = 'Port',
   ObjectID = '_id',
   SubToID = 'subToID',
@@ -28,6 +28,7 @@
   Token = 'token',
   Tag = 'tag',
   Tags = 'tags',
+  SortBy = 'sortBy',
   IsRepost = 'isRepost',
   IsDraft = 'isDraft',
   AuthorID = 'authorID',
@@ -38,7 +39,7 @@
   Page = 'page',
   CommentID = 'commentID',
   PostID = 'postID',
-  Email = 'email',
+  Email = 'Email',
   UserID = 'userID',
   Name = 'name',
   Subscribers = 'subscribers',
@@ -47,3 +48,5 @@
   Password = 'password',
   Avatar = 'avatar'
 }
+
+export default Property

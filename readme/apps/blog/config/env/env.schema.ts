@@ -1,4 +1,4 @@
-import { apiEnvSchema, rmqEnvSchema } from '@readme/core';
+import { apiEnvSchema, jwtEnvSchema, rmqEnvSchema } from '@readme/core';
 import * as Joi from 'joi';
 
 const blogEnvSchema = {
@@ -14,4 +14,5 @@ export default Joi.object({
   ...apiEnvSchema,
   ...blogEnvSchema,
   ...rmqEnvSchema,
+  ...jwtEnvSchema
 })

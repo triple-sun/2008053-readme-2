@@ -1,49 +1,49 @@
-import { IsArray, IsBoolean, IsEnum, IsMongoId, IsOptional, IsString, Length, } from 'class-validator';
+import { IsArray, IsBoolean, IsDate, IsMongoId, IsOptional, IsString, } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { PageQuery, SortDefault, SortByType, TitleDTO, PostTypeDTO, APIProp, Property, Size } from '@readme/core';
-import { ApiProperty, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
+import { PageQuery, SortByType, TitleDTO, PostTypeDTO, Property, APIOption, ValidateLength } from '@readme/core';
+import { ApiPropertyOptional, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
-const { Min, Max } = Size;
 const { Tag, Subscribers, IsDraft, AuthorID, UserID, Since} = Property
-const { Post } = APIProp
+const { Post } = APIOption
 
 class PostsBaseQuery {
   @Expose()
   @IsOptional()
-  @IsEnum(SortByType)
-  public sortBy?: SortByType.Date | SortByType.Likes | SortByType.Comm = SortDefault.PostSortBy
+  @ApiPropertyOptional(APIOption.Post(Property.SortBy, {enum: SortByType, default: SortByType.Date}))
+  public sortBy?: SortByType.Date | SortByType.Likes | SortByType.Comm = SortByType.Date
 
   @Expose()
   @IsString()
   @IsOptional()
-  @Length(Min(Tag), Max(Tag))
-  @ApiProperty(Post(Tag))
+  @ValidateLength()
+  @ApiPropertyOptional(Post(Tag))
   public tag?: string;
 
   @Expose()
   @IsArray()
   @IsOptional()
-  @ApiProperty(Post(Subscribers))
+  @ApiPropertyOptional(Post(Subscribers))
   public subs?: string[]
 
   @Expose()
   @IsOptional()
   @IsBoolean()
-  @ApiProperty(Post(IsDraft))
+  @ApiPropertyOptional(Post(IsDraft))
   public isDraft?: boolean;
 
   @Expose()
   @IsMongoId()
-  @ApiProperty(Post(AuthorID))
+  @ApiPropertyOptional(Post(AuthorID))
   public authorID?: string;
 
   @Expose()
   @IsMongoId()
-  @ApiProperty(Post(UserID))
+  @ApiPropertyOptional(Post(UserID))
   public userID?: string;
 
   @Expose()
-  @ApiProperty(Post(Since))
+  @IsDate()
+  @ApiPropertyOptional(Post(Since))
   public since?: Date;
 }
 

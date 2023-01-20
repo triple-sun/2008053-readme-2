@@ -19,7 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
   ],
   providers: [
     PostModule,
-    CommentModule
+    CommentModule,
   ],
 })
 export class AppModule {}

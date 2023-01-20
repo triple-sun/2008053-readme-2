@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EntityError } from "@readme/core";
+import { ErrorMessage } from "@readme/error";
 import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { SubscriberRepository } from "../subscriber.repository";
 
@@ -15,7 +15,7 @@ export class SubAlreadyExistsEmail implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return EntityError.User.Email.Exists(value)
+    return ErrorMessage.User.Email.Exists(value)
   }
 }
 
@@ -31,7 +31,7 @@ export class SubAlreadyExistsUserID implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return EntityError.User.Email.Exists(value)
+    return ErrorMessage.User.Email.Exists(value)
   }
 }
 
@@ -47,7 +47,7 @@ export class SubExistsID implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return EntityError.User.ID.NotFound(value)
+    return ErrorMessage.User.ID.NotFound(value)
   }
 }
 
@@ -63,7 +63,7 @@ export class SubExistsEmail implements ValidatorConstraintInterface {
   }
 
   defaultMessage({value}: ValidationArguments) {
-    return EntityError.User.Email.NotFound(value)
+    return ErrorMessage.User.Email.NotFound(value)
   }
 }
 

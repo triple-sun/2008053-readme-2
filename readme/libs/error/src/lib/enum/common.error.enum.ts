@@ -1,7 +1,7 @@
-export enum CommonError {
+export enum ECommonError {
   Fetch = 'Can\'t fetch data from',
   Env = 'Can\'t read .env file. Perhaps the file does not exist.',
-  File = 'Can\'t read the file:',
+  File = 'Validation failed (file expected)',
   Email = 'Please enter valid email',
   AvatarUrl = 'Should be in .jpg or .png format',
   MovieImgUrl = 'Should be in .jpg format',
@@ -32,12 +32,11 @@ export enum CommonError {
   TagsLimit = 'Posts can only have 8 tags or less',
   ParamArg = 'This pipe must used only with params!',
   BodyArg = 'This pipe must used only with body!',
-  FileType = 'File type is not matching:'
-}
-
-export enum ErrorType {
-  NotFound = 'NotFound',
-  Exists = 'Exists',
-  Invalid = 'Invalid',
-  Permission = 'Permission'
+  FileType = 'File type is not matching:',
+  Auth = 'You are not authorized',
+  SelfRepost = 'You can`t repost your own posts.',
+  SelfSubscribe = 'You can`t subscribe to yourself',
+  DuplicateRepost = 'You can`t repost the same post twice',
+  Published = 'This post is already published',
+  QueryType = 'Wrong type query',
 }
