@@ -1,11 +1,13 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { RPC, UserRDO, Validate } from '@readme/core';
+import { RPC, UserDTO, UserRDO, Validate } from '@readme/core';
 import { ErrorMessage } from '@readme/error';
 import { RMQService } from 'nestjs-rmq';
 import { UserCreateDTO } from './dto/user-create.dto';
+import { UserIDDTO } from './dto/user-id.dto';
 import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 
 import { UserUpdateDTO } from './dto/user-update.dto';
+import { UserQuery } from './query/user.query';
 import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
 
@@ -30,7 +32,8 @@ export class UserService {
     return user;
   }
 
-  async getUserData(id: string) {
+  async getUserData({id}: UserQuery) {
+    console.log(id)
     const user = await this.getUser({id})
     const subscribers = (await this.userRepository.findSubscribers(id)).length
     const posts = await this.rmqService.send<string, number>(RPC.GetPosts, id)
@@ -40,7 +43,7 @@ export class UserService {
   }
 
   async registerUser(dto: UserCreateDTO) {
-    const {email, name, password} = dto;
+    const {email, name, password: password} = dto;
     const user = await this.getUser({email})
 
     Validate.User.Registered(user)
@@ -59,7 +62,7 @@ export class UserService {
     return await this.userRepository.create(userEntity);
   }
 
-  async updateUser(id: string, { avatar, password }: UserUpdateDTO) {
+  async updateUser({id}: UserIDDTO, { avatar, password: password }: UserUpdateDTO) {
     const user = await this.getUser({id})
 
     const update = {
@@ -74,7 +77,7 @@ export class UserService {
     return await this.userRepository.update(id, userEntity)
   }
 
-  async subscribe(dto: UserSubscribeDTO, id: string) {
+  async subscribe(dto: UserSubscribeDTO, {id}: UserIDDTO) {
     await this.getUser({id})
 
     if (id === dto.subToID) {

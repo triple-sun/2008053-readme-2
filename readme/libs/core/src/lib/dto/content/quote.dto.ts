@@ -2,22 +2,33 @@ import { Expose } from "class-transformer";
 import { IsString} from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-import { Property } from "../../enum/property.enum";
 import { ValidateLength } from "../../decorator/validate-length.decorator";
-import { APIOption } from "../../utils/api.utils";
+import { Property } from "../../enum/property.enum";
+import { PostProperty } from "../../utils/api.utils";
+import { Size } from "../../const/size.const";
 
-const { Quote, Author } = Property;
-
-export class QuoteDTO {
+export class Quote {
   @Expose()
   @IsString()
-  @ValidateLength()
-  @ApiProperty(APIOption.Post(Quote))
-  public quote?: string;
+  public author: string;
 
   @Expose()
   @IsString()
-  @ValidateLength()
-  @ApiProperty(APIOption.Post(Author))
-  public author?: string;
+  public quote: string;
 }
+
+export class QuoteDTO extends Quote {
+  @Expose()
+  @IsString()
+  @ValidateLength()
+  @ApiProperty(PostProperty(Property.Quote, {minLength: Size.Quote.Min, maxLength: Size.Quote.Max}))
+  public quote: string;
+
+  @Expose()
+  @IsString()
+  @ValidateLength()
+  @ApiProperty(PostProperty(Property.Author, {minLength: Size.Author.Min, maxLength: Size.Author.Max}))
+  public author: string;
+}
+
+export class QuoteRDO extends Quote {}

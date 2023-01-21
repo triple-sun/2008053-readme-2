@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PostRDO, NotifyDTO, PostAuthorIDDTO, PostCreateDTO, PostIDDTO, PostTagDTO, PostTypeDTO, RPC, TitleDTO, toggleArrElement, UserDTO, Validate, fillObject} from '@readme/core';
+import { PostRDO, PostsDTO, PostCreateDTO, PostIDDTO, PostTypeDTO, RPC, TitleDTO, toggleArrElement, NameDTO, Validate, fillObject, AuthorIDDTO, TagDTO} from '@readme/core';
 import { IPost, IUser } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
 import { RMQService } from 'nestjs-rmq';
-import { PostsQuery } from './query/posts.query.dto';
+import { PostsQueryDTO } from './query/posts.query.dto';
 import { ContentType } from '@prisma/client';
 import { PostUpdateDTO } from './query/post-update.dto';
 
@@ -16,35 +16,35 @@ export class PostService {
     private readonly rmqService: RMQService
   ) {}
 
-  async getPostsByAuthor({authorID}: PostAuthorIDDTO, query?: PostsQuery) {
+  async getPostsByAuthor({authorID}: AuthorIDDTO, query?: PostsQueryDTO) {
     return await this.postRepository.find({...query, authorID})
   }
 
-  async getPostsByUser({userID}: UserDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getPostsByUser({userID}: NameDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find({...query, userID})
   }
 
-  async getPostsByTag({tag}: PostTagDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getPostsByTag({tag}: TagDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find({...query, tag})
   }
 
-  async getPostsByType({type}: PostTypeDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getPostsByType({type}: PostTypeDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find({...query, type})
   }
 
-  async getPostsByTitle({title}: TitleDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getPostsByTitle({title}: TitleDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find({...query, title})
   }
 
-  async getDrafts({userID}: UserDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getDrafts({userID}: NameDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find({...query, authorID: userID, isDraft: true})
   }
 
-  async getPosts(query?: PostsQuery): Promise<IPost[]> {
+  async getPosts(query?: PostsQueryDTO): Promise<IPost[]> {
     return await this.postRepository.find(query)
   }
 
-  async getFeed({userID}: UserDTO, query?: PostsQuery): Promise<IPost[]> {
+  async getFeed({userID}: NameDTO, query?: PostsQueryDTO): Promise<IPost[]> {
     const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
     const subs = [...user.subscriptions.map((sub) => sub.toString()), userID]
 
@@ -59,7 +59,7 @@ export class PostService {
     return post
   }
 
-  async createPost({userID}: UserDTO, {type}: PostTypeDTO, dto: PostCreateDTO): Promise<IPost> {
+  async createPost({userID}: NameDTO, {type}: PostTypeDTO, dto: PostCreateDTO): Promise<IPost> {
     const {tags, content} = dto
 
     const post = {
@@ -76,7 +76,7 @@ export class PostService {
     return await this.postRepository.create(postEntity);
   }
 
-  async updatePost(param: PostIDDTO, {userID}: UserDTO,  dto: PostUpdateDTO, type?: ContentType): Promise<IPost> {
+  async updatePost(param: PostIDDTO, {userID}: NameDTO,  dto: PostUpdateDTO, type?: ContentType): Promise<IPost> {
     const {publishAt, tags} = dto
     const post = await this.getPost(param);
 
@@ -98,7 +98,7 @@ export class PostService {
     return updatedPost
   }
 
-  async deletePost(param: PostIDDTO, {userID}: UserDTO) {
+  async deletePost(param: PostIDDTO, {userID}: NameDTO) {
     const post = await this.getPost(param);
 
     Validate.Post.User(post, userID)
@@ -106,7 +106,7 @@ export class PostService {
     await this.postRepository.destroy(param.postID)
   }
 
-  async repost(param: PostIDDTO, {userID}: UserDTO): Promise<IPost> {
+  async repost(param: PostIDDTO, {userID}: NameDTO): Promise<IPost> {
     const origin = await this.getPost(param);
 
     Validate.Post.Repost(origin, userID)
@@ -116,7 +116,7 @@ export class PostService {
     return await this.postRepository.create(repostEntity);
   }
 
-  async likePost(param: PostIDDTO, {userID}: UserDTO): Promise<IPost> {
+  async likePost(param: PostIDDTO, {userID}: NameDTO): Promise<IPost> {
     const post = await this.getPost(param);
 
     const likes = toggleArrElement(post.likes, userID);
@@ -124,7 +124,7 @@ export class PostService {
     return await this.postRepository.like(param.postID, likes)
   }
 
-  async publishPost(param: PostIDDTO, {userID}: UserDTO, publishAt?: Date): Promise<IPost> {
+  async publishPost(param: PostIDDTO, {userID}: NameDTO, publishAt?: Date): Promise<IPost> {
     const post = await this.getPost(param);
 
     Validate.Post.User(post, userID)
@@ -132,14 +132,16 @@ export class PostService {
     return await this.postRepository.publish(param.postID, publishAt ?? new Date())
   }
 
-  async notify({userID}: UserDTO) {
+  async notify({userID}: NameDTO) {
     const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
 
     const subs = [...new Set([...user.subscriptions.map((sub) => sub.toString()), userID])]
 
     const posts = (await this.postRepository.find({subs, since: user.notifiedAt})).map((post) => fillObject(PostRDO, post))
 
-    return await this.rmqService.notify<NotifyDTO>(RPC.Notify, {userID, posts})
+    const dto: PostsDTO = {email: user.email, posts, userID}
+
+    return await this.rmqService.notify<PostsDTO>(RPC.Notify, dto)
       .then(() => this.rmqService.notify<string>(RPC.Notified, userID))
   }
 }

@@ -2,29 +2,34 @@ import { Expose } from "class-transformer";
 import { IsString } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 
-import { TitleDTO } from "./title.dto";
-import { Property } from "../../enum/property.enum";
-import { APIOption } from "../../utils/api.utils";
+import { Title, TitleDTO } from "./title.dto";
 import { ValidateLength } from "../../decorator/validate-length.decorator";
+import { PostProperty } from "../../utils/api.utils";
+import { Property } from "../../enum/property.enum";
+import { Size } from "../../const/size.const";
 
-const { Ann, Text } = Property;
-const { Post } = APIOption
-
-class TextContent {
+class Text extends Title {
   @Expose()
   @IsString()
-  @ValidateLength()
-  @ApiProperty(Post(Ann))
-  public ann?: string;
+  public text: string;
 
   @Expose()
   @IsString()
-  @ValidateLength()
-  @ApiProperty(Post(Text))
-  public text?: string;
+  public ann: string;
 }
 
-export class TextDTO extends IntersectionType(
-  TitleDTO,
-  TextContent
-) {}
+export class TextDTO extends TitleDTO {
+  @Expose()
+  @IsString()
+  @ValidateLength()
+  @ApiProperty(PostProperty(Property.Ann, {minLength: Size.Ann.Min, maxLength: Size.Ann.Max}))
+  public ann: string;
+
+  @Expose()
+  @IsString()
+  @ValidateLength()
+  @ApiProperty(PostProperty(Property.Text, {minLength: Size.Ann.Min, maxLength: Size.Ann.Max}))
+  public text: string;
+}
+
+export class TextRDO extends Text {}

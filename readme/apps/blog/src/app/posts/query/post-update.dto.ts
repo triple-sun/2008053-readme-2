@@ -7,7 +7,7 @@ class PublishAtDTO {
   @Expose()
   @IsDate()
   @IsOptional()
-  @ApiProperty(APIOption.Post(Property.PublishAt))
+  @ApiProperty(APIOption.PostProperty(Property.PublishAt))
   publishAt?: Date;
 }
 

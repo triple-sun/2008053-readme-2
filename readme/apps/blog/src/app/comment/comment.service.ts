@@ -3,10 +3,10 @@ import { Injectable } from "@nestjs/common";
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
 import { CommentCreateDTO } from "./dto/comment-create.dto";
-import { CommentListQuery } from "./query/comment-list.query";
+import { CommentsDTO } from "./query/comments.dto";
 import { PostService } from "../posts/post.service";
-import { CommentCreateQuery } from "./query/comment-create.query";
-import { UserDTO, Validate } from "@readme/core";
+import { PostIDDTO, Validate } from "@readme/core";
+import { UserIDDTO } from "libs/core/src/lib/dto/user-create.dto";
 
 @Injectable()
 export class CommentService {
@@ -15,15 +15,14 @@ export class CommentService {
     private readonly postService: PostService
       ) {}
 
-  async getCommentsForPost({postID, page}: CommentListQuery) {
+  async getCommentsForPost({postID, page}: CommentsDTO) {
     await this.postService.getPost({postID})
 
     return await this.commentRepository.findAllByPostID({postID, page})
   }
 
-  async createComment({userID}: UserDTO, query: CommentCreateQuery, dto: CommentCreateDTO) {
-    const { postID } = query
-    const newComment = new CommentEntity({userID, ...dto, ...query})
+  async createComment({userID}: UserIDDTO, {postID}: PostIDDTO, dto: CommentCreateDTO) {
+    const newComment = new CommentEntity({userID,  postID, ...dto,})
 
     await this.postService.getPost({postID})
 

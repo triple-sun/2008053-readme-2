@@ -16,9 +16,11 @@
         "transformers": [{
           "name": "@nestjs/swagger/plugin",
           "options": {
-            "classValidatorShim": true
+            "classValidatorShim": true,
+            "introspectComments": true
           }
-        }],        "assets": ["apps/blog/src/assets"],
+        }],
+        "assets": ["apps/blog/src/assets"],
         "generatePackageJson": true
       },
       "configurations": {

@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
 import { IRMQServiceAsyncOptions } from 'nestjs-rmq'
-import { AppName } from "../enum/app-name";
+import { AppName } from "../enum/utils.enum";
 
 export const rmqModuleConfig = registerAs(AppName.RMQ, () => ({
   user: process.env.RMQ_USER,

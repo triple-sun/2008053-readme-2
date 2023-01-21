@@ -1,6 +1,6 @@
 import { ConfigService, registerAs } from "@nestjs/config"
 import { MongooseModuleAsyncOptions } from "@nestjs/mongoose"
-import { AppName } from "../enum/app-name"
+import { AppName } from "../enum/utils.enum"
 
 import { getMongoConnectionString } from "../utils/env.utils"
 

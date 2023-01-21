@@ -1,22 +1,16 @@
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { DocumentBuilder } from '@nestjs/swagger';
 import { IPost } from '@readme/shared-types';
-import { Logger, UnsupportedMediaTypeException } from '@nestjs/common';
+import { Logger, ParseFilePipeBuilder, UnsupportedMediaTypeException } from '@nestjs/common';
 import 'multer'
-import { ErrorMessage } from '@readme/error';
-import { APIConfig } from '../const/api.const';
+import { PostRDO } from '../dto/post/post-rdo.dto';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { imageExtRegExp } from '../const/post.const';
+import { Prefix, UploadType } from '../enum/utils.enum';
 import { AppName } from '../enum/app-name';
-import { Prefix } from '../enum/utils.enum';
-import { PostRDO } from '../dto/rdo/post.rdo';
+import { AppError } from '../const/error.const';
 
-export const getSwaggerDocument = (title: string, desc: string) => new DocumentBuilder()
-    .setTitle(title)
-    .setDescription(desc)
-    .setVersion(APIConfig.Version)
-    .build()
-
-
-export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
 
@@ -45,14 +39,34 @@ export function fileMimetypeFilter(...mimetypes: string[]) {
       callback(null, true);
     } else {
       callback(
-        new UnsupportedMediaTypeException(`${ErrorMessage.Common.FileType} ${mimetypes.join(', ')}`),
+        new UnsupportedMediaTypeException(`${AppError.FileType} ${mimetypes.join(', ')}`),
         false,
       );
     }
   };
 }
 
-export const getSize = (max: number, min?: number) => ({Max: max, Min: min ?? null})
+export const logStartup = (appName: AppName, port: string | number) => Logger.log(`🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`);
+
+export const getStorageOptions = (type: UploadType) => {
+  const filename = ({params}, {originalname}, cb) => {
+    const id = type === UploadType.Avatar
+      ? crypto.randomUUID()
+      : params.userID
+
+    cb(null, `${id}-${type}${extname(originalname)}`)
+  }
+
+  const destination = type === UploadType.Avatar
+    ? process.env.AVATAR_DIR
+    : process.env.UPLOAD_DIR
 
 
-export const logStartup = (appName: AppName, port: number) => Logger.log(`🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`);
+  return {storage: diskStorage({ destination, filename })}
+}
+
+export const getImageUploadPipe = (maxSize: number) => new ParseFilePipeBuilder()
+  .addFileTypeValidator({fileType: imageExtRegExp})
+  .addMaxSizeValidator({maxSize})
+  .build({fileIsRequired: false})
+

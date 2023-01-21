@@ -1,23 +1,25 @@
 import { Expose } from "class-transformer";
-import { IsUrl } from "class-validator";
-import { ApiProperty, IntersectionType } from "@nestjs/swagger";
+import { IsString, IsUrl } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
+import { Title, TitleDTO } from "./title.dto";
+import { PostProperty } from "../../utils/api.utils";
 import { Property } from "../../enum/property.enum";
-import { TitleDTO } from "./title.dto";
-import { APIOption } from "../../utils/api.utils";
 
 const { VideoLink } = Property;
-const { Post } = APIOption
 
-class VideoContent {
+export class Video extends Title {
+  @Expose()
+  @IsString()
+  public videoLink: string;
+}
+
+export class VideoDTO extends TitleDTO {
   @Expose()
   @IsUrl()
-  @ApiProperty(Post(VideoLink))
+  @ApiProperty(PostProperty(VideoLink))
   public videoLink?: string;
 }
 
-export class VideoDTO extends IntersectionType(
-  TitleDTO,
-  VideoContent
-) {}
+export class VideoRDO extends Video {}
 

@@ -1,37 +1,16 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { fileMimetypeFilter } from '../utils/common.utils';
+import { ApiConsumes } from '@nestjs/swagger';
+import { UploadType } from '../enum/utils.enum';
+import { getStorageOptions } from '../utils/common.utils';
 
-export const ApiFile = (
-  fieldName = 'file',
-  required = false,
+export const APIFile = (
+  fieldName = UploadType.Avatar || UploadType.Photo,
   localOptions?: MulterOptions,
 ) =>  {
   return applyDecorators(
-    UseInterceptors(FileInterceptor(fieldName, localOptions)),
+    UseInterceptors(FileInterceptor(fieldName, {...getStorageOptions(fieldName), ...localOptions})),
     ApiConsumes('multipart/form-data'),
-    ApiBody({
-      schema: {
-        type: 'object',
-        required: required ? [fieldName] : [],
-        properties: {
-          [fieldName]: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
-    }),
   );
-}
-
-export const APIAvatarFile = (
-  fileName = 'avatar',
-  required = false,
-) => {
-  return ApiFile(fileName, required, {
-    fileFilter: fileMimetypeFilter('image'),
-  });
 }

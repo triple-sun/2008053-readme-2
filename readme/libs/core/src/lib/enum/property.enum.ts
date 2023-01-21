@@ -1,6 +1,6 @@
 export enum Property {
-  ID = 'ID',
-  Port = 'Port',
+  ID = 'id',
+  Port = 'port',
   ObjectID = '_id',
   SubToID = 'subToID',
   Comment = 'comment',
@@ -14,11 +14,13 @@ export enum Property {
   Author = 'author',
   Desc = 'desc',
   Quote = 'quote',
+  Avatar = 'avatar',
+  AvatarLink = 'avatar',
   VideoLink = 'videoLink',
   Photo = 'photo',
-  Link = 'link',
-  Likes = 'likes',
   PhotoLink = 'photoLink',
+  WebLink = 'link',
+  Likes = 'likes',
   Video = 'video',
   Text = 'text',
   Type = 'type',
@@ -39,14 +41,10 @@ export enum Property {
   Page = 'page',
   CommentID = 'commentID',
   PostID = 'postID',
-  Email = 'Email',
+  Email = 'email',
   UserID = 'userID',
   Name = 'name',
   Subscribers = 'subscribers',
   Subscriptions = 'subscriptions',
-  Pass = 'pass',
   Password = 'password',
-  Avatar = 'avatar'
 }
-
-export default Property

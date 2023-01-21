@@ -1,16 +1,24 @@
-import { Property } from "../enum/property.enum";
+import Property from "../enum/property.enum";
 
-export const APIPropDesc = {
+export const PropertyDescripion = {
   ...Property,
   IsRepost: 'is a repost?',
-  Since: 'last notified date',
+  Since: 'date when emal notifications were sent',
   Author: 'quote author',
   IsDraft: 'is a draft?',
-  VideoLink: 'video link',
-  Photo: 'photo image file',
+  WebLink: 'web link',
+  VideoLink: 'youtube video link',
+  Photo: 'photo jpg/png file < 500KB',
   Desc: 'description',
   Ann: 'announcement',
-  SubToID: 'id to subscribe to',
-  Limit: 'limit per page'
+  SubToID: 'id for user to subscribe to',
+  Limit: 'items per page',
+  Token: 'JWT access token',
+  CreatedAt: 'date at which it will be or was created at',
+  PublishAt: 'date at which it will be or was published at',
+  AuthorID: 'author ID',
+  OriginID: 'ID of the original post for a repost',
+  ObjectID: 'Mongo ID',
+  Type: 'content type. Available types: "photo", "video", "quote", "text" or "link"'
 }
 

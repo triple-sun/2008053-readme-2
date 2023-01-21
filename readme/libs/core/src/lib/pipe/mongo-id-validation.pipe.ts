@@ -1,16 +1,17 @@
 import { Types } from 'mongoose';
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { ErrorMessage } from '@readme/error';
+import { AppError, InvalidError } from '../const/error.const';
 
 @Injectable()
 export class MongoIDValidationPipe implements PipeTransform {
-  transform(value: string, { type }: ArgumentMetadata) {
+  transform(value: string, { type, data }: ArgumentMetadata) {
     if (type !== 'param' && type !== 'query' && type !== 'custom') {
-      throw new BadRequestException(ErrorMessage.Common.ParamArg)
+      throw new BadRequestException(AppError.ParamArg)
     }
 
     if (!Types.ObjectId.isValid(value)) {
-      throw new BadRequestException(ErrorMessage.Common.MongoID);
+      console.log(value, data)
+      throw new BadRequestException(InvalidError({value, property: data}));
     }
 
     return value;

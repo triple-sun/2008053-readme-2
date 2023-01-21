@@ -1,22 +1,34 @@
-import { APIOption } from "../../utils/api.utils";
 import { IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-import { Property } from "../../enum/property.enum";
 import { Size } from "../../const/size.const";
-import { ErrorMessage } from "@readme/error";
+import { LengthError } from "../../const/error.const";
+import { Property } from "../../enum/property.enum";
+import { PostProperty } from "../../utils/api.utils";
+import { Expose } from "class-transformer";
 
+const { WebLink, Desc } = Property;
 
-const { Link } = Property;
+export class Link {
+  @Expose()
+  @IsString()
+  public webLink: string;
 
-export class LinkDTO {
+  @Expose()
+  @IsString()
+  public desc?: string;
+}
+
+export class LinkDTO extends Link {
   @IsUrl()
-  @ApiProperty(APIOption.Post(Link))
-  public link: string;
+  @ApiProperty(PostProperty(WebLink))
+  public webLink: string;
 
   @IsString()
   @IsOptional()
-  @MaxLength(Size.Desc.Max, { message: ErrorMessage.Length })
-  @ApiPropertyOptional(APIOption.Post(Link))
+  @MaxLength(Size.Desc.Max, { message: LengthError })
+  @ApiPropertyOptional(PostProperty(Desc))
   public desc?: string;
 }
+
+export class LinkRDO extends Link {}

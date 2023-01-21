@@ -16,8 +16,8 @@ GET http://localhost:3335/api/users
 ###
 
 # Get user by ID with authenthication (auth token received via login in auth.http)
-GET http://localhost:3335/api/users/user?userID=638a5bbf4ca776bd324605df
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzhhNWJiZjRjYTc3NmJkMzI0NjA1ZGYiLCJlbWFpbCI6ImFkZHJlc3NAZG9tYWluLmJlYnJhIiwiaWF0IjoxNjczOTU5MTA1LCJleHAiOjE2NzM5NjUxMDV9.ztRp5GiAyPJR5mpmw5ahZ_cEggQr3ywRmUqSExOmdvs
+GET http://localhost:3335/api/users/user?id=638a5bbf4ca776bd324605df
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzliNTE4MzlmMWYwNmE3ZGRkOGQzYjgiLCJuYW1lIjoiVXNlciIsImVtYWlsIjoiYWRkcmVzc0Bkb21haW4uZG9tYWltIiwiaWF0IjoxNjc0MjMyNjM5LCJleHAiOjE2NzQyMzg2Mzl9.YtbonBwzT7keF6Nmjm2hTt9GR_roQQ9Nv4X1WgTn9vA
 
 ###
 

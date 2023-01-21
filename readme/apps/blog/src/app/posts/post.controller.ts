@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, U
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FormDataRequest } from 'nestjs-form-data';
 
-import { fillObject, Prefix, PostInfo, Path, PostCreateDTO, Property, User, JwtAuthGuard, PostRDO, MongoIDValidationPipe, RPC, PostTypeDTO, UserDTO, PostTagDTO, PostAuthorIDDTO, TitleDTO, PostIDDTO, APIOption, mapPosts } from '@readme/core';
+import { fillObject, Prefix, PostInfo, Path, PostCreateDTO, Property, UserData, JwtAuthGuard, PostRDO, MongoIDValidationPipe, RPC, PostTypeDTO, NameDTO, TagDTO, AuthorIDDTO, TitleDTO, PostIDDTO, mapPosts } from '@readme/core';
 
 import { PostService } from './post.service';
-import { PostsQuery } from './query/posts.query.dto';
+import { PostsQueryDTO } from './query/posts.query.dto';
 import { PostUpdateDTO } from './query/post-update.dto';
 import { RMQRoute } from 'nestjs-rmq';
+import { ContentType } from '@prisma/client';
 
-const { Tag, PostID, Type, AuthorID, Title  } = Property
+const { Tag: TagDTO, PostID, AuthorID, Title  } = Property
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -31,7 +32,7 @@ export class PostController {
   @Get()
   @ApiResponse({ status: HttpStatus.OK, description: PostInfo.Loaded })
   async getAllPosts(
-    @Query() query: PostsQuery,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getPosts(query)
 
@@ -42,19 +43,19 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK, description: PostInfo.Loaded })
   async getFeed(
-    @User() dto: UserDTO,
-    @Query() query: PostsQuery,
+    @UserData() dto: NameDTO,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getFeed(dto, query)
 
     return mapPosts(posts)
   }
 
-  @Get(`${Path.Tag}/:${Tag}`)
+  @Get(`${Path.Tag}/:${TagDTO}`)
   @ApiResponse({ status: HttpStatus.OK, description: PostInfo.Loaded })
   async getPostsByTag(
-    @Param() dto: PostTagDTO,
-    @Query() query: PostsQuery,
+    @Param() dto: TagDTO,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getPostsByTag(dto, query)
 
@@ -62,14 +63,14 @@ export class PostController {
   }
 
   @Get(`${Path.Type}`)
-  @ApiQuery(APIOption.Post(Type))
+  @ApiQuery({enum: ContentType})
   @ApiResponse({
     status: HttpStatus.OK,
     description: PostInfo.Loaded
   })
   async getPostsByType(
     @Query() dto: PostTypeDTO,
-    @Query() query: PostsQuery,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getPostsByType(dto, query)
 
@@ -82,8 +83,8 @@ export class PostController {
     description: PostInfo.Loaded
   })
   async getPostsByAuthor(
-    @Param(AuthorID, MongoIDValidationPipe) dto: PostAuthorIDDTO,
-    @Query() query: PostsQuery,
+    @Param(AuthorID, MongoIDValidationPipe) dto: AuthorIDDTO,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getPostsByAuthor(dto, query)
 
@@ -97,7 +98,7 @@ export class PostController {
   })
   async getPostsByTitle(
     @Param() dto: TitleDTO,
-    @Query() query: PostsQuery,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getPostsByTitle(dto, query)
 
@@ -108,8 +109,8 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK, description: PostInfo.Loaded })
   async getDrafts(
-    @User() user: UserDTO,
-    @Query() query: PostsQuery,
+    @UserData() user: NameDTO,
+    @Query() query: PostsQueryDTO,
   ) {
     const posts = await this.postService.getDrafts(user, query)
 
@@ -118,11 +119,11 @@ export class PostController {
 
   @Post(`${Path.New}`)
   @UseGuards(JwtAuthGuard)
-  @ApiQuery(APIOption.Post(Type))
+  @ApiQuery({enum: ContentType})
   @FormDataRequest()
   @ApiResponse({ type: PostRDO, status: HttpStatus.CREATED, description: PostInfo.Created })
   async create(
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
     @Body() dto: PostCreateDTO,
     @Query() query: PostTypeDTO
   ) {
@@ -137,7 +138,7 @@ export class PostController {
   @ApiResponse({ type: PostRDO, status: HttpStatus.OK, description: PostInfo.Updated })
   async update(
     @Query() query: PostIDDTO,
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
     @Body() dto: PostUpdateDTO,
   ) {
     const post = await this.postService.updatePost(query, user, dto);
@@ -153,7 +154,7 @@ export class PostController {
   })
   async destroy(
     @Param(Property.PostID) param: PostIDDTO,
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
   ) {
     await this.postService.deletePost(param, user)
   }
@@ -167,7 +168,7 @@ export class PostController {
   })
   async repost(
     @Param() param: PostIDDTO,
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
   ) {
     const post = await this.postService.repost(param, user);
 
@@ -183,7 +184,7 @@ export class PostController {
   })
   async like(
     @Param() param: PostIDDTO,
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
   ) {
     const post = await this.postService.likePost(param, user);
 
@@ -193,14 +194,14 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   @Post(Path.Notify)
   async notify(
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
   ) {
     return await this.postService.notify(user)
   }
 
   @RMQRoute(RPC.GetPosts)
   async getPostsByUser(
-    @User() user: UserDTO,
+    @UserData() user: NameDTO,
   ) {
     return (await this.postService.getPostsByUser(user)).length
   }

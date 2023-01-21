@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { IComment, ICRUDRepo } from '@readme/shared-types';
 
 import { CommentEntity } from './comment.entity';
-import { CommentListQuery } from './query/comment-list.query';
+import { CommentsDTO } from './query/comments.dto';
 import { Size } from '@readme/core';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
     });
   }
 
-  async findAllByPostID({postID, page}: CommentListQuery): Promise<IComment[]> {
+  async findAllByPostID({postID, page}: CommentsDTO): Promise<IComment[]> {
     const comments = this.prisma.comment.findMany({
       where: {
         postID

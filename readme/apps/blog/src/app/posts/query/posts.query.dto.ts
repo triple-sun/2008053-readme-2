@@ -1,15 +1,15 @@
 import { IsArray, IsBoolean, IsDate, IsMongoId, IsOptional, IsString, } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { PageQuery, SortByType, TitleDTO, PostTypeDTO, Property, APIOption, ValidateLength } from '@readme/core';
+import {  SortByType, TitleDTO, PostTypeDTO, Property, APIOption, ValidateLength, PageDTO } from '@readme/core';
 import { ApiPropertyOptional, IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
 const { Tag, Subscribers, IsDraft, AuthorID, UserID, Since} = Property
-const { Post } = APIOption
+const { PostProperty: Post } = APIOption
 
-class PostsBaseQuery {
+class QueryDTO {
   @Expose()
   @IsOptional()
-  @ApiPropertyOptional(APIOption.Post(Property.SortBy, {enum: SortByType, default: SortByType.Date}))
+  @ApiPropertyOptional(APIOption.PostProperty(Property.SortBy, {enum: SortByType, default: SortByType.Date}))
   public sortBy?: SortByType.Date | SortByType.Likes | SortByType.Comm = SortByType.Date
 
   @Expose()
@@ -47,14 +47,14 @@ class PostsBaseQuery {
   public since?: Date;
 }
 
-export class PostsFindQuery extends IntersectionType(
-  IntersectionType(TitleDTO, PostsBaseQuery),
-  IntersectionType(PageQuery, PartialType(PostTypeDTO))
+export class PostsFindQueryDTO extends IntersectionType(
+  IntersectionType(TitleDTO, QueryDTO),
+  IntersectionType(PageDTO, PartialType(PostTypeDTO))
 ) {}
 
-export class PostsQuery extends IntersectionType(
-  PickType(PostsBaseQuery, ['sortBy', 'isDraft', 'since'] as const),
-  PageQuery
+export class PostsQueryDTO extends IntersectionType(
+  PickType(QueryDTO, ['sortBy', 'isDraft', 'since'] as const),
+  PageDTO
 ) {}
 
 

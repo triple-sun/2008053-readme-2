@@ -9,7 +9,7 @@ export const jwtConfig = registerAs(AppName.JWT, () => ({
 export const getJwtConfig = async (configService: ConfigService): Promise<JwtModuleOptions> => {
   return {
     secret: configService.get<string>(`${AppName.JWT}.secret`),
-    signOptions: { expiresIn: '6000s', algorithm: 'HS256' }
+    signOptions: { expiresIn: '10 days', algorithm: 'HS256' }
   }
 }
 

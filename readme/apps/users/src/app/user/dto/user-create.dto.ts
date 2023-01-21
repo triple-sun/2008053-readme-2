@@ -1,18 +1,19 @@
-import { ApiProperty, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
 import { APIOption, Property, UserDTO, ValidateLength } from "@readme/core";
-import { Transform } from "class-transformer";
+import { Expose } from "class-transformer";
 import { IsOptional, IsString } from "class-validator";
 
-const { Pass, Avatar } = Property
+const { Password: Pass, Avatar } = Property
 const { User } = APIOption
 
 export class UserCreateDTO extends PickType(UserDTO, ['email', 'name']) {
+  @Expose()
   @IsString()
   @IsOptional()
-  @Transform(({ obj }) => obj ? obj.path : '')
-  @ApiProperty(User(Avatar))
+  @ApiPropertyOptional(User(Avatar, {type: 'string', format: 'binary'}))
   public avatar?: string
 
+  @Expose()
   @IsString()
   @ValidateLength()
   @ApiProperty(User(Pass))

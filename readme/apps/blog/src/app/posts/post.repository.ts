@@ -4,7 +4,7 @@ import { ICRUDRepo, IPost } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostsFindQuery } from './query/posts.query.dto';
+import { PostsFindQueryDTO } from './query/posts.query.dto';
 
 @Injectable()
 export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
@@ -42,7 +42,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return exists
   }
 
-  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
+  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQueryDTO) {
     const limit = title ? Size.Search.Max : Size.Query.Max
     const sortByType = sortBy ?? SortByType.Date
 

@@ -1,16 +1,21 @@
-import { Transform } from "class-transformer";
-import { IsDefined, IsString } from "class-validator";
+import { Expose, Transform } from "class-transformer";
+import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Property } from "../../enum/property.enum";
-import { APIOption } from "../../utils/api.utils";
+import { PostProperty } from "../../utils/api.utils";
 
-const { Photo } = Property;
-const { Post } = APIOption
-
-export class PhotoDTO {
-  @IsDefined()
-  @Transform(({ obj }) => obj.path)
+export class Photo {
+  @Expose()
   @IsString()
-  @ApiProperty(Post(Photo))
   public photoLink: string;
 }
+
+export class PhotoDTO extends Photo {
+  @Expose({ name: Property.Avatar})
+  @Transform(({ obj }) => obj.filepath)
+  @IsString()
+  @ApiProperty(PostProperty(Property.Photo))
+  public photoLink: string;
+}
+
+export class PhotoRDO extends Photo {}
