@@ -17,7 +17,8 @@ import { PostModule } from '../posts/post.module';
     CommentRepository
   ],
   exports: [
-    CommentRepository
+    CommentModule,
+    CommentService
   ]
 })
 export class CommentModule {}

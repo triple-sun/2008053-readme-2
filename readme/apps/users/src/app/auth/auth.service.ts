@@ -1,11 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { IUser } from '@readme/shared-types';
 
 import { UserEntity } from '../user/user.entity';
-import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { ErrorMessage } from '@readme/error';
+import { AppError, UserLoginDTO, UserRDO } from '@readme/core';
 
 @Injectable()
 export class AuthService {
@@ -22,15 +20,14 @@ export class AuthService {
     const userEntity = new UserEntity(user);
 
     if (! await userEntity.comparePassword(password)) {
-      throw new UnauthorizedException(ErrorMessage.Common.Unauthorized);
+      throw new UnauthorizedException(AppError.Unauthorized);
     }
 
     return userEntity.toObject();
   }
 
-  async loginUser(user: IUser) {
+  async loginUser(user: UserRDO) {
     const payload = {
-      sub: user._id,
       id: user.id,
       name: user.name,
       email: user.email,

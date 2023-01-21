@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { Post } from '@prisma/client';
 import { IncludeForPost, Size, SortByType } from '@readme/core';
-import { ICRUDRepo, IPost } from '@readme/shared-types';
+import { ICRUDRepo } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostsFindQueryDTO } from './query/posts.query.dto';
+import { PostsQueryDTO } from './query/posts.query.dto';
 
 @Injectable()
-export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
+export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
   constructor(
     private readonly prisma: PrismaService
   ) {}
 
-  public async create(item: PostEntity): Promise<IPost> {
+  public async create(item: PostEntity): Promise<Post> {
     const {comments, ...data} = item.toObject()
     console.log({data}, {item})
     return await this.prisma.post.create({
@@ -32,7 +33,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     });
   }
 
-  public async findOne(id: number): Promise<IPost | null> {
+  public async findOne(id: number): Promise<Post | null> {
     console.log({id})
     const exists = await this.prisma.post.findUnique({
       where: { id },
@@ -42,7 +43,8 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return exists
   }
 
-  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQueryDTO) {
+  public async find({sortBy, since, page, isDraft, searchFor}: PostsQueryDTO) {
+    const {id: userID, authorID, type, tag, title, subs} = searchFor
     const limit = title ? Size.Search.Max : Size.Query.Max
     const sortByType = sortBy ?? SortByType.Date
 

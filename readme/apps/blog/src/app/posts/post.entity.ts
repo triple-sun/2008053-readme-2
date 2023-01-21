@@ -6,7 +6,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
 
   public type: ContentType;
   public title?: string;
-  public link?: string;
+  public webLink?: string;
   public desc?: string;
   public text?: string;
   public ann?: string;
@@ -54,7 +54,7 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
     this.userID = entity.userID;
     this.authorID = entity.authorID ?? entity.userID
 
-    this.link = entity.link
+    this.webLink = entity.webLink
     this.desc = entity.desc
     this.quote = entity.quote
     this.text = entity.text

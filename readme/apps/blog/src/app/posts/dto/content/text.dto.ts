@@ -1,14 +1,11 @@
 import { Expose } from "class-transformer";
 import { IsString } from "class-validator";
 import { ApiProperty, IntersectionType } from "@nestjs/swagger";
+import { PostProperty, Property, Size, ValidateLength } from "@readme/core";
 
-import { Title, TitleDTO } from "./title.dto";
-import { ValidateLength } from "../../decorator/validate-length.decorator";
-import { PostProperty } from "../../utils/api.utils";
-import { Property } from "../../enum/property.enum";
-import { Size } from "../../const/size.const";
+import { TitleDTO } from "./title.dto";
 
-class Text extends Title {
+export class TextRDO {
   @Expose()
   @IsString()
   public text: string;
@@ -18,7 +15,7 @@ class Text extends Title {
   public ann: string;
 }
 
-export class TextDTO extends TitleDTO {
+export class TextDTO extends IntersectionType(TextRDO, TitleDTO) {
   @Expose()
   @IsString()
   @ValidateLength()
@@ -31,5 +28,3 @@ export class TextDTO extends TitleDTO {
   @ApiProperty(PostProperty(Property.Text, {minLength: Size.Ann.Min, maxLength: Size.Ann.Max}))
   public text: string;
 }
-
-export class TextRDO extends Text {}

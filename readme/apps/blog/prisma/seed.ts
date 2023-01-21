@@ -15,7 +15,7 @@ async function fillDb() {
               userID: '24',
               authorID: '24',
               originID: 1,
-              link: 'www.test.com',
+              webLink: 'www.test.com',
               desc: 'test link'
     },
   });

@@ -5,7 +5,7 @@ import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UserSubscribeDTO } from './dto/user-subscribe.dto';
+import { UserAuthDTO, UserSubscribeDTO } from '@readme/core';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -18,6 +18,8 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
   }
 
   public async create(item: UserEntity): Promise<IUser> {
+        console.log('obama')
+
     const newUser = new this.userModel(item);
     return newUser.save();
   }
@@ -29,32 +31,27 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
   public async findOne(id: string): Promise<IUser | null> {
     return await this.userModel
       .findOne({id})
-      .exec();
   }
 
   public async findSubscribers(id: string): Promise<IUser[]> {
     return await this.userModel
       .find({ subscriptions: { '$elemMatch': {'$eq': id } }})
-      .exec();
   }
 
   public async findByEmail(email: string): Promise<IUser | null> {
     return await this.userModel
-      .findOne({email})
-      .exec();
+      .findOne({email: email})
   }
 
   public async update(id: string, item: UserEntity): Promise<IUser> {
     return await this.userModel
       .findByIdAndUpdate(id, item.toObject(), {new: true})
-      .exec();
   }
 
-  public async subscribe({subToID}: UserSubscribeDTO, userID: string): Promise<IUser> {
-    const isSubscribed = await this.userModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
+  public async subscribe({subToID}: UserSubscribeDTO, {id}: UserAuthDTO): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id: id, subscriptions: { '$in': [subToID] }})
 
     return await this.userModel
-      .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: userID }}, { new: true })
-      .exec()
+      .findByIdAndUpdate(id, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: id }}, { new: true })
   }
 }

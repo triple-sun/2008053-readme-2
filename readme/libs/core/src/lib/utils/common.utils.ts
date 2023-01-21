@@ -1,16 +1,9 @@
 import { plainToInstance, ClassConstructor } from 'class-transformer';
-import { IPost } from '@readme/shared-types';
-import { Logger, ParseFilePipeBuilder, UnsupportedMediaTypeException } from '@nestjs/common';
-import 'multer'
-import { PostRDO } from '../dto/post/post-rdo.dto';
+import { ParseFilePipeBuilder } from '@nestjs/common';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { imageExtRegExp } from '../const/post.const';
-import { Prefix, UploadType } from '../enum/utils.enum';
-import { AppName } from '../enum/app-name';
-import { AppError } from '../const/error.const';
-
-export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+import { Upload } from '../enum/utils.enum';
 
 export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
 
@@ -27,37 +20,16 @@ export const toggleArrElement = (array: string[], value: string) => {
   return result
 }
 
-export const mapPosts = (posts: IPost[]) => posts.map((post) => fillObject(PostRDO, post))
-
-export function fileMimetypeFilter(...mimetypes: string[]) {
-  return (
-    req: Request,
-    file: Express.Multer.File,
-    callback: (error: Error | null, acceptFile: boolean) => void,
-  ) => {
-    if (mimetypes.some((m) => file.mimetype.includes(m))) {
-      callback(null, true);
-    } else {
-      callback(
-        new UnsupportedMediaTypeException(`${AppError.FileType} ${mimetypes.join(', ')}`),
-        false,
-      );
-    }
-  };
-}
-
-export const logStartup = (appName: AppName, port: string | number) => Logger.log(`🚀 ${appName} REST API service is running on:  http://localhost:${port}/${Prefix.Global}`);
-
-export const getStorageOptions = (type: UploadType) => {
+export const getStorageOptions = (type: string) => {
   const filename = ({params}, {originalname}, cb) => {
-    const id = type === UploadType.Avatar
+    const id = type === Upload.Avatar
       ? crypto.randomUUID()
       : params.userID
 
     cb(null, `${id}-${type}${extname(originalname)}`)
   }
 
-  const destination = type === UploadType.Avatar
+  const destination = type === Upload.Avatar
     ? process.env.AVATAR_DIR
     : process.env.UPLOAD_DIR
 
@@ -70,3 +42,6 @@ export const getImageUploadPipe = (maxSize: number) => new ParseFilePipeBuilder(
   .addMaxSizeValidator({maxSize})
   .build({fileIsRequired: false})
 
+export const capitalize = (str: string) => str.toString().charAt(0).toUpperCase() + str.slice(1);
+
+export const mapArrToObject = <T, V>(arr: T[], mapFn: (item: T) => V) => Object.fromEntries(new Map(arr.map((item) => [item, mapFn(item)])))

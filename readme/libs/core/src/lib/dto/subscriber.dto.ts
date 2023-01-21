@@ -1,7 +1,16 @@
-import { PartialType, PickType } from "@nestjs/swagger";
-import { UserCreateDTO } from "./user/user-create.dto";
+import { ApiProperty, PartialType, PickType } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
+import { IsMongoId } from "class-validator";
+import { Property } from "../enum/property.enum";
+import { UserProperty } from "../utils/api.utils";
+import { UserDTO } from "./user/user.dto";
 
-export class SubscriberCreateDTO extends PickType(UserCreateDTO, ['email', 'name', 'userID'] as const) {}
+export class SubscriberDTO extends PickType(UserDTO, ['email', 'name', 'id'] as const) {
+  @Expose({ name: Property.Id })
+  @IsMongoId()
+  @ApiProperty(UserProperty(Property.UserID))
+  public userID: string
+}
 
-export class SubscriberUpdateDTO extends PartialType(SubscriberCreateDTO) {}
+export class SubscriberUpdateDTO extends PartialType(SubscriberDTO) {}
 

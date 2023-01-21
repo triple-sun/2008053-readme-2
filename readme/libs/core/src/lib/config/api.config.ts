@@ -1,19 +1,11 @@
 import { DocumentBuilder } from "@nestjs/swagger";
-import { AppName } from "../enum/app-name";
-import { PortDefault } from "../enum/utils.enum";
+import { AppName, PortDefault } from "../enum/utils.enum";
 
 const getSwaggerConfig = (title: string, desc: string, version: string) => new DocumentBuilder()
   .setTitle(title)
   .setDescription(desc)
   .setVersion(version)
-  .addBearerAuth({
-    type: 'http',
-    scheme: 'bearer',
-    bearerFormat: 'JWT',
-    name: 'JWT',
-    description: 'JWT token',
-    in: 'header',
-  },'token')
+  .addBearerAuth()
   .build()
 
 

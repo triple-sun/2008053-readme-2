@@ -4,7 +4,3 @@ export interface ICRUDRepo<E, I, R> {
   update?(id: I, item: E): Promise<R>;
   destroy(id: I): Promise<void>;
 }
-
-export interface ICRUDEmailRepo<E, I, R> extends ICRUDRepo<E, I, R> {
-  findByEmail(email: string): Promise<R | null>
-}

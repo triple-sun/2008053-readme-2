@@ -1,4 +1,4 @@
-import { Size } from "./size.const"
+import { Size } from "../utils/size.utils"
 
 export const IncludeForPost = { comments: { take: Size.Comments.Max }}
 

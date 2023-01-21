@@ -2,8 +2,6 @@ import { Entity } from "../enum/utils.enum"
 import { IMessageProps } from "../type/error.type"
 import { capitalize } from "./common.utils"
 
-const { Comment, Post, User } = Entity
-
 export const getNotFoundMessage = (
 ({entity, property}: IMessageProps) => ((
     value?: string | number,
@@ -13,7 +11,7 @@ export const getNotFoundMessage = (
       ? `${entity ?? args.entity} with`
       : ''
     )}
-    ${property || args.property
+    ${(property || args.property)
       ? ` ${property ?? args.property}:`
       : ''
     } value ${
@@ -55,16 +53,16 @@ export const getENVErrorMessage = (
 ) => `${targetName} ${property.toLowerCase().replace(/_/g, " ")} is required. Current value: ${value}`
 
 export const getPermissionErrorMessage = (({entity}: IMessageProps) => (({value}: IMessageProps) => (
-  `You can only ${entity === Comment
+  `You can only ${entity === Entity.Comment
     ? ''
     : 'edit'
-  }${ entity === Post
+  }${ entity === Entity.Post
     ? ', publish'
     : ''
-  }${ entity !== Comment
+  }${ entity !== Entity.Comment
     ? ' or'
     : ''
-  } delete your own ${entity === User
+  } delete your own ${entity === Entity.User
     ? 'data'
     : `${entity.toString().toLowerCase()}s`}. ${entity} ID: ${value}
 `)))

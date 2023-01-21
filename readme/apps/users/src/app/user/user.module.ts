@@ -29,6 +29,7 @@ import { RMQModule } from 'nestjs-rmq';
   exports: [
     UserService,
     UserRepository,
+    JwtStrategy,
     JwtService
   ],
 })

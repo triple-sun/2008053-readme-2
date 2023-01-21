@@ -1,8 +1,7 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
+import { PostProperty, Property } from "@readme/core";
 import { Expose, Transform } from "class-transformer";
 import { IsNumber } from "class-validator";
-import { Property } from "../enum/property.enum";
-import { PostProperty } from "../utils/api.utils";
 
 export class PageDTO {
   @Expose()

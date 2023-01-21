@@ -5,7 +5,7 @@ export interface IPost {
   id?: number;
   type: ContentType;
   title?: string
-  link?: string
+  webLink?: string
   desc?: string
   text?: string
   ann?: string

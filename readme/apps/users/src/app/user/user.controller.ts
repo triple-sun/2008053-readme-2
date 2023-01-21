@@ -1,14 +1,9 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Put, Query, UploadedFile, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
-import { fillObject, Path, Prefix, UserInfo, RPC, User, JwtAuthGuard, UserRDO, APIFile, UploadType } from '@readme/core';
+import { fillObject, Path, Prefix, RPC, JwtAuthGuard, UserRDO, Upload, User, UserAuthDTO, UserCreateDTO, UserUpdateDTO, UserSubscribeDTO, APIFind, APIIndex, UserIDDTO, APICreateOrUpdate, AppInfo, Consumes, UserUpdateSchema, UserRegisterSchema } from '@readme/core';
 import { UserService } from './user.service';
-import { UserUpdateDTO } from './dto/user-update.dto';
-import { UserCreateDTO } from './dto/user-create.dto';
 import { RMQRoute } from 'nestjs-rmq';
-import { UserSubscribeDTO } from './dto/user-subscribe.dto';
-import { UserQuery } from './query/user.query';
-import { UserIDDTO } from './dto/user-id.dto';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -18,9 +13,8 @@ export class UserController {
   ) {}
 
   @Get()
-  @ApiResponse({type: UserRDO, isArray: true, status: HttpStatus.OK, description: UserInfo.Found
-  })
-  async index(): Promise<UserRDO[]> {
+  @APIIndex({type: UserRDO, description: AppInfo.Loaded})
+  async index() {
     const users = await this.userService.getUsers()
 
     return users.map((user) => fillObject(UserRDO, user));
@@ -28,20 +22,18 @@ export class UserController {
 
   @Get(Path.User)
   @UseGuards(JwtAuthGuard)
-  @ApiConsumes('multipart/form-data')
-  @ApiResponse({type: UserRDO, status: HttpStatus.OK, description: UserInfo.Found})
+  @ApiConsumes(Consumes.FormData)
+  @APIFind({type: UserRDO, description: AppInfo.Found})
   async show(
-    @Query() query: UserQuery,
+    @Query() dto: UserIDDTO,
   ) {
-    const user = await this.userService.getUserData(query);
+    const user = await this.userService.getUserData(dto);
 
     return fillObject(UserRDO, user);
   }
 
   @Post(Path.Register)
-  @APIFile(UploadType.Avatar)
-  @ApiBody({ type: UserCreateDTO})
-  @ApiResponse({ type: UserRDO, status: HttpStatus.CREATED, description: UserInfo.Register })
+  @APICreateOrUpdate({type: UserRDO, description: AppInfo.Created}, {fieldName: Upload.Avatar}, UserRegisterSchema)
   async register(
     @Body() dto: UserCreateDTO,
   ) {
@@ -52,15 +44,10 @@ export class UserController {
 
   @Put(`${Path.Update}`)
   @UseGuards(JwtAuthGuard)
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: UserUpdateDTO })
-  @ApiResponse({
-   type: UserRDO,
-   status: HttpStatus.OK,
-   description: UserInfo.Updated
-  })
+  @ApiBearerAuth()
+  @APICreateOrUpdate({type: UserRDO, description: AppInfo.Updated}, {fieldName: Upload.Avatar}, UserUpdateSchema)
   async update(
-    @User() user: UserIDDTO,
+    @User() user: UserAuthDTO,
     @Body() dto: UserUpdateDTO,
   ) {
     const update = await this.userService.updateUser(user, dto);
@@ -68,17 +55,27 @@ export class UserController {
     return fillObject(UserRDO, update);
   }
 
+  @Put(Path.Avatar)
   @UseGuards(JwtAuthGuard)
-  @Patch(Path.Subscribe)
-  @APIFile(UploadType.Avatar)
-  @ApiResponse({ type: UserRDO, status: HttpStatus.OK,
-   description: UserInfo.Updated
-  })
-  async subscribe(
-    @User() user: UserIDDTO,
-    @Query() query: UserSubscribeDTO
+  @ApiBearerAuth()
+  @APICreateOrUpdate({type: UserRDO, description: AppInfo.Updated}, {fieldName: Upload.Avatar}, UserUpdateSchema)
+  async uploadAvatar(
+    @User() user: UserAuthDTO,
+    @Body('email') email: string,
+    @UploadedFile('avatar') file: Express.Multer.File
   ) {
-    const update = await this.userService.subscribe(query, user);
+    const update = await this.userService.uploadAvatar(user, {avatarLink: file.path});
+
+    return fillObject(UserRDO, update);
+  }
+
+  @Post(Path.Subscribe)
+  @UseGuards(JwtAuthGuard)
+  async subscribe(
+    @User() user: UserAuthDTO,
+    @Query() dto: UserSubscribeDTO
+  ) {
+    const update = await this.userService.subscribe(user, dto);
 
     return fillObject(UserRDO, update);
   }

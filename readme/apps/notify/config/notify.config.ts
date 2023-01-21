@@ -1,9 +1,9 @@
-import { moduleConfig, EnvFilePath, mailerConfig, mongoConfig, rmqModuleConfig,  } from "@readme/core";
+import { appConfig, EnvFilePath, mailerConfig, mongoConfig, rmqModuleConfig,  } from "@readme/core";
 import envSchema from "./env/env.schema";
 import envValidation from "./env/env.validation";
 
 export const notifyConfig = {
-  ...moduleConfig,
+  ...appConfig,
   envFilePath: EnvFilePath.Notify,
   load: [mailerConfig, mongoConfig, rmqModuleConfig],
   validate: envValidation,

@@ -6,22 +6,23 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app/app.module';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { BlogAPI, logStartup, Path, Prefix } from '@readme/core';
+import { BlogAPI, logAppRunning, Path, Prefix } from '@readme/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const { Name, Port, Config } = BlogAPI
-
   app.setGlobalPrefix(Prefix.Global);
 
-  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, Config))
+  app.useGlobalPipes(new ValidationPipe(
+    {transform: true, validateCustomDecorators: true, transformOptions:
+      {enableImplicitConversion: true, excludeExtraneousValues: true, exposeDefaultValues: true}}
+  ))
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, validateCustomDecorators: true }))
+  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, BlogAPI.Config))
 
-  await app.listen(Port);
+  await app.listen(BlogAPI.Port);
 
-  logStartup(Name, Port)
+  logAppRunning(BlogAPI.Name, BlogAPI.Port)
 }
 
 bootstrap();

@@ -1,11 +1,8 @@
-import { Body, Controller, HttpStatus, Post} from '@nestjs/common';
-import { fillObject, Path, Prefix, UserInfo } from '@readme/core';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post} from '@nestjs/common';
+import { APILogin, AppInfo, fillObject, Path, Prefix, UserLoggedRDO, UserLoginDTO, UserRDO } from '@readme/core';
+import { ApiTags } from '@nestjs/swagger';
 
-import { UserLoggedRDO } from '../user/rdo/user-logged.rdo';
-import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { AuthService } from './auth.service';
-import { ErrorMessage } from '@readme/error';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -15,21 +12,14 @@ export class AuthController {
   ) {}
 
   @Post(Path.Login)
-  @ApiResponse({
-    type: UserLoggedRDO,
-    status: HttpStatus.OK,
-    description: UserInfo.Login
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: ErrorMessage.Common.Unauthorized,
-  })
+  @APILogin({type: UserLoggedRDO, description: AppInfo.Login})
   async login(
     @Body() dto: UserLoginDTO
   ) {
+    console.log(dto)
     const user = await this.authService.verifyUser(dto)
 
-    const token = await this.authService.loginUser(user)
+    const token = await this.authService.loginUser(fillObject(UserRDO, user))
 
     return fillObject(UserLoggedRDO, {...user, token})
   }

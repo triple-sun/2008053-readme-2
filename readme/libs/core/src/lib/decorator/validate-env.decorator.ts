@@ -1,6 +1,6 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 import { ENVError } from '../const/error.const';
-import { Size } from '../const/size.const';
+import { Size } from '../utils/size.utils';
 
 export const ValidateENVProp = (validationOptions?: ValidationOptions) => {
   return function (object, propertyName: string) {

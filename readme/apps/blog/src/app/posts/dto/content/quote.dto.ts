@@ -1,13 +1,9 @@
 import { Expose } from "class-transformer";
-import { IsString} from "class-validator";
+import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { PostProperty, Property, Size, ValidateLength } from "@readme/core";
 
-import { ValidateLength } from "../../decorator/validate-length.decorator";
-import { Property } from "../../enum/property.enum";
-import { PostProperty } from "../../utils/api.utils";
-import { Size } from "../../const/size.const";
-
-export class Quote {
+export class QuoteRDO {
   @Expose()
   @IsString()
   public author: string;
@@ -17,7 +13,7 @@ export class Quote {
   public quote: string;
 }
 
-export class QuoteDTO extends Quote {
+export class QuoteDTO extends QuoteRDO {
   @Expose()
   @IsString()
   @ValidateLength()
@@ -31,4 +27,3 @@ export class QuoteDTO extends Quote {
   public author: string;
 }
 
-export class QuoteRDO extends Quote {}

@@ -1,6 +1,6 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 import { LengthError } from '../const/error.const';
-import { Size } from '../const/size.const';
+import { Size } from '../utils/size.utils';
 import { Property } from '../enum/property.enum';
 import { capitalize } from '../utils/common.utils';
 
@@ -12,7 +12,9 @@ export const ValidateLength = (validationOptions?: ValidationOptions) => {
       options: validationOptions,
       validator: {
         validate(value: string, {property}: ValidationArguments) {
+          console.log({value}, {property})
           const propKey = (property === Property.Tags) ? capitalize(Property.Tag) : capitalize(property)
+          console.log({propKey}, {Size})
 
           return value.length >= Size[propKey].Min && value.length <= Size[propKey].Max
         },

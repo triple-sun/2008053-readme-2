@@ -13,7 +13,7 @@ export enum Path {
   Upload = 'upload',
   Photo = 'photo',
   Like = 'like',
-  Link = 'link',
+  WebLink = 'webLink',
   New = 'new',
   Search = 'search',
   Tag = 'tag',

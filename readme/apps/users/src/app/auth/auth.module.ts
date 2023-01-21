@@ -16,6 +16,9 @@ import { JwtStrategy } from '@readme/core';
     AuthService,
     JwtStrategy
   ],
+  exports: [
+    AuthService
+  ]
 })
 
 export class AuthModule {}

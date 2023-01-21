@@ -5,23 +5,21 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { APIConfig, logStartup, Path, Prefix } from '@readme/core';
+import { logAppRunning, NotifyAPI, Path, Prefix } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-  const { Name, Port, SwaggerConfig } = APIConfig.Notify
-
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix(Prefix.Global);
 
-  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, SwaggerConfig))
+  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, NotifyAPI.Config))
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, validateCustomDecorators: true }))
 
-  await app.listen(Port);
+  await app.listen(NotifyAPI.Port);
 
-  logStartup(Name, Port)
+  logAppRunning(NotifyAPI.Name, NotifyAPI.Port)
 }
 
 bootstrap();

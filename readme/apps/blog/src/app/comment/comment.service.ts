@@ -2,29 +2,30 @@ import { Injectable } from "@nestjs/common";
 
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
-import { CommentCreateDTO } from "./dto/comment-create.dto";
-import { CommentsDTO } from "./query/comments.dto";
-import { PostService } from "../posts/post.service";
-import { PostIDDTO, Validate } from "@readme/core";
-import { UserIDDTO } from "libs/core/src/lib/dto/user-create.dto";
+import { UserIDDTO, Validate } from "@readme/core";
+import { CommentDTO, CommentsDTO } from "../posts/dto/comment.dto";
+import { PostIDDTO } from "../posts/dto/post/post.dto";
+import { PostRepository } from "../posts/post.repository";
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
-    private readonly postService: PostService
+    private readonly postRepository: PostRepository
       ) {}
 
-  async getCommentsForPost({postID, page}: CommentsDTO) {
-    await this.postService.getPost({postID})
+  async getCommentsForPost(dto: CommentsDTO) {
+    const post = await this.postRepository.findOne(dto.id)
+    Validate.Post.Exists(dto.id, post)
 
-    return await this.commentRepository.findAllByPostID({postID, page})
+    return await this.commentRepository.findAllByPostID(dto)
   }
 
-  async createComment({userID}: UserIDDTO, {postID}: PostIDDTO, dto: CommentCreateDTO) {
-    const newComment = new CommentEntity({userID,  postID, ...dto,})
+  async createComment({id: userID}: UserIDDTO, {id}: PostIDDTO, dto: CommentDTO) {
+    const post = await this.postRepository.findOne(id)
 
-    await this.postService.getPost({postID})
+    Validate.Post.Exists(id, post)
+    const newComment = new CommentEntity({userID,  postID: id, ...dto,})
 
     return await this.commentRepository.create(newComment);
   }

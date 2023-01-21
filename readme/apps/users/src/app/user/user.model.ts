@@ -12,7 +12,7 @@ export class UserModel extends mongoose.Document implements IUser {
   @Prop({
     default: ''
   })
-  public avatar: string;
+  public avatarLink: string;
 
   @Prop({
     required: true,
@@ -31,7 +31,7 @@ export class UserModel extends mongoose.Document implements IUser {
     default: [],
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: UserModel.name }]
   })
-  public subscriptions: Types.ObjectId[]
+  public subscriptions: string[]
 
   @Prop({
     required: true,

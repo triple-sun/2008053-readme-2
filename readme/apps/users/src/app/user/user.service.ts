@@ -1,13 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { RPC, UserDTO, UserRDO, Validate } from '@readme/core';
-import { ErrorMessage } from '@readme/error';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { AppError, UserAuthDTO, RPC, UserRDO, UserCreateDTO, UserUpdateDTO, UserSubscribeDTO, UserError } from '@readme/core';
 import { RMQService } from 'nestjs-rmq';
-import { UserCreateDTO } from './dto/user-create.dto';
-import { UserIDDTO } from './dto/user-id.dto';
-import { UserSubscribeDTO } from './dto/user-subscribe.dto';
 
-import { UserUpdateDTO } from './dto/user-update.dto';
-import { UserQuery } from './query/user.query';
 import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
 
@@ -23,18 +17,20 @@ export class UserService {
   }
 
   async getUser({id, email}: Partial<Pick<UserRDO, 'id' | 'email'>>) {
-    const user = email
-      ? await this.userRepository.findByEmail(email)
-      : await this.userRepository.findOne(id)
+    const user = await (email
+      ? this.userRepository.findByEmail(email)
+      : this.userRepository.findOne(id))
 
-    Validate.User.Exists({id, email}, user)
-
+    if (!user) {
+      throw new NotFoundException(email ? UserError.Email.NotFound : UserError.Id.NotFound)
+    }
+    
     return user;
   }
 
-  async getUserData({id}: UserQuery) {
-    console.log(id)
+  async getUserData({id}: UserAuthDTO) {
     const user = await this.getUser({id})
+
     const subscribers = (await this.userRepository.findSubscribers(id)).length
     const posts = await this.rmqService.send<string, number>(RPC.GetPosts, id)
 
@@ -42,16 +38,17 @@ export class UserService {
     return {...user, posts, subscribers}
   }
 
-  async registerUser(dto: UserCreateDTO) {
-    const {email, name, password: password} = dto;
-    const user = await this.getUser({email})
+  async registerUser({email, name, password, avatarLink}: UserCreateDTO) {
+    const user = await this.userRepository.findByEmail(email)
 
-    Validate.User.Registered(user)
+    if (user) {
+      throw new ConflictException(UserError.Email.Exists)
+    }
 
     const newUserData = {
       email,
       name,
-      avatar: dto.avatar ?? '',
+      avatarLink: avatarLink ?? user.avatarLink,
       notifiedAt: new Date(),
       subscribers: [],
       passwordHash: '',
@@ -62,12 +59,12 @@ export class UserService {
     return await this.userRepository.create(userEntity);
   }
 
-  async updateUser({id}: UserIDDTO, { avatar, password: password }: UserUpdateDTO) {
+  async updateUser({id}: UserAuthDTO, { avatarLink, password }: UserUpdateDTO) {
     const user = await this.getUser({id})
 
     const update = {
       ...user,
-      avatarUrl: avatar ?? user.avatar
+      avatarLink: avatarLink ?? user.avatarLink
     }
 
     const userEntity = password
@@ -77,25 +74,33 @@ export class UserService {
     return await this.userRepository.update(id, userEntity)
   }
 
-  async subscribe(dto: UserSubscribeDTO, {id}: UserIDDTO) {
+  async uploadAvatar({id}: UserAuthDTO, { avatarLink }: UserUpdateDTO) {
+    const user = await this.getUser({id})
+
+    const update = {
+      ...user,
+      avatarLink: avatarLink ?? user.avatarLink
+    }
+
+    const userEntity = new UserEntity(update)
+    return await this.userRepository.update(id, userEntity)
+  }
+
+  async subscribe(user: UserAuthDTO, dto: UserSubscribeDTO) {
+    const {id} = user
     await this.getUser({id})
 
     if (id === dto.subToID) {
-      throw new ConflictException(ErrorMessage.Common.SelfSubscribe)
+      throw new ConflictException(AppError.SelfSubscribe)
     }
 
-    return await this.userRepository.subscribe(dto, id);
+    return await this.userRepository.subscribe(dto, user);
   }
 
   async setNotified(id: string) {
     const user = await this.getUser({id})
 
-    const update = {
-      ...user,
-      notifiedAt: new Date(),
-    }
-
-    const userEntity = new UserEntity(update)
+    const userEntity = new UserEntity({...user, notifiedAt: new Date()})
 
     return await this.userRepository.update(id, userEntity)
   }

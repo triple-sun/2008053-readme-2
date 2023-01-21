@@ -4,15 +4,13 @@ import { Entity } from "../enum/utils.enum";
 import { IMessageProps } from "../type/error.type";
 import { getENVErrorMessage, getExistsMessage, getInvalidMessage, getLengthErrorMessage, getNotFoundMessage, getPermissionErrorMessage } from "../utils/error.utils";
 
-const { ID, Email} = Property
-
 const { User, Comment, Post } = {
   User: {
-    Email: {entity: Entity.User, property: Email},
-    ID: {entity: Entity.User, property: ID}
+    Email: {entity: Entity.User, property: Property.Email},
+    Id: {entity: Entity.User, property: Property.Id}
   },
-  Comment: {entity: Entity.Comment, property: ID},
-  Post: {entity: Entity.Post, property: ID}
+  Comment: {entity: Entity.Comment, property: Property.Id},
+  Post: {entity: Entity.Post, property: Property.Id}
 }
 
 const ErrorMessage = {
@@ -36,11 +34,11 @@ const Error = {
       NotFound: ErrorMessage.NotFound(User.Email),
       Invalid: ErrorMessage.Invalid(User.Email)
     },
-    ID: {
-      Exists: ErrorMessage.Exists(User.ID),
-      NotFound: ErrorMessage.NotFound(User.ID),
-      Invalid: ErrorMessage.Invalid(User.ID),
-      Permission: ErrorMessage.Permission(User.ID)
+    Id: {
+      Exists: ErrorMessage.Exists(User.Id),
+      NotFound: ErrorMessage.NotFound(User.Id),
+      Invalid: ErrorMessage.Invalid(User.Id),
+      Permission: ErrorMessage.Permission(User.Id)
     }
   },
   CommentError: {
@@ -64,5 +62,4 @@ export const {
   ENVError,
   InvalidError,
   LengthError,
-
  } = Error

@@ -31,6 +31,11 @@ export enum EnvFilePath {
   Users = 'environments/users.env'
 }
 
+export enum Consumes {
+  FormData = 'multipart/form-data',
+  AppJson = 'application/json'
+}
+
 export enum PortDefault {
   Mongo = 27017,
   Mailer = 5025,
@@ -64,7 +69,7 @@ export enum SortByType {
   Comm = 'comments',
 }
 
-export enum UploadType {
+export enum Upload {
   Photo = 'photo',
   Avatar = 'avatar'
 }

@@ -1,14 +1,13 @@
 import { UsersConfig } from '@readme/core';
 import { IUser } from '@readme/shared-types';
 import { genSalt, hash, compare } from 'bcrypt';
-import { Types } from 'mongoose';
 
 export class UserEntity implements IUser {
   public _id: string;
-  public avatar?: string;
+  public avatarLink?: string;
   public email: string;
   public name: string;
-  public subscriptions?: Types.ObjectId[];
+  public subscriptions?: string[];
   public passwordHash: string;
   public notifiedAt?: Date;
 
@@ -33,8 +32,8 @@ export class UserEntity implements IUser {
   public fillEntity(user: IUser) {
     this._id = user._id;
     this.name = user.name;
-    this.avatar = user.avatar;
     this.email = user.email;
+    this.avatarLink = user.avatarLink;
     this.subscriptions = user.subscriptions;
     this.passwordHash = user.passwordHash;
     this.notifiedAt = user.notifiedAt;

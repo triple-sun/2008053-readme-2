@@ -1,9 +1,5 @@
-export interface ISubscriber {
-  id?: string;
-  email: string;
-  name: string;
+import { IUser } from "./user.interface";
+
+export interface ISubscriber extends Pick<IUser, 'id' | 'email' | 'name'> {
   userID: string;
-  notifiedAt?: Date;
-  posts?: number[]
-  subscriptions?: string[]
 }

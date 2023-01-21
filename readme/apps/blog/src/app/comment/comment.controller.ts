@@ -1,12 +1,10 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { fillObject, Prefix, CommentInfo, UserData, Path, JwtAuthGuard, Property, NameDTO } from '@readme/core';
+import { fillObject, Prefix, CommentInfo, User, Path, JwtAuthGuard, Property, UserEntityDTO } from '@readme/core';
+import { CommentDTO, CommentRDO, CommentsDTO } from '../posts/dto/comment.dto';
+import { PostIDDTO } from '../posts/dto/post/post.dto';
 
 import { CommentService } from './comment.service';
-import { CommentCreateDTO } from './dto/comment-create.dto';
-import { CommentCreateDTO } from './query/comment-create.dto';
-import { CommentsDTO } from './query/comments.dto';
-import { CommentRDO } from './rdo/comment.rdo';
 
 @ApiTags(Prefix.Comments)
 @Controller(Prefix.Comments)
@@ -36,9 +34,9 @@ export class CommentController {
     description: CommentInfo.Created
   })
   async create(
-    @UserData() user: NameDTO,
-    @Query() query: CommentCreateDTO,
-    @Body() dto: CommentCreateDTO
+    @User() user: UserEntityDTO,
+    @Query() query: PostIDDTO,
+    @Body() dto: CommentDTO
     ) {
     const comment = await this.commentService.createComment(user, query, dto);
 
@@ -53,7 +51,7 @@ export class CommentController {
   })
   async delete(
     @Param(Property.CommentID) commentID: number,
-    @UserData() userID: string
+    @User() userID: string
     ) {
     await this.commentService.deleteComment(commentID, userID);
   }

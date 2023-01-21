@@ -17,10 +17,8 @@ export enum EAppError {
   Rating = 'From 1 to 10',
   Salt = 'Missing password salt',
   Exists = 'already exists.',
-  NotFound = 'not found.',
   NotImplemented = 'Not implemented',
   UserEmail = 'User with email',
-  Forbidden = 'You are not authorized or do not have permission to this page',
   ObjectID = 'is invalid ObjectID',
   Unauthorized = 'Unauthorized',
   Token = 'Invalid token',
@@ -39,4 +37,8 @@ export enum EAppError {
   DuplicateRepost = 'You can`t repost the same post twice',
   Published = 'This post is already published',
   QueryType = 'Wrong type query',
+  NotFound = 'Item not found',
+  Internal = 'Internal server error',
+  Forbidden = 'You are not authorized or do not have permission to acess or edit this item',
+  Conflict = 'Failed to update or create new item using provided data'
 }

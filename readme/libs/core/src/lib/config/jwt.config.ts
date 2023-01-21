@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
-import { AppName } from '../enum/app-name';
+import { AppName } from '../enum/utils.enum';
 
 export const jwtConfig = registerAs(AppName.JWT, () => ({
   secret: process.env.JWT_SECRET,
