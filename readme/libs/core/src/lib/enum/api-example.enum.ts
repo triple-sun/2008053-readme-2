@@ -2,7 +2,7 @@ export enum APIExample {
   IsDraft = 'true',
   IsRepost = 'false',
   Type = 'video',
-  Id = '22',
+  Id = '638a5bbf4ca776bd324605df',
   Tag = 'tag',
   WebLink = 'https =//link.subdomain.domain',
   Desc = 'Post description example',

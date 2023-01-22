@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { Property, getRMQModuleConfig, jwtModuleConfig, JwtStrategy} from '@readme/core';
-import { RMQModule } from 'nestjs-rmq';
+import { JwtStrategy, getJWTConfig, Upload, getFormDataConfig} from '@readme/core';
+import { NestjsFormDataModule } from 'nestjs-form-data';
 import { PostController } from './post.controller';
 import { PostRepository } from './post.repository';
 import { PostService } from './post.service';
@@ -10,8 +10,8 @@ import { PostService } from './post.service';
 @Module({
   imports: [
     PassportModule,
-    RMQModule.forRootAsync(getRMQModuleConfig(Property.Post)),
-    JwtModule.registerAsync(jwtModuleConfig),
+    JwtModule.registerAsync(getJWTConfig()),
+    NestjsFormDataModule.configAsync(getFormDataConfig(Upload.Photo)),
   ],
   controllers: [
     PostController,
@@ -23,7 +23,8 @@ import { PostService } from './post.service';
   ],
   exports: [
     PostRepository,
-    PostService
+    PostService,
+    NestjsFormDataModule
   ]
 })
 export class PostModule {}

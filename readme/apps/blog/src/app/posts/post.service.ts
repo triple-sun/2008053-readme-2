@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { ContentType, Post } from '@prisma/client';
-import { RPC, toggleArrElement, Validate, UserIDDTO, UserRDO} from '@readme/core';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ContentType } from '@prisma/client';
+import { AppError, PostError, RPC, toggleArrElement, UserError, UserIDDTO} from '@readme/core';
 import { IPost, IUser } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
 import { RMQService } from 'nestjs-rmq';
 import { PostsQueryDTO } from './query/posts.query.dto';
-import { AuthorIDDTO, PostCreateDTO, PostIDDTO, TagDTO, TypeDTO, PostUpdateDTO } from './dto/post/post.dto';
+import { AuthorIDDTO, PostCreateDTO, PostIDDTO, PostUpdateDTO, TagDTO } from './dto/post/post.dto';
 import { TitleDTO } from './dto/content/title.dto';
-import { NotifyDTO } from '../../../../../libs/core/src/lib/dto/notify.dto';
+import { TypeDTO } from './dto/content/type.dto';
 
 @Injectable()
 export class PostService {
@@ -56,7 +56,9 @@ export class PostService {
   async getPost({id}: PostIDDTO): Promise<IPost> {
     const post = await this.postRepository.findOne(id);
 
-    Validate.Post.Exists(id, post)
+    if (!post) {
+      throw new NotFoundException(PostError.NotFound(id))
+    }
 
     return post
   }
@@ -82,7 +84,7 @@ export class PostService {
     const {publishAt, tags} = dto
     const post = await this.getPost(postIdDto);
 
-    Validate.Post.User(post, userID)
+    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     const update = {
       ...post,
@@ -96,14 +98,13 @@ export class PostService {
 
     const updatedPost = await this.postRepository.update(postIdDto.id, updatedEntity)
 
-    console.log({updatedPost})
     return updatedPost
   }
 
   async deletePost(postIdDto: PostIDDTO, {id: userID}: UserIDDTO) {
     const post = await this.getPost(postIdDto);
 
-    Validate.Post.User(post, userID)
+    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     await this.postRepository.destroy(postIdDto.id)
   }
@@ -111,7 +112,8 @@ export class PostService {
   async repost(param: PostIDDTO, {id: userID}: UserIDDTO): Promise<IPost> {
     const origin = await this.getPost(param);
 
-    Validate.Post.Repost(origin, userID)
+    if (origin.authorID === userID) { throw new ConflictException(AppError.SelfRepost)}
+    if (origin.userID === userID) { throw new ConflictException(AppError.DuplicateRepost)}
 
     const repostEntity = new PostEntity({...origin, id: origin.id, isRepost: true})
 
@@ -129,19 +131,8 @@ export class PostService {
   async publishPost(param: PostIDDTO, {id: userID}: UserIDDTO, publishAt?: Date): Promise<IPost> {
     const post = await this.getPost(param);
 
-    Validate.Post.User(post, userID)
+    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     return await this.postRepository.publish(param.id, publishAt ?? new Date())
-  }
-
-  async notify(dto: UserIDDTO) {
-    const {email, name, id, subscriptions, notifiedAt} = await this.rmqService.send<string, UserRDO>(RPC.GetUser, dto.id)
-
-    const subs: string[] = [...new Set([...subscriptions.map((sub) => sub.toString()), id])]
-
-    const posts = await this.postRepository.find({searchFor: {subs}, since: notifiedAt})
-
-    return await this.rmqService.notify<NotifyDTO>(RPC.Notify, {email, name, posts})
-      .then(() => this.rmqService.notify<UserIDDTO>(RPC.Notified, {id}))
   }
 }

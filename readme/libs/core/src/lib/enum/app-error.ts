@@ -37,8 +37,8 @@ export enum EAppError {
   DuplicateRepost = 'You can`t repost the same post twice',
   Published = 'This post is already published',
   QueryType = 'Wrong type query',
-  NotFound = 'Item not found',
+  NotFound = 'was not found',
   Internal = 'Internal server error',
-  Forbidden = 'You are not authorized or do not have permission to acess or edit this item',
-  Conflict = 'Failed to update or create new item using provided data'
+  Forbidden = 'You are not authorized or do not have permission to acess or edit this',
+  Conflict = 'Failed to update or create new entity with provided data'
 }

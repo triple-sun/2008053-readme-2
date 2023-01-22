@@ -5,7 +5,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { logAppRunning, Path, Prefix, UsersAPI } from '@readme/core';
+import { logAppRunning, Path, Prefix, UserDTO, UserRDO, UsersAPI } from '@readme/core';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
@@ -13,11 +13,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix(Prefix.Global);
 
-  app.useGlobalPipes(new ValidationPipe(
-    {transform: true, validateCustomDecorators: true, transformOptions: {exposeDefaultValues: true, excludeExtraneousValues: true}}
-  ))
+  const document = SwaggerModule.createDocument(app, UsersAPI.Config, {extraModels: [UserDTO, UserRDO]})
+  SwaggerModule.setup(Path.Spec, app, document)
 
-  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, UsersAPI.Config))
+  app.useGlobalPipes( new ValidationPipe({
+    transform: true, validateCustomDecorators: true, skipMissingProperties: true,
+    transformOptions: { enableImplicitConversion: true, exposeDefaultValues: true }
+  }))
 
   await app.listen(UsersAPI.Port);
 

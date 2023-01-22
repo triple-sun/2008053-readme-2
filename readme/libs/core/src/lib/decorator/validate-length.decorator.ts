@@ -12,9 +12,7 @@ export const ValidateLength = (validationOptions?: ValidationOptions) => {
       options: validationOptions,
       validator: {
         validate(value: string, {property}: ValidationArguments) {
-          console.log({value}, {property})
           const propKey = (property === Property.Tags) ? capitalize(Property.Tag) : capitalize(property)
-          console.log({propKey}, {Size})
 
           return value.length >= Size[propKey].Min && value.length <= Size[propKey].Max
         },

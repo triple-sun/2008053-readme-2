@@ -5,7 +5,7 @@ import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UserAuthDTO, UserSubscribeDTO } from '@readme/core';
+import { UserAuthDTO, SubcribeDTO } from '@readme/core';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -18,8 +18,6 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
   }
 
   public async create(item: UserEntity): Promise<IUser> {
-        console.log('obama')
-
     const newUser = new this.userModel(item);
     return newUser.save();
   }
@@ -35,12 +33,12 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
 
   public async findSubscribers(id: string): Promise<IUser[]> {
     return await this.userModel
-      .find({ subscriptions: { '$elemMatch': {'$eq': id } }})
+      .find({ subscriptions: { '$in': [id] }})
   }
 
   public async findByEmail(email: string): Promise<IUser | null> {
     return await this.userModel
-      .findOne({email: email})
+      .findOne({email})
   }
 
   public async update(id: string, item: UserEntity): Promise<IUser> {
@@ -48,7 +46,7 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .findByIdAndUpdate(id, item.toObject(), {new: true})
   }
 
-  public async subscribe({subToID}: UserSubscribeDTO, {id}: UserAuthDTO): Promise<IUser> {
+  public async subscribe({subToID}: SubcribeDTO, {id}: UserAuthDTO): Promise<IUser> {
     const isSubscribed = await this.userModel.findOne({ _id: id, subscriptions: { '$in': [subToID] }})
 
     return await this.userModel

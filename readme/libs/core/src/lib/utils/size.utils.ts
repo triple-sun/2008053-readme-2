@@ -20,8 +20,8 @@ const SizeFull = {
 const SizeMax = {
   Desc: getSizeMax(300),
   Comments: getSizeMax(50),
-  Avatar: getSizeMax(500000),
-  Photo: getSizeMax(1000000),
+  Avatar: getSizeMax(1e5),
+  Photo: getSizeMax(1e6),
   Tags: getSizeMax(8),
   Query: getSizeMax(25),
   Search: getSizeMax(20)

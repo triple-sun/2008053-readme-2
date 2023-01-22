@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { fillObject, Prefix, CommentInfo, User, Path, JwtAuthGuard, Property, UserEntityDTO } from '@readme/core';
-import { CommentDTO, CommentRDO, CommentsDTO } from '../posts/dto/comment.dto';
+import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { fillObject, Prefix, User, Path, JwtAuthGuard, Consumes, Entity, UserAuthDTO, ApiAuth } from '@readme/core';
+import { CommentDTO, CommentIDDTO, CommentRDO, CommentsDTO } from '../posts/dto/comment.dto';
 import { PostIDDTO } from '../posts/dto/post/post.dto';
 
 import { CommentService } from './comment.service';
@@ -14,10 +14,8 @@ export class CommentController {
   ) {}
 
   @Get()
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: CommentInfo.Loaded
-  })
+  @ApiAuth(Entity.Comment)
+  @ApiQuery({ type: CommentsDTO })
   async getComments(
     @Query() query: CommentsDTO
   ) {
@@ -27,14 +25,10 @@ export class CommentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-    type: [CommentRDO],
-    status: HttpStatus.CREATED,
-    description: CommentInfo.Created
-  })
+  @ApiAuth(Entity.User)
+  @ApiQuery({ type: PostIDDTO })
   async create(
-    @User() user: UserEntityDTO,
+    @User() user: UserAuthDTO,
     @Query() query: PostIDDTO,
     @Body() dto: CommentDTO
     ) {
@@ -43,16 +37,15 @@ export class CommentController {
     return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`${Path.Delete}/:${Property.CommentID}`)
+  @Delete(`${Path.Delete}`)
   @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-   status: HttpStatus.OK,
-   description: CommentInfo.Deleted
-  })
+  @ApiConsumes(Consumes.FormData)
+  @ApiBearerAuth()
+  @ApiQuery({ type: PostIDDTO })
   async delete(
-    @Param(Property.CommentID) commentID: number,
+    @Query() dto: CommentIDDTO,
     @User() userID: string
     ) {
-    await this.commentService.deleteComment(commentID, userID);
+    await this.commentService.deleteComment(dto, userID);
   }
 }

@@ -1,11 +1,12 @@
 export enum AppInfo {
-  File = 'Avatar uploaded successfully.',
-  Found = 'Item found.',
+  File = 'uploaded successfully.',
+  Found = ' found.',
   Running = 'REST API service is running on:',
-  Updated = 'Item has been successfully updated.',
-  Created = 'Item has been successfully created.',
-  Loaded = 'Items hae been successfully loaded.',
+  Updated = 'has been successfully updated.',
+  Created = 'has been successfully created.',
+  Loaded = '(s) have been successfully loaded.',
   Login = 'Logged in successfully.',
-  Deleted = 'Item has been successfully deleted.',
-  Reposted = 'Post has been reposted successfully.'
+  Deleted = 'has been successfully deleted.',
+  Reposted = 'has been reposted successfully.',
+  Subscribe = 'Subcribe/usubscribe successful'
 }

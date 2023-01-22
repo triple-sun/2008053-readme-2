@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
+import { AppName, getRMQModuleConfig } from '@readme/core';
+import { RMQModule } from 'nestjs-rmq';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { BffService } from './bff/bff.service';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    RMQModule.forRootAsync(getRMQModuleConfig(AppName.BFF))
+  ],
+  controllers: [BffService],
+  providers: [BffService],
 })
 export class AppModule {}

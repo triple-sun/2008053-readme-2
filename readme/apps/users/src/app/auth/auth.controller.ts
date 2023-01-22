@@ -1,8 +1,9 @@
-import { Body, Controller, Post} from '@nestjs/common';
-import { APILogin, AppInfo, fillObject, Path, Prefix, UserLoggedRDO, UserLoginDTO, UserRDO } from '@readme/core';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post} from '@nestjs/common';
+import { ApiCommonResponses, AppInfo, Consumes, Entity, fillObject, Path, Prefix, UserLoggedRDO, UserLoginDTO } from '@readme/core';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -12,14 +13,18 @@ export class AuthController {
   ) {}
 
   @Post(Path.Login)
-  @APILogin({type: UserLoggedRDO, description: AppInfo.Login})
+  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.OK)
+  @ApiCommonResponses(Entity.User, {type: UserLoggedRDO, description: `${AppInfo.Login}`})
+  @ApiConsumes(Consumes.FormData)
+  @FormDataRequest()
   async login(
     @Body() dto: UserLoginDTO
   ) {
-    console.log(dto)
     const user = await this.authService.verifyUser(dto)
+    const token = await this.authService.loginUser(user)
 
-    const token = await this.authService.loginUser(fillObject(UserRDO, user))
+    console.log({token})
 
     return fillObject(UserLoggedRDO, {...user, token})
   }

@@ -28,7 +28,7 @@ model Post {
   text      String?
   quote     String?
   author    String?
-  webLink      String?
+  webLink    String?
   desc      String?
   videoLink String?
   photoLink String?

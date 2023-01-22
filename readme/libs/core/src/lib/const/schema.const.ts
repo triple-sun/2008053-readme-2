@@ -1,19 +1,29 @@
 import { ApiBodyOptions } from "@nestjs/swagger";
+import { UserIDDTO, UserLoginDTO } from "../dto/user/user.dto";
 import { Property } from "../enum/property.enum";
 import { Entity } from "../enum/utils.enum";
 import { getSchema } from "../utils/schema.utils";
 
-export const UserLoginSchema = getSchema({
-  entity: Entity.User,
-  props: [Property.Email, Property.Password],
-  requireAll: true
-})
+export const UserIDSchema = {
+  ...getSchema({
+    entity: Entity.User,
+    props: [Property.Id],
+    requireAll: true
+}), type: UserIDDTO }
+
+export const UserLoginSchema = {
+  ...getSchema({
+    entity: Entity.User,
+    props: [Property.Email, Property.Password],
+    requireAll: true
+  }), type: UserLoginDTO
+}
 
 export const UserRegisterSchema = getSchema({
   entity: Entity.User,
   props: [Property.Email, Property.Name, Property.Password],
   requireAll: true,
-  hasFile: true
+  hasFile: true,
 })
 
 export const UserUpdateSchema = getSchema({
@@ -36,7 +46,7 @@ export const PostUpdateSchema: ApiBodyOptions = getSchema({
 })
 
 export const CommentCreateSchema: ApiBodyOptions = getSchema({
-  entity: Entity.Post,
+  entity: Entity.Comment,
   props: [Property.Comment],
   requireAll: true
 })

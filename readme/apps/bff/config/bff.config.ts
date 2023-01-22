@@ -1,10 +1,10 @@
-import { EnvFilePath, jwtConfig, moduleConfig, rmqModuleConfig } from "@readme/core";
+import { appConfig, EnvFilePath, rmqModuleConfig } from "@readme/core";
 import blogEnvSchema from "./env/env.schema";
 import envValidation from "./env/env.validation";
 export const bffConfig = {
-  ...moduleConfig,
+  ...appConfig,
   envFilePath: EnvFilePath.Blog,
-  load: [jwtConfig, rmqModuleConfig],
+  load: [rmqModuleConfig],
   validate: envValidation,
   validationSchema: blogEnvSchema
 }

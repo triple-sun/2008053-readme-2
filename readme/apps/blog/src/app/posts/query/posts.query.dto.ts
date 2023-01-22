@@ -1,9 +1,11 @@
 import { Expose } from 'class-transformer';
 import { ApiPropertyOptional, getSchemaPath, IntersectionType, PartialType, } from '@nestjs/swagger';
 import { PostProperty, Property, SortByType, UserIDDTO } from '@readme/core';
-import { AuthorIDDTO, IsDraftDTO, SinceDTO, TagDTO, TypeDTO } from '../dto/post/post.dto';
+import { AuthorIDDTO, IsDraftDTO, SinceDTO, TagDTO } from '../dto/post/post.dto';
 import { PageDTO } from '../dto/page.dto';
 import { TitleDTO } from '../dto/content/title.dto';
+import { IsString } from 'class-validator';
+import { TypeDTO } from '../dto/content/type.dto';
 
 export class SubsDTO {
   @Expose()
@@ -18,6 +20,12 @@ class SearchQueryDTO extends PartialType(
     IntersectionType(UserIDDTO, IntersectionType(SubsDTO, TypeDTO))
   )
 ) {}
+
+export class SearchDTO extends TitleDTO {
+  @Expose({ name: Property.Search })
+  @IsString()
+  public title: string;
+}
 
 export class PostsQueryDTO extends PartialType(IntersectionType(SinceDTO, IntersectionType(IsDraftDTO, PageDTO))) {
   @Expose()
@@ -34,7 +42,6 @@ export class PostsQueryDTO extends PartialType(IntersectionType(SinceDTO, Inters
       { $ref: getSchemaPath(TypeDTO) },
       { $ref: getSchemaPath(AuthorIDDTO) },
       { $ref: getSchemaPath(SubsDTO) }
-
     ]
   }))
   public searchFor?: SearchQueryDTO

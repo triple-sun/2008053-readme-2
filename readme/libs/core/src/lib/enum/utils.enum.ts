@@ -5,7 +5,7 @@ export enum AppName {
   Mailer = 'Mailer',
   JWT = 'Jwt',
   RMQ = 'Rmq',
-  FormData = 'Form-data',
+  FormData = 'FormData',
   Notify = 'Notify',
   Users = 'Users',
   Mongo = 'Mongo'
@@ -55,13 +55,25 @@ export enum Prefix {
 }
 
 export enum RPC {
-  GetPosts = 'rpc-posts',
   Notify = 'rpc-notify',
-  Notified = 'rpc-notified',
-  GetUser = 'rpc-users',
-  NewSub = 'rpc-new-sub',
+  AddComment = 'rpc-comments-add',
+  AddSub = 'rpc-sub-add',
+  AddUser = 'rpc-user-add',
+  AddPost = 'rpc-posts-new',
+  DeleteComment = 'rpc-comments-delete',
+  DeletePost = 'rpc-posts-delete',
+  GetUser = 'rpc-user-xget',
+  GetPosts = 'rpc-post-list',
+  GetPost = 'rpc-post',
+  PostsSearchFor = 'rpc-search',
+  PostsByUser = 'rpc-posts-user',
+  PostsForFeed = 'rpc-posts-feed',
+  CommentsforPost = 'rpc-comments',
+  UpdatePost = 'rpc-posts-update',
+  UpdateUser = 'rpc-users-update',
+  UpdateSub = 'rpc-subs-update',
+  Subscribe = 'rpc-users-subscrbe'
 }
-
 
 export enum SortByType {
   Date = 'createdAt',

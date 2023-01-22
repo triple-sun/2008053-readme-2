@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { AppError, UserAuthDTO, RPC, UserRDO, UserCreateDTO, UserUpdateDTO, UserSubscribeDTO, UserError } from '@readme/core';
+import { AppError, UserAuthDTO, RPC, UserRDO, UserCreateDTO, UserUpdateDTO, SubcribeDTO, UserError } from '@readme/core';
+import { ObjectId } from 'mongoose';
 import { RMQService } from 'nestjs-rmq';
 
 import { UserEntity } from './user.entity';
@@ -22,23 +23,23 @@ export class UserService {
       : this.userRepository.findOne(id))
 
     if (!user) {
-      throw new NotFoundException(email ? UserError.Email.NotFound : UserError.Id.NotFound)
+      throw new NotFoundException(email ? UserError.Email.NotFound(email) : UserError.Id.NotFound(id))
     }
-    
+
     return user;
   }
 
   async getUserData({id}: UserAuthDTO) {
     const user = await this.getUser({id})
 
-    const subscribers = (await this.userRepository.findSubscribers(id)).length
-    const posts = await this.rmqService.send<string, number>(RPC.GetPosts, id)
+      if (!user) {
+      throw new NotFoundException(UserError.Id.NotFound(id))
+    }
 
-
-    return {...user, posts, subscribers}
+    return user
   }
 
-  async registerUser({email, name, password, avatarLink}: UserCreateDTO) {
+  async registerUser({email, name, password, avatar}: UserCreateDTO) {
     const user = await this.userRepository.findByEmail(email)
 
     if (user) {
@@ -48,7 +49,7 @@ export class UserService {
     const newUserData = {
       email,
       name,
-      avatarLink: avatarLink ?? user.avatarLink,
+      avatar: avatar,
       notifiedAt: new Date(),
       subscribers: [],
       passwordHash: '',
@@ -59,12 +60,14 @@ export class UserService {
     return await this.userRepository.create(userEntity);
   }
 
-  async updateUser({id}: UserAuthDTO, { avatarLink, password }: UserUpdateDTO) {
+  async updateUser({id}: UserAuthDTO, { avatar, password }: UserUpdateDTO) {
     const user = await this.getUser({id})
 
+    const posts = await this.rmqService.send<ObjectId, number[]>(RPC.GetPosts, user.id)
     const update = {
       ...user,
-      avatarLink: avatarLink ?? user.avatarLink
+      posts,
+      avatar: avatar ?? user.avatar
     }
 
     const userEntity = password
@@ -74,19 +77,7 @@ export class UserService {
     return await this.userRepository.update(id, userEntity)
   }
 
-  async uploadAvatar({id}: UserAuthDTO, { avatarLink }: UserUpdateDTO) {
-    const user = await this.getUser({id})
-
-    const update = {
-      ...user,
-      avatarLink: avatarLink ?? user.avatarLink
-    }
-
-    const userEntity = new UserEntity(update)
-    return await this.userRepository.update(id, userEntity)
-  }
-
-  async subscribe(user: UserAuthDTO, dto: UserSubscribeDTO) {
+  async subscribe(user: UserAuthDTO, dto: SubcribeDTO) {
     const {id} = user
     await this.getUser({id})
 
@@ -99,7 +90,6 @@ export class UserService {
 
   async setNotified(id: string) {
     const user = await this.getUser({id})
-
     const userEntity = new UserEntity({...user, notifiedAt: new Date()})
 
     return await this.userRepository.update(id, userEntity)

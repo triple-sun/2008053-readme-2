@@ -3,11 +3,10 @@ import { Entity } from "../enum/utils.enum"
 import { Property } from "../enum/property.enum"
 import { capitalize, mapArrToObject } from "./common.utils"
 import { APIDescripion } from "../enum/api-description.enum"
-import { Logger } from "@nestjs/common"
 import { SchemaObject } from "@nestjs/swagger/dist/interfaces/open-api-spec.interface"
 import { ApiBodyOptions, ApiPropertyOptions } from "@nestjs/swagger"
 import { getConstraints, Size } from "./size.utils"
-import { GetSchemaOptions } from "../type/options.type"
+import { TSchemaOptions } from "../type/options.type"
 
 export const getOptions = <T extends SchemaObject | ApiPropertyOptions = Record<string, SchemaObject>> (
   entity: Entity, property: Property, options?: ApiPropertyOptions
@@ -18,18 +17,13 @@ export const getOptions = <T extends SchemaObject | ApiPropertyOptions = Record<
   const constraints = Size[prop] ? getConstraints(prop, options?.type?.toString()) : {}
   const title = property ?? ''
 
-
-  const result =  {
+  return {
     title,
     example,
     description,
     ...constraints,
     ...options
-  }
-
-  Logger.log(result)
-
-  return result as T
+  } as T
 }
 
 export const getSchemaForProps = (entity: Entity, props: Property[], options?: ApiPropertyOptions) => {
@@ -42,14 +36,14 @@ export const getSchemaForProps = (entity: Entity, props: Property[], options?: A
   return schema as Record<string, SchemaObject>
 }
 
-export const getSchema = ({props, required = [], options, hasFile = false, requireAll = false}: GetSchemaOptions): ApiBodyOptions => ({
+export const getSchema = ({props = [], required = [], options = {}, entity, hasFile = false, requireAll = false}: TSchemaOptions): ApiBodyOptions => {
+  return {
   schema: {
     type: "object",
     required: requireAll ? props : required,
     properties: {
-      ...(
-        hasFile ? {file: { type: "file", format: "binary" }} : {}
-      ),
-      ...getSchemaForProps(Entity.User, props, options),
+      ...(hasFile ? { file: { type: "file", format: "binary" }} : {}),
+      ...getSchemaForProps(entity, props, options),
     }}
-})
+  }
+}

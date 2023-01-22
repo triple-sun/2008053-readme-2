@@ -1,21 +1,26 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { UserEntity } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { AppError, UserLoginDTO, UserRDO } from '@readme/core';
+import { AppError, UserError, UserLoginDTO } from '@readme/core';
+import { IUser } from '@readme/shared-types';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async verifyUser(dto: UserLoginDTO) {
     const {email, password: password} = dto;
 
-    const user = await this.userService.getUser({email})
+    const user = await this.userRepository.findByEmail(email)
+
+    if (!user) {
+      throw new NotFoundException(UserError.Email.NotFound(email))
+    }
 
     const userEntity = new UserEntity(user);
 
@@ -26,12 +31,15 @@ export class AuthService {
     return userEntity.toObject();
   }
 
-  async loginUser(user: UserRDO) {
+  async loginUser(user: IUser) {
     const payload = {
-      id: user.id,
+      sub: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
     };
+
+    console.log(this)
 
     return await this.jwtService.signAsync(payload)
   }

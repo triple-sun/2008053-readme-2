@@ -12,12 +12,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix(Prefix.Global);
+  app.useGlobalPipes( new ValidationPipe({
+    transform: true, validateCustomDecorators: true, skipMissingProperties: true,
+    transformOptions: { enableImplicitConversion: true, exposeDefaultValues: true }
+  }))
 
-  SwaggerModule.setup(Path.Spec, app, SwaggerModule.createDocument(app, NotifyAPI.Config))
+  const document = SwaggerModule.createDocument(app, NotifyAPI.Config)
+  SwaggerModule.setup(Path.Spec, app, document)
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, validateCustomDecorators: true }))
-
-  await app.listen(NotifyAPI.Port);
+  await app.listen(NotifyAPI.Port)
 
   logAppRunning(NotifyAPI.Name, NotifyAPI.Port)
 }

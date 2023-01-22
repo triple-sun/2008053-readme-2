@@ -28,7 +28,6 @@ export const ValidateENVPort = (validationOptions?: ValidationOptions) => {
       options: validationOptions,
       validator: {
         validate(value) {
-          console.log(value >= Size.Port.Max, Size.Port.Min)
             return typeof value  === 'number' && value <= Size.Port.Max && value > Size.Port.Min
         },
         defaultMessage(args: ValidationArguments) {

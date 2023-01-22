@@ -1,20 +1,18 @@
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { AppName } from '../enum/utils.enum';
+import { JwtModuleAsyncOptions } from '@nestjs/jwt';
 
 export const jwtConfig = registerAs(AppName.JWT, () => ({
   secret: process.env.JWT_SECRET,
 }));
 
-export const getJwtConfig = async (configService: ConfigService): Promise<JwtModuleOptions> => {
-  return {
-    secret: configService.get<string>(`${AppName.JWT}.secret`),
-    signOptions: { expiresIn: '10 days', algorithm: 'HS256' }
-  }
-}
-
-export const jwtModuleConfig = {
+export const getJWTConfig = (): JwtModuleAsyncOptions => ({
+  inject: [ConfigService],
   imports: [ConfigModule],
-  useFactory: getJwtConfig,
-  inject: [ConfigService]
+  useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> => ({
+    secret: configService.get<string>(`${AppName.JWT}.secret`),
+    signOptions: { expiresIn: '7000000s', algorithm: 'HS256' }
+  })
 }
+)

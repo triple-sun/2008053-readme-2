@@ -1,39 +1,24 @@
-import { ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
+import { ApiExtraModels, ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
 import { ContentType } from "@prisma/client";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Expose, Transform } from "class-transformer";
-import { ArrayMaxSize, IsArray, IsBoolean, IsDate, IsDefined, IsMongoId, IsNumber, IsOptional, IsString } from "class-validator";
+import { Expose, Transform, Type } from "class-transformer";
+import { ArrayMaxSize, IsArray, IsBoolean, IsDate, IsDefined, IsMongoId, IsNumber, IsOptional, IsString, MaxLength, ValidateIf, ValidateNested } from "class-validator";
 import { Entity, getOptions, PostProperty, Property, Size, ValidateLength } from "@readme/core";
-import { ContentDTO } from "../content/content.dto";
 
-export class Post {
-  @Expose()
-  @IsOptional()
-  @Transform(({value}) => +value)
-  public id?: number;
+import { ClassForType } from "../../post.const";
+import { LinkDTO } from "../content/link.dto";
+import { VideoDTO } from "../content/video.dto";
+import { QuoteDTO } from "../content/quote.dto";
+import { TextDTO } from "../content/text.dto";
+import { PhotoDTO } from "../content/photo.dto";
 
+@ApiExtraModels(LinkDTO, VideoDTO, QuoteDTO, TextDTO, PhotoDTO)
+export class ContentDTO {
   @Expose()
-  @IsDefined()
-  public type: ContentType;
-
-  @Expose()
-  public isRepost?: boolean;
-
-  @Expose()
-  public isDraft?: boolean;
-
-  @Expose()
-  @IsMongoId()
-  public authorID?: string;
-
-  @Expose()
-  @Transform(({value, obj}) => !value ? obj.postID ?? obj.id : value )
-  @IsNumber()
-  public originID?: number;
-
-  @Expose()
-  @IsArray()
-  public tags?: string[];
+  @ValidateNested()
+  @Type(({object}) => ClassForType.DTO[object.type])
+  @ApiProperty(PostProperty(Property.Content))
+  public content: LinkDTO | VideoDTO | QuoteDTO | TextDTO | PhotoDTO
 }
 
 export class PostIDDTO {
@@ -51,34 +36,28 @@ export class TagDTO {
   public tag?: string;
 }
 
-export class PostTagsDTO extends PickType(Post, ['tags']) {
+export class PostTagsDTO {
   @Expose()
   @IsOptional()
   @IsArray()
   @ValidateLength({})
   @ArrayMaxSize(Size.Tags.Max)
-  @Transform(({ value }) => value ? [... new Set(value.map((tag: string) => tag.toLowerCase()))] : [])
+  @Transform(({ value }) => value ? [...(new Set(
+    value.map((tag: string) => tag.toLowerCase())
+  ))] : [])
   @ApiPropertyOptional(PostProperty(Property.Tags, { maxItems: Size.Tags.Max }))
   public tags?: string[];
 }
 
-export class IsDraftDTO extends PickType(Post, ['isDraft'])  {
+export class IsDraftDTO {
   @Expose()
   @IsString()
   @Transform(({value}) => ContentType[value.toUpperCase()])
   @ApiProperty(PostProperty(Property.IsDraft, {default: false}))
-  public IsDraft: boolean;
+  public isDraft: boolean;
 }
 
-export class TypeDTO extends PickType(Post, ['type'])  {
-  @Expose()
-  @IsString()
-  @Transform(({value}) => ContentType[value.toUpperCase()])
-  @ApiProperty(PostProperty(Property.Type, {name: Property.Type, enum: ContentType }))
-  public type: ContentType;
-}
-
-export class AuthorIDDTO extends PickType(Post, ['authorID'])  {
+export class AuthorIDDTO {
   @Expose()
   @IsMongoId()
   @ApiProperty(PostProperty(Property.AuthorID))
@@ -101,12 +80,6 @@ export class SinceDTO {
   since: Date;
 }
 
-export class PostCreateDTO extends IntersectionType(
-  PostTagsDTO,
-  IntersectionType(ContentDTO, TypeDTO)
-) {}
-
-
 export class PostToggleDTO {
   @Expose()
   @IsOptional()
@@ -121,14 +94,8 @@ export class PostToggleDTO {
   public isRepost?: boolean
 }
 
+export class PostCreateDTO extends IntersectionType(ContentDTO, PostTagsDTO) {}
+
 export class PostUpdateDTO extends IntersectionType(
-  PartialType(
-    IntersectionType(
-      PostTagsDTO, PostToggleDTO
-      )
-    ),
-  PartialType(
-    IntersectionType(
-      PostCreateDTO, PublishAtDTO
-    )
-)) {}
+  PartialType(PostCreateDTO), IntersectionType(PublishAtDTO, PostToggleDTO)
+) {}

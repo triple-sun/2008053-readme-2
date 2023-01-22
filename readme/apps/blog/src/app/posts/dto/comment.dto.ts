@@ -5,8 +5,7 @@ import { IsInt, IsString } from 'class-validator';
 import { PageDTO } from './page.dto';
 import { PostIDDTO } from './post/post.dto';
 
-
-export class CommentID {
+export class CommentIDDTO {
   @Expose()
   @IsInt()
   public commentID: number;
@@ -39,5 +38,5 @@ export class CommentsDTO extends IntersectionType(
   PageDTO
 ) {}
 
-export class CommentRDO extends IntersectionType(CommentDTO, CommentID) {}
+export class CommentRDO extends IntersectionType(CommentDTO, CommentIDDTO) {}
 

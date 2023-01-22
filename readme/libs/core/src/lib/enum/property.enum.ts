@@ -15,7 +15,7 @@ export enum Property {
   Desc = 'desc',
   Quote = 'quote',
   Avatar = 'avatar',
-  AvatarLink = 'avatar',
+  AvatarLink = 'avatarLink',
   VideoLink = 'videoLink',
   Photo = 'photo',
   PhotoLink = 'photoLink',
@@ -47,5 +47,6 @@ export enum Property {
   Name = 'name',
   Subscribers = 'subscribers',
   Subscriptions = 'subscriptions',
+  SubscribersCount = 'subscribersCount',
   Password = 'password',
 }

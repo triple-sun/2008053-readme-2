@@ -13,8 +13,7 @@ export const mongoConfig = registerAs(AppName.Mongo, () => ({
   authBase: process.env.MONGO_AUTH_BASE,
 }))
 
-export const getMongoConfig = (): MongooseModuleAsyncOptions => {
-  return {
+export const getMongoConfig = (): MongooseModuleAsyncOptions => ({
     useFactory: async (configService: ConfigService) => {
       return {
         uri: getMongoConnectionString({
@@ -28,5 +27,5 @@ export const getMongoConfig = (): MongooseModuleAsyncOptions => {
       }
     },
     inject: [ConfigService]
-  }
-}
+})
+

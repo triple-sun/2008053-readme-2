@@ -10,7 +10,6 @@ export class MongoIDValidationPipe implements PipeTransform {
     }
 
     if (!Types.ObjectId.isValid(value)) {
-      console.log(value, data)
       throw new BadRequestException(InvalidError({value, property: data}));
     }
 
