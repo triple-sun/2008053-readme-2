@@ -1,57 +1,30 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Query } from '@nestjs/common';
+import {  ApiExtraModels, ApiTags } from '@nestjs/swagger';
 
-import { fillObject, Path, Prefix, UserInfo, RPC, UserID, JwtAuthGuard, UserRDO } from '@readme/core';
+import { fillObject, Prefix, RPC, UserRDO, User, UserAuthDTO, UserCreateDTO, UserUpdateDTO, SubscribeDTO, UserIDDTO, ApiCommonResponses, Entity, AppInfo } from '@readme/core';
 import { UserService } from './user.service';
-import { UserUpdateDTO } from './dto/user-update.dto';
-import { UserCreateDTO } from './dto/user-create.dto';
-import { RMQRoute } from 'nestjs-rmq';
-import { UserSubscribeDTO } from './dto/user-subscribe.dto';
-import { UserQuery } from './query/user.query';
-import { FormDataRequest } from 'nestjs-form-data';
+import { MessagePattern } from '@nestjs/microservices';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
+@ApiExtraModels(UserRDO)
 export class UserController {
   constructor(
     private readonly userService: UserService,
   ) {}
 
-  @Get()
-  @ApiResponse({
-   type: UserRDO,
-   status: HttpStatus.OK,
-   description: UserInfo.Found
-  })
-  async index() {
-    const users = await this.userService.getUsers()
-
-    return users.map((user) => fillObject(UserRDO, user));
-  }
-
-  @Get(Path.User)
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-   type: UserRDO,
-   status: HttpStatus.OK,
-   description: UserInfo.Found
-  })
+  @MessagePattern(RPC.GetUser)
+  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Found}`})
   async show(
-    @Query() {userID}: UserQuery,
+    @Query() dto: UserIDDTO,
   ) {
-    const user = await this.userService.getUserData(userID);
+    const user = await this.userService.getUserData(dto);
 
     return fillObject(UserRDO, user);
   }
 
-  @Post(Path.Register)
-  @FormDataRequest()
-  @ApiBody({ type: UserCreateDTO})
-  @ApiResponse({
-    type: UserRDO,
-    status: HttpStatus.CREATED,
-    description: UserInfo.Register
-  })
+  @MessagePattern(RPC.AddUser)
+  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${AppInfo.Login}`})
   async register(
     @Body() dto: UserCreateDTO,
   ) {
@@ -60,49 +33,25 @@ export class UserController {
     return fillObject(UserRDO, user);
   }
 
-  @Put(`${Path.Update}`)
-  @UseGuards(JwtAuthGuard)
-  @FormDataRequest()
-  @ApiBody({
-    type: UserUpdateDTO
-  })
-  @ApiResponse({
-   type: UserRDO,
-   status: HttpStatus.OK,
-   description: UserInfo.Updated
-  })
+  @MessagePattern(RPC.UpdateUser)
   async update(
+    @User() user: UserAuthDTO,
     @Body() dto: UserUpdateDTO,
-    @UserID() userID: string,
   ) {
-    const update = await this.userService.updateUser(userID, dto);
+    const update = await this.userService.updateUser(user, dto);
 
     return fillObject(UserRDO, update);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Patch(Path.Subscribe)
-  @ApiResponse({
-   type: UserRDO,
-   status: HttpStatus.OK,
-   description: UserInfo.Updated
-  })
-  async subscribe(
-    @UserID() userID: string,
-    @Query() query: UserSubscribeDTO
-  ) {
-    const update = await this.userService.subscribe(query, userID);
+ @MessagePattern(RPC.Subscribe)
+  async subscribe(user: UserAuthDTO, dto: SubscribeDTO) {
+    const update = await this.userService.subscribe(user,dto);
 
     return fillObject(UserRDO, update);
   }
 
-  @RMQRoute(RPC.GetUser)
-  public async getUser(id: string) {
-    return await this.userService.getUser({id})
-  }
-
-  @RMQRoute(RPC.Notified)
-  public async setNotified(id: string) {
-    return await this.userService.setNotified(id)
+  @MessagePattern(RPC.GetUser)
+  public async getUser(dto: Partial<Pick<UserRDO, 'id' | 'email'>>) {
+    return await this.userService.getUser(dto)
   }
 }

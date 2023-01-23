@@ -1,40 +1,48 @@
-import { Injectable } from "@nestjs/common";
-import { validateCommentExists, validateCommentUserID } from "@readme/core";
-
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
-import { CommentCreateDTO } from "./dto/comment-create.dto";
-import { CommentListQuery } from "./query/comment-list.query";
-import { PostService } from "../posts/post.service";
-import { CommentCreateQuery } from "./query/comment-create.query";
+import { CommentError, CommentsDTO, PostError, PostIDDTO, UserIDDTO, UserAuthDTO, CommentCreateDTO, CommentIDDTO } from "@readme/core";
+import { PostRepository } from "../posts/post.repository";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
-    private readonly postService: PostService
+    private readonly postRepository: PostRepository
       ) {}
 
-  async getCommentsForPost(query: CommentListQuery) {
-    await this.postService.getPost(query.postID)
+  async getPost(id: number)  {
+    const post = await this.postRepository.findOne(id)
 
-    return await this.commentRepository.findAllByPostID(query)
+    if (!post) {
+      return { error: PostError.NotFound(id)}
+    }
+  }
+  async getCommentsForPost(dto: CommentsDTO) {
+    await this.getPost(dto.postId)
+
+    return await this.commentRepository.findAllByPostID(dto)
   }
 
-  async createComment(userID: string, query: CommentCreateQuery, dto: CommentCreateDTO) {
-    const newComment = new CommentEntity({userID, ...dto, ...query})
+  async createComment({userId}: UserIDDTO, {postId}: PostIDDTO, dto: CommentCreateDTO) {
+    await this.getPost(postId)
 
-    await this.postService.getPost(query.postID)
+    const newComment = new CommentEntity({userId,  postId, ...dto,})
 
-    return await this.commentRepository.create(newComment);
+    return await this.commentRepository.create(newComment)
   }
 
-  async deleteComment(commentID: number, userID: string) {
-    const comment = await this.commentRepository.findOne(commentID);
+  async deleteComment({commentId}: CommentIDDTO, user: UserAuthDTO ) {
+    const comment = await this.commentRepository.findOne(commentId);
 
-    validateCommentExists(commentID, comment)
-    validateCommentUserID(comment, userID)
+    if (!comment) {
+      return { error: CommentError.NotFound(commentId) }
+    }
 
-    await this.commentRepository.destroy(commentID)
+    if (comment.userId !== user.userId.toString()) {
+      return { error: CommentError.Permission}
+    }
+
+    await this.commentRepository.destroy(commentId)
   }
 }

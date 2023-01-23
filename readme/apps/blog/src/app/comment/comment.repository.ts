@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IComment, ICRUDRepo } from '@readme/shared-types';
-
 import { CommentEntity } from './comment.entity';
-import { CommentListQuery } from './query/comment-list.query';
-import { Property, Size } from '@readme/core';
+import { CommentsDTO, Size } from '@readme/core';
 
 @Injectable()
 export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComment> {
@@ -23,25 +21,25 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
         }
       }
     });
-  }
+  }w
 
-  async findAllByPostID({postID, page}: CommentListQuery): Promise<IComment[]> {
+  async findAllByPostID({postId, page}: CommentsDTO): Promise<IComment[]> {
     const comments = this.prisma.comment.findMany({
       where: {
-        postID
+        postId
       },
       select: {
         id: true,
-        text: true,
+        comment: true,
         post: {
           select: {id: true}
         },
-        userID: true,
-        postID: true,
+        userId: true,
+        postId: true,
         createdAt: true
       },
-      take: Size.Max(Property.Comments),
-      skip: page > 0 ? Size.Max(Property.Comments) * (page - 1) : undefined
+      take: Size.Comments.Max,
+      skip: page > 0 ? Size.Comments.Max * (page - 1) : undefined
     })
 
     return comments
@@ -49,16 +47,16 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
 
   public async create(item: CommentEntity): Promise<IComment> {
     const entityData = item.toObject();
-    const {postID, userID, text} = entityData;
+    const {postId, userId, comment} = entityData;
 
-    return this.prisma.comment.create(
+    return await this.prisma.comment.create(
       {
         data: {
-          text,
-          userID,
+          comment,
+          userId,
           post: {
             connect: {
-              id: postID
+              id: postId
             }
           }
         },

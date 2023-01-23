@@ -1,14 +1,17 @@
 import { UsersConfig } from '@readme/core';
 import { IUser } from '@readme/shared-types';
 import { genSalt, hash, compare } from 'bcrypt';
-import { Types } from 'mongoose';
+import { FileSystemStoredFile } from 'nestjs-form-data';
 
 export class UserEntity implements IUser {
   public _id: string;
-  public avatar?: string;
+  public id: string;
+  public avatar?: FileSystemStoredFile;
+  public avatarLink?: string;
   public email: string;
   public name: string;
-  public subscriptions?: Types.ObjectId[];
+  public subscriptions?: string[];
+  public subscribers?: string[];
   public passwordHash: string;
   public notifiedAt?: Date;
 
@@ -19,6 +22,7 @@ export class UserEntity implements IUser {
   public async setPassword(password: string): Promise<UserEntity> {
     const salt = await genSalt(UsersConfig.SaltRounds);
     this.passwordHash = await hash(password, salt);
+
     return this;
   }
 
@@ -32,11 +36,11 @@ export class UserEntity implements IUser {
 
   public fillEntity(user: IUser) {
     this._id = user._id;
+    this.id = user.id;
     this.name = user.name;
-    this.avatar = user.avatar;
     this.email = user.email;
+    this.avatar = user.avatar
     this.subscriptions = user.subscriptions;
     this.passwordHash = user.passwordHash;
-    this.notifiedAt = user.notifiedAt;
   }
 }

@@ -1,28 +1,31 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { IUser } from '@readme/shared-types';
-import { AuthError } from '@readme/core';
+import { Injectable } from '@nestjs/common';
 
-import { UserEntity } from '../user/user.entity';
-import { UserLoginDTO } from '../user/dto/user-login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { AppError, UserError, UserLoginDTO } from '@readme/core';
+import { IUser } from '@readme/shared-types';
+import { UserEntity } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async verifyUser(dto: UserLoginDTO) {
-    const {email, password} = dto;
+    const {email, password: password} = dto;
 
-    const user = await this.userService.getUser({email})
+    const user = await this.userRepository.findByEmail(email)
+
+    if (!user) {
+      return { error: UserError.Email.NotFound(email)}
+    }
 
     const userEntity = new UserEntity(user);
 
     if (! await userEntity.comparePassword(password)) {
-      throw new UnauthorizedException(AuthError.Login);
+      return { error: AppError.Auth }
     }
 
     return userEntity.toObject();
@@ -31,7 +34,7 @@ export class AuthService {
   async loginUser(user: IUser) {
     const payload = {
       sub: user._id,
-      id: user.id,
+      id: user._id,
       name: user.name,
       email: user.email,
     };

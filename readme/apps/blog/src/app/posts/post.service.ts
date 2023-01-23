@@ -1,72 +1,42 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { fillPostRDO, NotifyDTO, PostCreateDTO, PostError, RPC, toggleArrElement, validatePostExists, validatePostUserID, validateRepost } from '@readme/core';
-import { IPost, IUser } from '@readme/shared-types';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { AppError, PostCreateDTO, PostError, PostIDDTO, PostsFullQueryDTO, PostUpdateDTO, QueryType, toggleArrElement, UserAuthDTO, UserError, UserIDDTO, FeedDTO} from '@readme/core';
+import { IPost } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { RMQService } from 'nestjs-rmq';
-import { PostsQuery } from './query/posts.query.dto';
-import { ContentType } from '@prisma/client';
-import { PostUpdateDTO } from './query/post-update.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly rmqService: RMQService
   ) {}
-  async getPostsByAuthor(query: PostsQuery, authorID: string) {
-    return await this.postRepository.find({...query, authorID})
+
+  async getPosts<T>(query: PostsFullQueryDTO<T>) {
+    return await this.postRepository.find<T>(query)
   }
 
-  async getPostsByUser(userID: string, query?: PostsQuery) {
-    return await this.postRepository.find({...query, userID})
-  }
-
-  async getPostsByTag(query: PostsQuery, tag: string) {
-    return await this.postRepository.find({...query, tag})
-  }
-
-  async getPostsByType(query: PostsQuery, type: ContentType) {
-    return await this.postRepository.find({...query, type})
-  }
-
-  async getPostsByTitle(query: PostsQuery, title: string) {
-    return await this.postRepository.find({...query, title})
-  }
-
-  async getDrafts(query: PostsQuery, userID: string) {
-    return await this.postRepository.find({...query, authorID: userID, isDraft: true})
-  }
-
-  async getPosts(query: PostsQuery) {
+  async getFeed(query: PostsFullQueryDTO<FeedDTO>): Promise<IPost[]> {
     return await this.postRepository.find(query)
   }
 
-  async getFeed(userID: string, query?: PostsQuery) {
-    const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
-    const subs = [...user.subscriptions.map((sub) => sub.toString()), userID]
+  async getPost(postId: number): Promise<IPost> {
+    const post = await this.postRepository.findOne(postId);
 
-    return await this.postRepository.find({...query, subs})
-  }
-
-  async getPost(postID: number): Promise<IPost> {
-    const post = await this.postRepository.findOne(postID);
-
-    validatePostExists(post, postID)
+    if (!post) {
+      throw new NotFoundException(PostError.NotFound(postId))
+    }
 
     return post
   }
 
-  async createPost(userID: string, dto: PostCreateDTO) {
-    const {tags, type} = dto
-    const content = dto.photo ? {photoLink: dto.photo} : dto[type.toLowerCase()]
+  async createPost({userId}: UserIDDTO, dto: PostCreateDTO): Promise<IPost> {
+    const {tags, content, type} = dto
 
     const post = {
       ...content,
       type,
       tags,
-      userID,
+      userId,
       comments: [],
       likes: [],
     }
@@ -76,75 +46,65 @@ export class PostService {
     return await this.postRepository.create(postEntity);
   }
 
-  async updatePost(userID: string, postID: number, dto: PostUpdateDTO) {
-    const {publishAt, tags} = dto
-    const post = await this.getPost(postID);
+  async updatePost({postId}: PostIDDTO, {userId}: UserIDDTO, dto: PostUpdateDTO): Promise<IPost> {
+    const {publishAt, tags, type, content} = dto
+    const post = await this.getPost(postId);
 
-    validatePostExists(post, postID)
-    validatePostUserID(post, userID)
+    if (post.userId !== userId) {
+      throw new ForbiddenException(UserError.Id.Permission)
+    }
 
     const update = {
       ...post,
-      ...dto[dto.type.toLowerCase()],
-      type: dto.type ?? post.type,
-      publishAt,
-      tags: tags ?? post.tags
+      ...content,
+      type: type ?? post.type,
+      publishAt: publishAt ?? post.publishAt ?? new Date(),
+      tags: tags ?? post.tags ?? []
     }
 
-    console.log({update})
     const updatedEntity = new PostEntity(update)
 
-    const updatedPost = await this.postRepository.update(postID, updatedEntity)
+    const updatedPost = await this.postRepository.update({postId}.postId, updatedEntity)
 
-    console.log({updatedPost})
     return updatedPost
   }
 
-  async deletePost(userID: string, postID: number) {
-    const post = await this.getPost(postID);
+  async deletePost({postId}: PostIDDTO, {userId}: UserIDDTO) {
+    const post = await this.getPost(postId);
 
-    validatePostExists(post, postID)
-    validatePostUserID(post, userID)
+    if (post.userId !== userId) { throw new ForbiddenException(UserError.Id.Permission)}
 
-    await this.postRepository.destroy(postID)
+    await this.postRepository.destroy(postId)
   }
 
-  async repost(postID: number, userID: string): Promise<IPost> {
-    const origin = await this.getPost(postID);
+  async repost({postId}: PostIDDTO, {userId}: UserIDDTO): Promise<IPost> {
+    const origin = await this.getPost(postId);
+    const reposted = await this.getPosts({type: QueryType.UserId, searchFor: { userId }})
 
-    validateRepost(origin, userID)
+    if ((origin.userId === userId && origin.authorId === userId) || !!reposted.some((repost) => repost.userId === userId)) {
+       throw new ConflictException(AppError.TripleRepost)
+    }
 
     const repostEntity = new PostEntity({...origin, id: origin.id, isRepost: true})
 
     return await this.postRepository.create(repostEntity);
   }
 
-  async likePost(postID: number, userID: string): Promise<IPost> {
-    const post = await this.getPost(postID);
+  async likePost({postId}: PostIDDTO, {userId}: UserIDDTO): Promise<IPost> {
+    const post = await this.getPost(postId);
 
-    const likes = toggleArrElement(post.likes, userID);
+    const likes = toggleArrElement(post.likes, userId);
 
-    return await this.postRepository.like(postID, likes)
+    return await this.postRepository.like(postId, likes)
   }
 
-  async publishPost(postID: number, userID: string, publishAt?: Date): Promise<IPost> {
-    const post = await this.getPost(postID);
+  async publishPost({postId}: PostIDDTO, {userId}: UserAuthDTO, publishAt?: Date): Promise<IPost> {
+    const post = await this.getPost(postId);
 
-    if (post.userID !== userID) {
-      throw new ForbiddenException(PostError.Permission)
+    if (post.userId !== userId) {
+      throw new ForbiddenException(UserError.Id.Permission)
     }
 
-    return await this.postRepository.publish(postID, publishAt ?? new Date())
-  }
-
-  async notify(userID: string) {
-    const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
-
-    const subs = [...new Set([...user.subscriptions.map((sub) => sub.toString()), userID])]
-
-    const posts = (await this.postRepository.find({subs, since: user.notifiedAt})).map((post) => fillPostRDO(post))
-
-    return await this.rmqService.notify<NotifyDTO>(RPC.Notify, {userID, posts})
-      .then(() => this.rmqService.notify<string>(RPC.Notified, userID))
+    return await this.postRepository.publish(post.id, publishAt ?? new Date())
   }
 }

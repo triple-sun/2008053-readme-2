@@ -1,11 +1,8 @@
-import { IsString } from 'class-validator';
-import { APIEnvConfig, ENVError, JWTEnvConfig, MongoEnvConfig, RMQEnvConfig, validateEnv } from '@readme/core';
+import { APIEnvConfig, JWTEnvConfig, MongoEnvConfig, RMQEnvConfig, validateEnv, ValidateENVProp } from '@readme/core';
 import { IntersectionType } from '@nestjs/swagger';
 
 class UsersEnvConfig {
-  @IsString({
-    message: ENVError.AvatarDir
-  })
+  @ValidateENVProp()
   public UPLOAD_DIR: string;
 }
 

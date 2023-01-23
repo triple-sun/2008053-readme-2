@@ -1,11 +1,11 @@
 /* eslint-disable @nrwl/nx/enforce-module-boundaries */
-import { ContentType } from "@prisma/client";
-import { IComment } from "./comment.interface";
+import { Comment, ContentType } from "@prisma/client";
 
 export interface IPost {
   id?: number;
   type: ContentType;
-  link?: string
+  title?: string
+  webLink?: string
   desc?: string
   text?: string
   ann?: string
@@ -15,14 +15,14 @@ export interface IPost {
   photoLink?: string;
   tags?: string[];
   likes?: string[];
-  comments?: IComment[];
+  comments?: Comment[];
   likeCount?: number;
   commentCount?: number;
   isRepost?: boolean;
   isDraft?: boolean;
-  userID: string;
-  originID?: number;
-  authorID?: string;
+  userId?: string;
+  originId?: number;
+  authorId?: string;
   publishAt?: Date;
   createdAt?: Date;
 }

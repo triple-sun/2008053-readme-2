@@ -13,6 +13,13 @@
         "outputPath": "dist/apps/users",
         "main": "apps/users/src/main.ts",
         "tsConfig": "apps/users/tsconfig.app.json",
+        "transformers": [{
+          "name": "@nestjs/swagger/plugin",
+          "options": {
+            "classValidatorShim": true,
+            "introspectComments": true
+          }
+        }],
         "assets": ["apps/users/src/assets"],
         "generatePackageJson": true
       },

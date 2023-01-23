@@ -29,3 +29,18 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: test
       ME_CONFIG_MONGODB_URL: mongodb://admin:test@mongodb:27017/
+
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: readme.users.rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: test
+    ports:
+      - 5673:5672
+      - 1085:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MailConfig, TPostRDO } from '@readme/core';
-import { ISubscriber } from '@readme/shared-types';
+import { MailConfig, NotifyDTO } from '@readme/core';
+import { ISub } from '@readme/shared-types';
 
 @Injectable()
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  public async sendNotifyNewPosts(subscriber: ISubscriber, posts: TPostRDO[]) {
+  public async sendNotifyNewPosts({sub, posts}: NotifyDTO) {
     await this.mailerService.sendMail({
-      to: subscriber.email,
+      to: sub.email,
       subject: MailConfig.NewPostsSubject,
       template: MailConfig.NewPostsTemplate,
       context: {
-        name: subscriber.name,
+        name: sub.name,
         posts: posts
       }
     })
   }
 
-  public async sendNotifyNewSubscriber({email, name}: ISubscriber) {
+  public async sendNotifyNewSubscriber({email, name}: ISub) {
     await this.mailerService.sendMail({
       to: email,
       subject: MailConfig.NewSubSubject,

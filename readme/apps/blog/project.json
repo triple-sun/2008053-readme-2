@@ -13,17 +13,15 @@
         "outputPath": "dist/apps/blog",
         "main": "apps/blog/src/main.ts",
         "tsConfig": "apps/blog/tsconfig.app.json",
-        "assets": ["apps/blog/src/assets"],
-        "generatePackageJson": true,
-        "transformers": [
-          {
-            "name": "@nestjs/swagger/plugin",
-            "options": {
-              "classValidatorShim": true,
-              "introspectComments": true
+        "transformers": [{
+          "name": "@nestjs/swagger/plugin",
+          "options": {
+            "classValidatorShim": true,
+            "introspectComments": true
           }
-        }
-      ]
+        }],
+        "assets": ["apps/blog/src/assets"],
+        "generatePackageJson": true
       },
       "configurations": {
         "production": {

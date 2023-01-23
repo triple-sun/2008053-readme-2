@@ -1,11 +1,10 @@
-import { EnvFilePath, formDataConfig, jwtConfig, moduleConfig, rmqModuleConfig } from "@readme/core";
+import { EnvFilePath, jwtConfig, appConfig, rabbitMqConfig, formDataConfig } from "@readme/core";
 import blogEnvSchema from "./env/env.schema";
 import envValidation from "./env/env.validation";
-
 export const blogConfig = {
-  ...moduleConfig,
+  ...appConfig,
   envFilePath: EnvFilePath.Blog,
-  load: [rmqModuleConfig, jwtConfig, formDataConfig],
+  load: [jwtConfig, rabbitMqConfig, formDataConfig],
   validate: envValidation,
   validationSchema: blogEnvSchema
 }

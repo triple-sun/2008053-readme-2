@@ -3,7 +3,7 @@ import { MailerAsyncOptions } from "@nestjs-modules/mailer/dist/interfaces/maile
 import { ConfigService, registerAs } from "@nestjs/config";
 
 import { join } from "path";
-import { AppName } from "../enum/app-name";
+import { AppName } from "../enum/utils.enum";
 
 export const mailerConfig = registerAs(AppName.Mailer, () => ({
   port: process.env.MAILER_PORT,

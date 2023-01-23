@@ -16,7 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@readme/core": ["libs/core/src/index.ts"],
-      "@readme/shared-types": ["libs/shared-types/src/index.ts"]
+      "@readme/error": ["libs/error/src/index.ts"],
+      "@readme/shared-types": ["libs/shared-types/src/index.ts"],
+      "@readme/validation": ["libs/validation/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

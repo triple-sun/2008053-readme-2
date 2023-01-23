@@ -28,27 +28,27 @@ model Post {
   text      String?
   quote     String?
   author    String?
-  link      String?
+  webLink    String?
   desc      String?
   videoLink String?
   photoLink String?
   tags      String[]    @default([])
   likes     String[]    @default([])
-  isDraft   Boolean     @default(false)
-  isRepost  Boolean     @default(false)
+  isDraft   Boolean?     @default(false)
+  isRepost  Boolean?     @default(false)
   createdAt DateTime    @default(now())
   publishAt DateTime    @default(now())
-  userID    String
-  authorID  String?
-  originID  Int?
+  userId    String
+  authorId  String?
+  originId  Int?
   comments  Comment[]
 }
 
 model Comment {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  text      String
-  userID    String
-  post      Post     @relation(fields: [postID], references: [id], onDelete: Cascade)
-  postID    Int
+  comment   String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
 }

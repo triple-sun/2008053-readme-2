@@ -1,28 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { PostInclude, Property, Size, SortByType } from '@readme/core';
-import { ICRUDRepo, IPost,  } from '@readme/shared-types';
+import { Post } from '@prisma/client';
+import { IncludeForPost, PostsFullQueryDTO, Size, SortByType, SearchFor, DTOForSearch } from '@readme/core';
+import { ICRUDRepo } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostsFindQuery } from './query/posts.query.dto';
 
 @Injectable()
-export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
+export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
   constructor(
     private readonly prisma: PrismaService
   ) {}
 
-  public async create(item: PostEntity): Promise<IPost> {
-    const {comments, ...data} = item.toObject()
-    console.log({data}, {item})
+  public async create(item: PostEntity): Promise<Post> {
     return await this.prisma.post.create({
       data: {
-        ...data,
+        ...item.toObject(),
         comments: {
-          create: comments
+          create: []
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -32,42 +30,27 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     });
   }
 
-  public async findOne(id: number): Promise<IPost | null> {
+  public async findOne(id: number): Promise<Post | null> {
     console.log({id})
     const exists = await this.prisma.post.findUnique({
       where: { id },
-      include: PostInclude
+      include: IncludeForPost
     })
 
     return exists
   }
 
-  public async find({sortBy, page, isDraft, subs, authorID, type, tag, since, title, userID}: PostsFindQuery) {
-    const limit = title ? Size.Max(Property.Search) : Size.Max(Property.Query)
-    const sortByType = sortBy ?? SortByType.Date
+  public async find<T extends SearchFor>(dto: PostsFullQueryDTO<T>) {
+    const { since, searchFor, isDraft, page, sortBy} = dto
 
-    const query = () => {
-      switch(true) {
-        case !!subs:
-          return { userID: { in: subs }}
-        case !!authorID:
-          return { authorID: { equals: authorID }}
-        case !!type:
-          return { type }
-        case !!tag:
-          return { tags: { has: tag }}
-        case !!title:
-          return { title: { contains: title }}
-        case !!userID:
-          return { userID: { equals: userID }}
-        default:
-          return {}
-      }
-    }
+    const query = DTOForSearch<T>(dto)[dto.type]
+
+    const limit = searchFor.title ? Size.Search.Max : Size.Query.Max
+    const sortByType = sortBy ?? SortByType.Date
 
     const posts = await this.prisma.post.findMany({
       where: {
-        ...query(),
+        ...query,
         createdAt: {
           gt: since ?? undefined
         },
@@ -75,7 +58,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
       },
       take: limit,
       include: {
-        ...PostInclude,
+        ...IncludeForPost,
         _count:{ select: { comments: true }}
       },
       orderBy: [
@@ -83,7 +66,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           ? { [sortByType]: {_count: 'desc'}}
           : { [sortByType]: 'desc' }
       ],
-      skip: page > 0 && title ? limit * (page - 1) : undefined,
+      skip: page > 0 && dto.searchFor.title ? limit * (page - 1) : undefined,
     });
 
     return posts
@@ -100,7 +83,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           connect: comments
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -112,7 +95,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
           set: likes
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 
@@ -120,12 +103,12 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, IPost> {
     return await this.prisma.post.update({
       where: { id },
       data: {
-        isDraft: false,
+        isDraft: new Date(publishAt) < new Date() ? false : true,
         publishAt: {
           set: publishAt
         }
       },
-      include: PostInclude
+      include: IncludeForPost
     })
   }
 

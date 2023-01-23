@@ -1,58 +1,15 @@
+import { Logger } from "@nestjs/common"
 import { ApiPropertyOptions } from "@nestjs/swagger"
-import { ContentType } from "@prisma/client"
-
-import { APIExample } from "../const/api-example.const"
-import { Constraints, Required } from "../const/api-options.const"
-import { APIPropDesc } from "../const/api-prop.const"
+import { AppInfo } from "../enum/info.enum"
 import { Property } from "../enum/property.enum"
-import { Entity } from "../enum/utils.enum"
+import { AppName, Entity, Prefix } from "../enum/utils.enum"
+import { getOptions } from "./schema.utils"
 
-const { Port, Tags, Tag, Desc, Type, IsDraft, IsRepost} = Property
+export const logAppRunning = (appName: AppName, port: string | number) => Logger.log(
+  `🚀 ${appName} ${AppInfo.Running} http://localhost:${port}/${Prefix.Global}`
+)
 
-export const getConstraints = (property: Property) => {
-  const constr = Constraints[property]
-  const max = constr ? constr[0] : null
-  const min = constr ? constr[1] : null
-
-  switch (true) {
-    case !max:
-      return {}
-    case property === Port:
-      return { minimum: min, maximum: max }
-    case property === Tags:
-      return { maxItems: max, items: getConstraints(Tag)}
-    case property === Desc:
-      return { maxLength: max}
-    case !min:
-      return { maximum: max, default: max }
-    default:
-      return { minLength: min, maxLength: max }
-  }
-}
-
-export const getOptions = (prop: Property, entity: Entity, options?: ApiPropertyOptions) => {
-  const required = Required[entity]
-    .includes(prop)
-
-  const type = prop === Type
-    ? { enum: ContentType }
-    : {}
-
-  const def = (prop === (IsDraft || IsRepost))
-    ? {default: false}
-    : {}
-
-  return{ ...options, ...type, ...def, ...getConstraints(prop), required }
-}
-
-export const getApiProp = (entity: Entity, property: Property, options?: ApiPropertyOptions) => ({
-  description: `${entity} ${APIPropDesc[property]}`,
-  example: APIExample[entity] ? APIExample[entity][property] : {},
-  ...getOptions(property, entity, options)
-})
-
-export const APIProp = {
-  Comment: (prop: Property, options?: ApiPropertyOptions) => getApiProp(Entity.Comment, prop, options),
-  Post: (prop: Property, options?: ApiPropertyOptions) => getApiProp(Entity.Post, prop, options),
-  Users: (prop: Property, options?: ApiPropertyOptions) => getApiProp(Entity.User, prop, options),
-}
+export const UserProperty = (prop: Property, options?: ApiPropertyOptions) => getOptions(Entity.User, prop, options)
+export const CommentProperty = (prop: Property, options?: ApiPropertyOptions) => getOptions(Entity.Comment, prop, options)
+export const PostProperty = (prop: Property, options?: ApiPropertyOptions) => getOptions(Entity.Post, prop, options)
+export const SubProperty = (prop: Property, options?: ApiPropertyOptions) => getOptions(Entity.Subscriber, prop, options)

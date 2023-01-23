@@ -12,10 +12,10 @@ async function fillDb() {
               likes: ['43', '58'],
               isDraft: false,
               isRepost: false,
-              userID: '24',
-              authorID: '24',
-              originID: 1,
-              link: 'www.test.com',
+              userId: '24',
+              authorId: '24',
+              originId: 1,
+              webLink: 'www.test.com',
               desc: 'test link'
     },
   });
@@ -28,9 +28,9 @@ async function fillDb() {
               likes: ['65', '22'],
               isDraft: false,
               isRepost: true,
-              userID: '35',
-              authorID: '24',
-              originID: 1,
+              userId: '35',
+              authorId: '24',
+              originId: 1,
               quote: 'Lorem ipsum dolor set amet.',
               author: 'Michael Bay',
     },
@@ -39,8 +39,8 @@ async function fillDb() {
     where: { id: 1 },
     update: {},
     create: {
-      text: 'test comment text',
-      userID: '54',
+      comment: 'test comment text',
+      userId: '54',
       post: {
         connect: {
           id: 2
@@ -52,8 +52,8 @@ async function fillDb() {
     where: { id: 2 },
     update: {},
     create: {
-      text: 'another test comment text',
-      userID: '65',
+      comment: 'another test comment text',
+      userId: '65',
       post: {
         connect: {
           id: 2

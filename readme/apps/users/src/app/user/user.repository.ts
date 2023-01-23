@@ -1,11 +1,11 @@
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UserSubscribeDTO } from './dto/user-subscribe.dto';
+import { UserAuthDTO, SubscribeDTO } from '@readme/core';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -29,32 +29,27 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
   public async findOne(id: string): Promise<IUser | null> {
     return await this.userModel
       .findOne({id})
-      .exec();
   }
 
   public async findSubscribers(id: string): Promise<IUser[]> {
     return await this.userModel
-      .find({ subscriptions: { '$elemMatch': {'$eq': id } }})
-      .exec();
+      .find({ subscriptions: { '$in': [id] }})
   }
 
   public async findByEmail(email: string): Promise<IUser | null> {
     return await this.userModel
       .findOne({email})
-      .exec();
   }
 
   public async update(id: string, item: UserEntity): Promise<IUser> {
     return await this.userModel
       .findByIdAndUpdate(id, item.toObject(), {new: true})
-      .exec();
   }
 
-  public async subscribe({subToID}: UserSubscribeDTO, userID: string): Promise<IUser> {
-    const isSubscribed = await this.userModel.findOne({ _id: userID, subscriptions: { '$in': [subToID] }})
+  public async subscribe({subToId}: SubscribeDTO, {userId}: UserAuthDTO): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id: userId, subscriptions: { '$in': [subToId] }})
 
     return await this.userModel
-      .findByIdAndUpdate(userID, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: userID }}, { new: true })
-      .exec()
+      .findByIdAndUpdate(userId, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: subToId }}, { new: true })
   }
 }

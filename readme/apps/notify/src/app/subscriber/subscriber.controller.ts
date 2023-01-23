@@ -1,9 +1,7 @@
-import { Controller, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard, RPC } from '@readme/core';
+import { Body, Controller } from '@nestjs/common';
+import { ApiAuth, Entity, NotifyDTO, RPC, SubscriberCreateDTO, User, UserIDDTO } from '@readme/core';
 import { SubscriberService } from './subscriber.service';
 import { RMQRoute } from 'nestjs-rmq';
-import { SubscriberCreateDTO } from './dto/subscriber-create.dto';
-import { SubscriberNotifyDTO } from './dto/subscriber-notify.dto';
 
 @Controller()
 export class SubscriberController {
@@ -11,14 +9,16 @@ export class SubscriberController {
     private readonly subscriberService: SubscriberService,
   ) {}
 
-  @RMQRoute(RPC.NewSub)
-  public async create(subscriber: SubscriberCreateDTO) {
-    return this.subscriberService.addSubscriber(subscriber);
+  @RMQRoute(RPC.AddSub)
+  public async create(user: SubscriberCreateDTO) {
+    return this.subscriberService.addSubscriber(user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @RMQRoute(RPC.Notify)
-  async notify(dto: SubscriberNotifyDTO) {
+  @ApiAuth(Entity.Subscriber)
+  async notify(
+    @Body() dto: NotifyDTO
+  ) {
     return this.subscriberService.notify(dto)
   }
 }

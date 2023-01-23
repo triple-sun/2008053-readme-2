@@ -1,11 +1,10 @@
-import { ContentType } from "@prisma/client";
-import { IComment, IEntity, IPost } from "@readme/shared-types";
+import { Comment, ContentType } from "@prisma/client";
+import { IEntity, IPost } from "@readme/shared-types";
 
 export class PostEntity implements IEntity<PostEntity>, IPost {
-  public id?: number;
   public type: ContentType;
   public title?: string;
-  public link?: string;
+  public webLink?: string;
   public desc?: string;
   public text?: string;
   public ann?: string;
@@ -16,16 +15,17 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
 
   public tags?: string[]
   public likes?: string[]
-  public comments?: IComment[]
+  public comments?: Comment[]
 
   public isDraft?: boolean;
   public isRepost?: boolean;
 
-  public userID: string;
-  public authorID?: string;
-  public originID?: number;
+  public userId: string;
+  public authorId?: string;
+  public originId?: number;
 
   public publishAt?: Date;
+  public createdAt?: Date;
 
   constructor(post: IPost) {
     this.fillEntity(post);
@@ -40,18 +40,19 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
     this.isDraft = entity.isDraft ?? false;
 
     this.publishAt = entity.publishAt ?? new Date();
+    this.createdAt = !entity.createdAt || entity.isRepost ? new Date() : entity.createdAt;
 
-    this.originID = entity.id
+    this.originId = entity.originId ?? entity.id
     this.type = entity.type;
 
     this.tags = [...entity.tags]
     this.likes = [...entity.likes]
     this.comments = entity.comments
 
-    this.userID = entity.userID;
-    this.authorID = entity.authorID ?? entity.userID
+    this.userId = entity.userId;
+    this.authorId = entity.authorId ?? entity.userId
 
-    this.link = entity.link
+    this.webLink = entity.webLink
     this.desc = entity.desc
     this.quote = entity.quote
     this.text = entity.text

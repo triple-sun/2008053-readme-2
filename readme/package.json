@@ -30,6 +30,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.13.2",
     "dayjs": "^1.11.7",
+    "file-type": "^18.2.0",
     "handlebars": "^4.7.7",
     "joi": "17.7.0",
     "mongoose": "^6.7.2",
@@ -46,6 +47,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@nestjs/cli": "^9.1.8",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@nrwl/cli": "15.0.13",

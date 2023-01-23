@@ -1,20 +1,22 @@
-import { IEntity, ISubscriber } from "@readme/shared-types";
+import { IEntity, ISub } from "@readme/shared-types";
 
-export class SubscriberEntity implements IEntity<SubscriberEntity>, ISubscriber {
+export class SubscriberEntity implements IEntity<SubscriberEntity>, ISub {
   public id: string;
   public email: string;
   public name: string;
-  public userID: string;
+  public userId: string;
+  public notifiedAt?: Date;
 
-  constructor(emailSubscriber: ISubscriber) {
+  constructor(emailSubscriber: ISub) {
     this.fillEntity(emailSubscriber);
   }
 
-  public fillEntity(entity: ISubscriber) {
+  public fillEntity(entity: ISub) {
     this.email = entity.email;
-    this.userID = entity.userID;
-    this.name = entity.name;
     this.id = entity.id;
+    this.name = entity.name;
+    this.userId = entity.userId
+    this.notifiedAt = entity.notifiedAt
   }
 
   public toObject(): SubscriberEntity {

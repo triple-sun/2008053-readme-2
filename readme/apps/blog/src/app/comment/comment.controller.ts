@@ -1,12 +1,9 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { fillObject, Prefix, CommentInfo, UserID, Path, JwtAuthGuard, Property } from '@readme/core';
+import { Body, Controller, Query} from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
+import { ApiTags } from '@nestjs/swagger';
+import { Prefix, User, PostIDDTO, CommentCreateDTO, CommentIDDTO, RPC, UserAuthDTO } from '@readme/core';
 
 import { CommentService } from './comment.service';
-import { CommentCreateDTO } from './dto/comment-create.dto';
-import { CommentCreateQuery } from './query/comment-create.query';
-import { CommentListQuery } from './query/comment-list.query';
-import { CommentRDO } from './rdo/comment.rdo';
 
 @ApiTags(Prefix.Comments)
 @Controller(Prefix.Comments)
@@ -15,46 +12,20 @@ export class CommentController {
     private readonly commentService: CommentService,
   ) {}
 
-  @Get()
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: CommentInfo.Loaded
-  })
-  async getComments(
-    @Query() query: CommentListQuery
-  ) {
-    const comments = await this.commentService.getCommentsForPost(query)
-
-    return comments.map((comment) => fillObject(CommentRDO, comment))
-  }
-
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-    type: [CommentRDO],
-    status: HttpStatus.CREATED,
-    description: CommentInfo.Created
-  })
+  @MessagePattern(RPC.AddComment)
   async create(
-    @UserID() userID: string,
-    @Query() query: CommentCreateQuery,
+    @User() user: UserAuthDTO,
+    @Query() query: PostIDDTO,
     @Body() dto: CommentCreateDTO
     ) {
-    const comment = await this.commentService.createComment(userID, query, dto);
-
-    return fillObject(CommentRDO, comment);
+    return await this.commentService.createComment(user, query, dto);
   }
 
-  @Delete(`${Path.Delete}/:${Property.CommentID}`)
-  @UseGuards(JwtAuthGuard)
-  @ApiResponse({
-   status: HttpStatus.OK,
-   description: CommentInfo.Deleted
-  })
+  @MessagePattern(RPC.DeleteComment)
   async delete(
-    @Param(Property.CommentID) commentID: number,
-    @UserID() userID: string
+    @Query() dto: CommentIDDTO,
+    @User() user: UserAuthDTO
     ) {
-    await this.commentService.deleteComment(commentID, userID);
+    return await this.commentService.deleteComment(dto, user);
   }
 }
