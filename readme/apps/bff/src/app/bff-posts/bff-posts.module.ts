@@ -1,10 +1,20 @@
 import { Module } from '@nestjs/common';
+import { JwtStrategy } from '@readme/core';
+import { BffRpcModule } from '../bff-rpc/bff-rpc.module';
 import { BffPostsController } from './bff-posts.controller';
-import { BffPostsService } from './bff-posts.service';
 
 @Module({
-  imports: [  ],
-  controllers: [BffPostsController],
-  providers: [BffPostsService],
+  imports: [
+    BffRpcModule
+  ],
+  controllers: [
+    BffPostsController
+  ],
+  providers: [
+    JwtStrategy
+  ],
+  exports: [
+    BffPostsModule,
+  ]
 })
 export class BffPostsModule {}

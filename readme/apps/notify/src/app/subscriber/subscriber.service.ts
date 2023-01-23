@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Post } from '@prisma/client';
-import { NotifyDTO, RPC, SubscriberCreateDTO, UserIDDTO } from '@readme/core';
-import { ObjectId } from 'mongoose';
+import { NotifyDTO, SubscriberCreateDTO } from '@readme/core';
 import { MailService } from '../mail/mail.service';
 import { SubscriberEntity } from './subscriber.entity';
 import { SubscriberRepository } from './subscriber.repository';

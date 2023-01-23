@@ -6,16 +6,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { usersConfig } from '../../config/users.config';
 import { getMongoConfig } from '@readme/core'
 
-
 @Module({
   imports: [
     ConfigModule.forRoot(usersConfig),
     MongooseModule.forRootAsync(getMongoConfig()),
     AuthModule,
     UserModule,
-  ],
-  controllers: [],
-  providers: [],
-  exports: []
+  ]
 })
 export class AppModule {}

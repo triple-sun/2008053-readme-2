@@ -1,17 +1,13 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { AppError, UserAuthDTO, RPC, UserRDO, UserCreateDTO, UserUpdateDTO, SubcribeDTO, UserError, AppName, Property, Prefix } from '@readme/core';
-import { RMQService } from 'nestjs-rmq';
+import { AppError, UserAuthDTO, UserRDO, UserCreateDTO, UserUpdateDTO, SubscribeDTO, UserError } from '@readme/core';
 
 import { UserEntity } from './user.entity';
 import { UserRepository } from './user.repository';
-
-const logger = new Logger(`${AppName.Users}-${Prefix.Service}`)
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly rmqService: RMQService
   ) {}
   async getUsers() {
     return await this.userRepository.find()
@@ -26,17 +22,14 @@ export class UserService {
       throw new NotFoundException(email ? UserError.Email.NotFound(email) : UserError.Id.NotFound(id.toString()))
     }
 
-    logger.log(`Trying to fetch user data for ${email ?? id}`)
-
-
     return user;
   }
 
   async getUserData({userId}: UserAuthDTO) {
     const user = await this.getUser({id: userId})
 
-      if (!user) {
-      throw new NotFoundException(UserError.Id.NotFound(userId.toString()))
+    if (!user) {
+       return UserError.Id.NotFound(userId.toString())
     }
 
     return user
@@ -46,7 +39,7 @@ export class UserService {
     const user = await this.userRepository.findByEmail(email)
 
     if (user) {
-      throw new ConflictException(UserError.Email.Exists)
+      return UserError.Email.Exists(email)
     }
 
     const newUserData = {
@@ -60,18 +53,21 @@ export class UserService {
 
     const userEntity = await new UserEntity(newUserData).setPassword(password)
 
-    logger.log(`Trying to register new user ${name} with email ${email}`)
+    Logger.log(`Creating to register new user with email ${email}`)
 
+    const created =  await this.userRepository.create(userEntity);
 
-    return await this.userRepository.create(userEntity);
+    Logger.log(`Success!`)
+
+    return created
+
   }
 
   async updateUser({userId}: UserAuthDTO, { avatar, password }: UserUpdateDTO) {
     const user = await this.getUser({id: userId})
-    const posts = await this.rmqService.send<string, number[]>(RPC.GetPosts, user.id)
+    //const posts = await this.rmqService.send<string, number[]>(RPC.GetPosts, user.id)
     const update = {
       ...user,
-      posts,
       avatar: avatar ?? user.avatar
     }
 
@@ -79,22 +75,23 @@ export class UserService {
       ? new UserEntity(update)
       : await new UserEntity(update).setPassword(password)
 
-    logger.log(`Trying to update user ${userId} data using ${avatar} ${password}`)
+    Logger.log(`Trying to update user ${userId} data using ${avatar} ${password}`)
 
 
     return await this.userRepository.update(userId, userEntity)
   }
 
-  async subscribe(user: UserAuthDTO, dto: SubcribeDTO) {
-    await this.getUser({id: user.userId})
+  async subscribe({name, userId, email}: UserAuthDTO, {subToId}: SubscribeDTO) {
+    await this.getUser({id: userId})
 
-    if (user.userId === dto.subToId) {
+    if (userId === subToId) {
       throw new ConflictException(AppError.SelfSubscribe)
     }
 
-    logger.log(`Adding user ${dto.subToId} to subscriptions of user ${user.name} (${user.userId}, ${user.email})`)
+    await this.getUser({id: subToId})
 
+    Logger.log(`Adding user ${subToId} to subscriptions of user ${name} (${userId}, ${email})`)
 
-    return await this.userRepository.subscribe(dto, user);
+    return await this.userRepository.subscribe({subToId}, {userId});
   }
 }

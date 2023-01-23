@@ -1,72 +1,42 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { ContentType } from '@prisma/client';
-import { AppError, AuthorIDDTO, PostError, PostsQueryDTO, RPC, toggleArrElement, UserError, UserIDDTO} from '@readme/core';
-import { IPost, IUser } from '@readme/shared-types';
+import { AppError, PostCreateDTO, PostError, PostIDDTO, PostsFullQueryDTO, PostUpdateDTO, QueryType, toggleArrElement, UserAuthDTO, UserError, UserIDDTO, FeedDTO} from '@readme/core';
+import { IPost } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
-import { RMQService } from 'nestjs-rmq';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly rmqService: RMQService
   ) {}
 
-  async getPostsByAuthor(authorID: AuthorIDDTO, query?: PostsQueryDTO) {
-    return await this.postRepository.find({...query, searchFor: authorID})
+  async getPosts<T>(query: PostsFullQueryDTO<T>) {
+    return await this.postRepository.find<T>(query)
   }
 
-  async getPostsByUser(userID: UserIDDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    return await this.postRepository.find({...query, searchFor: userID})
-  }
-
-  async getPostsByTag(tag: TagDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    return await this.postRepository.find({...query, searchFor: tag})
-  }
-
-  async getPostsByType(type: TypeDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    return await this.postRepository.find({...query, searchFor: type})
-  }
-
-  async getPostsByTitle(title: TitleDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    return await this.postRepository.find({...query, searchFor: title})
-  }
-
-  async getDrafts(userID: UserIDDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    return await this.postRepository.find({...query, searchFor: userID, isDraft: true})
-  }
-
-  async getPosts(query?: PostsQueryDTO): Promise<IPost[]> {
+  async getFeed(query: PostsFullQueryDTO<FeedDTO>): Promise<IPost[]> {
     return await this.postRepository.find(query)
   }
 
-  async getFeed({id: userID}: UserIDDTO, query?: PostsQueryDTO): Promise<IPost[]> {
-    const user = await this.rmqService.send<string, IUser>(RPC.GetUser, userID)
-    const subs = [...user.subscriptions.map((sub) => sub.toString()), userID]
-
-    return await this.postRepository.find({...query, searchFor: {subs}})
-  }
-
-  async getPost({id}: PostIDDTO): Promise<IPost> {
-    const post = await this.postRepository.findOne(id);
+  async getPost(postId: number): Promise<IPost> {
+    const post = await this.postRepository.findOne(postId);
 
     if (!post) {
-      throw new NotFoundException(PostError.NotFound(id))
+      throw new NotFoundException(PostError.NotFound(postId))
     }
 
     return post
   }
 
-  async createPost({id: userID}: UserIDDTO, {type}: TypeDTO, dto: PostCreateDTO): Promise<IPost> {
-    const {tags, content} = dto
+  async createPost({userId}: UserIDDTO, dto: PostCreateDTO): Promise<IPost> {
+    const {tags, content, type} = dto
 
     const post = {
       ...content,
       type,
       tags,
-      userID,
+      userId,
       comments: [],
       likes: [],
     }
@@ -76,59 +46,65 @@ export class PostService {
     return await this.postRepository.create(postEntity);
   }
 
-  async updatePost(postIdDto: PostIDDTO, {id: userID}: UserIDDTO,  dto: PostUpdateDTO, type?: ContentType): Promise<IPost> {
-    const {publishAt, tags} = dto
-    const post = await this.getPost(postIdDto);
+  async updatePost({postId}: PostIDDTO, {userId}: UserIDDTO, dto: PostUpdateDTO): Promise<IPost> {
+    const {publishAt, tags, type, content} = dto
+    const post = await this.getPost(postId);
 
-    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userId) {
+      throw new ForbiddenException(UserError.Id.Permission)
+    }
 
     const update = {
       ...post,
-      ...dto.content,
+      ...content,
       type: type ?? post.type,
-      publishAt,
-      tags: tags ?? post.tags
+      publishAt: publishAt ?? post.publishAt ?? new Date(),
+      tags: tags ?? post.tags ?? []
     }
 
     const updatedEntity = new PostEntity(update)
 
-    const updatedPost = await this.postRepository.update(postIdDto.id, updatedEntity)
+    const updatedPost = await this.postRepository.update({postId}.postId, updatedEntity)
 
     return updatedPost
   }
 
-  async deletePost(postIdDto: PostIDDTO, {id: userID}: UserIDDTO) {
-    const post = await this.getPost(postIdDto);
+  async deletePost({postId}: PostIDDTO, {userId}: UserIDDTO) {
+    const post = await this.getPost(postId);
 
-    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userId) { throw new ForbiddenException(UserError.Id.Permission)}
 
-    await this.postRepository.destroy(postIdDto.id)
+    await this.postRepository.destroy(postId)
   }
 
-  async repost(param: PostIDDTO, {id: userID}: UserIDDTO): Promise<IPost> {
-    const origin = await this.getPost(param);
+  async repost({postId}: PostIDDTO, {userId}: UserIDDTO): Promise<IPost> {
+    const origin = await this.getPost(postId);
+    const reposted = await this.getPosts({type: QueryType.UserId, searchFor: { userId }})
 
-    if (origin.authorId === userID) { throw new ConflictException(AppError.SelfRepost)}
-    if (origin.userId === userID) { throw new ConflictException(AppError.DuplicateRepost)}
+    if ((origin.userId === userId && origin.authorId === userId) || !!reposted.some((repost) => repost.userId === userId)) {
+       throw new ConflictException(AppError.TripleRepost)
+    }
 
     const repostEntity = new PostEntity({...origin, id: origin.id, isRepost: true})
 
     return await this.postRepository.create(repostEntity);
   }
 
-  async likePost(postDto: PostIDDTO, {id: userID}: UserIDDTO): Promise<IPost> {
-    const post = await this.getPost(postDto);
+  async likePost({postId}: PostIDDTO, {userId}: UserIDDTO): Promise<IPost> {
+    const post = await this.getPost(postId);
 
-    const likes = toggleArrElement(post.likes, userID);
+    const likes = toggleArrElement(post.likes, userId);
 
-    return await this.postRepository.like(postDto.id, likes)
+    return await this.postRepository.like(postId, likes)
   }
 
-  async publishPost(param: PostIDDTO, {id: userID}: UserIDDTO, publishAt?: Date): Promise<IPost> {
-    const post = await this.getPost(param);
+  async publishPost({postId}: PostIDDTO, {userId}: UserAuthDTO, publishAt?: Date): Promise<IPost> {
+    const post = await this.getPost(postId);
 
-    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userId) {
+      throw new ForbiddenException(UserError.Id.Permission)
+    }
 
-    return await this.postRepository.publish(param.id, publishAt ?? new Date())
+    return await this.postRepository.publish(post.id, publishAt ?? new Date())
   }
 }

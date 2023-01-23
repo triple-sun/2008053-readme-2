@@ -1,8 +1,9 @@
-import { ApiExtraModels, ApiProperty, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
+import { ApiProperty, getSchemaPath, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
 import { ContentType } from "@prisma/client";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Exclude, Expose, Transform, Type } from "class-transformer";
-import { ArrayMaxSize, IsArray, IsBoolean, IsInt, IsMongoId, IsOptional, IsString, IsUrl, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
+import { ArrayMaxSize, IsBoolean, IsDate, IsInt, IsMongoId, IsOptional, IsString, IsUrl, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
+import { IPost } from "@readme/shared-types";
 
 import { Property } from "../../enum/property.enum";
 import { CommentProperty, PostProperty } from "../../utils/api.utils";
@@ -10,13 +11,14 @@ import { Size } from "../../utils/size.utils";
 import { ValidateLength } from "../../decorator/validate-length.decorator";
 import { Entity } from "../../enum/utils.enum";
 import { getOptions } from "../../utils/schema.utils";
-import { PageDTO, PublishAtDTO, TypeDTO } from "./posts.query.dto";
+import { PageDTO, TypeDTO } from "./posts.query.dto";
 import { IMAGE_MIME_TYPES, YoutubeLinkRegExp } from "../../const/utils.const";
 import { Photo, Quote, Title } from "../content.dto";
 import { LengthError } from "../../const/error.const";
 import { FileSystemStoredFile, HasMimeType, IsFile, MaxFileSize } from "nestjs-form-data";
 import { UserIDDTO } from "../user/user.dto";
-import { IPost } from "@readme/shared-types";
+import { fillObject } from "../../utils/common.utils";
+import { APIExample } from "../../enum/api-example.enum";
 
 export class PostID  {
   @Expose({ name: Property.Id})
@@ -103,39 +105,45 @@ export class VideoDTO extends TitleDTO {
   public title: string;
 }
 
+type TContent = VideoDTO | QuoteDTO | LinkDTO | TextDTO | PhotoDTO
+
+const DTOForType = {
+  [ContentType.LINK]: LinkDTO,
+  [ContentType.QUOTE]: QuoteDTO,
+  [ContentType.VIDEO]: VideoDTO,
+  [ContentType.TEXT]: TextDTO,
+  [ContentType.PHOTO]: PhotoDTO,
+}
+
 export class ContentDTO extends TypeDTO {
   @Expose()
   @ValidateNested()
-  @Type(({object}) => DTOForType[object.type])
-  @ApiProperty(PostProperty(Property.Content))
-  public content: LinkDTO | VideoDTO | QuoteDTO | TextDTO | PhotoDTO
+  @Transform(({ obj, value }) => fillObject(DTOForType[obj.type], value))
+  @ApiProperty(PostProperty(Property.Content, {
+    oneOf:[
+      { $ref: getSchemaPath(VideoDTO) },
+      { $ref: getSchemaPath(PhotoDTO) },
+      { $ref: getSchemaPath(TextDTO) },
+      { $ref: getSchemaPath(QuoteDTO) },
+      { $ref: getSchemaPath(LinkDTO) },
+    ]
+  }))
+  public content: TContent
 }
 
 export class PostIDDTO {
   @Expose({ name: Property.Id})
   @Transform(({value}) => +value)
-  @ApiProperty(getOptions(Entity.Post, Property.Id))
+  @ApiProperty(getOptions(Entity.Post, Property.Id, {example: APIExample.PostId}))
   public postId: number;
 }
 
-export class PostTagsDTO {
-  @Expose()
-  @IsOptional()
-  @IsArray()
-  @ValidateLength()
-  @ArrayMaxSize(Size.Tags.Max)
-  @Transform(({ value }) => value ? [...(new Set(
-    value.map((tag: string) => tag.toLowerCase())
-  ))] : [])
-  @ApiPropertyOptional(PostProperty(Property.Tags, { maxItems: Size.Tags.Max }))
-  public tags?: string[];
-}
 
 export class PostToggleDTO {
   @Expose()
   @IsOptional()
   @IsBoolean()
-    @Transform(({value}) => !!value)
+  @Transform(({value}) => !!value)
   @ApiProperty(PostProperty(Property.IsDraft, {default: false}))
   public isDraft?: boolean
 
@@ -146,12 +154,6 @@ export class PostToggleDTO {
   @ApiProperty(PostProperty(Property.IsRepost, {default: false}))
   public isRepost?: boolean
 }
-
-export class PostCreateDTO extends IntersectionType(ContentDTO, PostTagsDTO) {}
-
-export class PostUpdateDTO extends PartialType(IntersectionType(
-  PostCreateDTO, PublishAtDTO
-)) {}
 
 export class CommentIDDTO {
   @Expose()
@@ -180,10 +182,10 @@ export class CommentCreateDTO extends PickType(CommentRDO, ['comment', 'postId',
   @ApiProperty(CommentProperty(Property.Comment))
   public comment: string
 
-  @ApiProperty(CommentProperty(Property.Comment))
+  @ApiProperty(CommentProperty(Property.UserId))
   public userId: string
 
-  @ApiProperty(CommentProperty(Property.Comment))
+  @ApiProperty(CommentProperty(Property.PostId))
   public postId: number
 }
 
@@ -197,13 +199,19 @@ export class ContentRDO extends IntersectionType(
   IntersectionType( QuoteDTO, IntersectionType(LinkDTO, PhotoDTO))
 ) {}
 
-export class PostAddRDO {
+export class PostAddRDO extends TypeDTO {
+  @Expose()
+  @IsOptional()
+  @IsDate()
+  public publishAt: Date;
+
   @Expose()
   @IsBoolean()
   public isRepost: boolean;
 
   @Expose()
   @IsBoolean()
+  @Transform(({obj, value}) => obj.publishAt < new Date() ? !value : !!value)
   public isDraft: boolean;
 
   @Expose()
@@ -215,10 +223,12 @@ export class PostAddRDO {
   public originID: number;
 
   @Expose()
+  @Type(() => CommentRDO)
   @Transform(({value}) => value ?? [])
-  public comments: number[];
+  public comments: Comment[];
 
   @Expose()
+  @IsMongoId({each: true})
   @Transform(({ value }) => value ?? [])
   public likes: string[];
 
@@ -237,30 +247,103 @@ export class PostVideoRDO extends IntersectionType(PostAddRDO, VideoDTO) {}
 export class PostTextRDO extends IntersectionType(PostAddRDO, TextDTO) {}
 export class PostPhotoRDO extends IntersectionType(PostAddRDO, PhotoDTO) {}
 
-export const RDOForType = (post: IPost) => {
+export class PostCreateDTO extends ContentDTO {
+  @Expose()
+  @IsOptional()
+  @ValidateLength()
+  @ValidateIf(o => o.tags.length > 0)
+  @ArrayMaxSize(Size.Tags.Max)
+  @Transform(({ value }) => value ? [...(new Set(
+    value.map((tag: string) => tag.toLowerCase())
+  ))] : [])
+  @ApiPropertyOptional(PostProperty(Property.Tags, { maxItems: Size.Tags.Max }))
+  public tags?: string[];
+}
+
+export class PostLinkDTO extends PostCreateDTO {
+  public readonly type = ContentType.LINK
+
+  @Type(() => LinkDTO)
+  public content: LinkDTO
+}
+
+export class PostQuoteDTO extends PostCreateDTO {
+  public readonly type = ContentType.QUOTE
+
+  @Type(() => QuoteDTO)
+  public content: QuoteDTO
+}
+
+export class PostPhotoDTO extends PostCreateDTO {
+  public readonly type = ContentType.PHOTO
+
+  @Type(() => PhotoDTO)
+  public content: PhotoDTO
+}
+
+export class PostVideoDTO extends PostCreateDTO {
+  public readonly type = ContentType.VIDEO
+
+  @Type(() => VideoDTO)
+  public content: VideoDTO
+}
+
+export class PostTextDTO extends PostCreateDTO {
+  public readonly type = ContentType.TEXT
+
+  @Type(() => TextDTO)
+  public content: TextDTO
+}
+
+export const fillRDOForPost = (post: IPost) => {
   switch(post.type) {
     case ContentType.LINK:
-      return PostLinkRDO
+      return fillObject(PostLinkRDO, post)
     case ContentType.QUOTE:
-      return PostQuoteRDO
+      return fillObject(PostQuoteRDO, post)
     case ContentType.TEXT:
-      return PostTextRDO
+      return fillObject(PostTextRDO, post)
     case ContentType.VIDEO:
-      return PostVideoRDO
+      return fillObject(PostVideoRDO, post)
     case ContentType.PHOTO:
-      return PostPhotoRDO
+      return fillObject(PostPhotoRDO, post)
 }}
 
-export const DTOForType = (post: IPost) => {
-  switch(post.type) {
+export const fillDTOForPost = (dto: PostCreateDTO) => {
+  switch(dto.type) {
     case ContentType.LINK:
-      return LinkDTO
+      return fillObject(PostLinkDTO, dto)
     case ContentType.QUOTE:
-      return QuoteDTO
+      return fillObject(PostQuoteDTO, dto)
     case ContentType.TEXT:
-      return TextDTO
+      return fillObject(PostTextDTO, dto)
     case ContentType.VIDEO:
-      return VideoDTO
+      return fillObject(PostVideoDTO, dto)
     case ContentType.PHOTO:
-      return PhotoDTO
+      return fillObject(PostPhotoDTO, dto)
 }}
+
+export class FillRDO<T, K> {
+  private readonly data: T
+  private readonly rdo: K
+  constructor(data: T) {
+    this.data = data
+  }
+}
+
+export class PostUpdateDTO extends PartialType(
+  IntersectionType(
+    PostCreateDTO,
+    PickType(PostAddRDO, ['publishAt'] as const
+  ))
+) {
+  @ValidateIf(o => o.content && o.type)
+  public type?: ContentType
+
+  @ValidateIf(o => o.type && o.content)
+  public content?: TContent
+
+  @ValidateIf(o => o.tags.length > 0)
+  public tags?: string[]
+}
+

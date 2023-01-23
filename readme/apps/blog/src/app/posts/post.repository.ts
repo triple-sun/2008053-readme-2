@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Post } from '@prisma/client';
-import { IncludeForPost, PostsQueryDTO, Size, SortByType } from '@readme/core';
+import { IncludeForPost, PostsFullQueryDTO, Size, SortByType, SearchFor, DTOForSearch } from '@readme/core';
 import { ICRUDRepo } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,18 +13,11 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
   ) {}
 
   public async create(item: PostEntity): Promise<Post> {
-    const {comments, ...data} = item.toObject()
-    console.log({data}, {item})
-
-    const commentsForDB = comments.map((comment) => {where: comment.id, create: {}})
     return await this.prisma.post.create({
       data: {
-        ...data,
+        ...item.toObject(),
         comments: {
-          connectOrCreate: {
-            where
-            create:
-            comments
+          create: []
         }
       },
       include: IncludeForPost
@@ -47,33 +40,17 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
     return exists
   }
 
-  public async find({sortBy, since, page, isDraft, searchFor}: PostsQueryDTO) {
-    const {userId, authorId, type, tag, title, subs} = searchFor
-    const limit = title ? Size.Search.Max : Size.Query.Max
-    const sortByType = sortBy ?? SortByType.Date
+  public async find<T extends SearchFor>(dto: PostsFullQueryDTO<T>) {
+    const { since, searchFor, isDraft, page, sortBy} = dto
 
-    const query = () => {
-      switch(true) {
-        case !!subs:
-          return { userId: {in: subs }}
-        case !!authorId:
-          return { authorId: { equals: authorId.toString() }}
-        case !!type:
-          return { type }
-        case !!tag:
-          return { tags: { has: tag }}
-        case !!title:
-          return { title: { contains: title }}
-        case !!userId:
-          return { userId: { equals: userId.toString() }}
-        default:
-          return {}
-      }
-    }
+    const query = DTOForSearch<T>(dto)[dto.type]
+
+    const limit = searchFor.title ? Size.Search.Max : Size.Query.Max
+    const sortByType = sortBy ?? SortByType.Date
 
     const posts = await this.prisma.post.findMany({
       where: {
-        ...query(),
+        ...query,
         createdAt: {
           gt: since ?? undefined
         },
@@ -89,7 +66,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
           ? { [sortByType]: {_count: 'desc'}}
           : { [sortByType]: 'desc' }
       ],
-      skip: page > 0 && title ? limit * (page - 1) : undefined,
+      skip: page > 0 && dto.searchFor.title ? limit * (page - 1) : undefined,
     });
 
     return posts
@@ -126,7 +103,7 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
     return await this.prisma.post.update({
       where: { id },
       data: {
-        isDraft: false,
+        isDraft: new Date(publishAt) < new Date() ? false : true,
         publishAt: {
           set: publishAt
         }

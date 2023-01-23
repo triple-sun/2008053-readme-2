@@ -1,3 +1,4 @@
+import { RpcException } from "@nestjs/microservices"
 import { ValidationArguments } from "class-validator"
 import { Property } from "../enum/property.enum"
 import { Entity } from "../enum/utils.enum"

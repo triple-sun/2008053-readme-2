@@ -1,165 +1,132 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ContentType } from '@prisma/client';
-import { RMQService } from 'nestjs-rmq';
 import { FormDataRequest } from 'nestjs-form-data';
-import { IPost } from '@readme/shared-types';
-import { BffPostsService } from './bff-posts.service';
-import { ApiAuth, ApiCommonResponses, AppInfo, AppName,
-  Consumes, Entity, fillObject, JwtAuthGuard, Path, PostIDDTO,
-  SearchDTO, PostsQueryDTO, Prefix, Property, RDOForType,
-  RPC, User, UserAuthDTO, UserIDDTO, TagDTO, TypeDTO, AuthorIDDTO, PostCreateDTO, PostUpdateDTO } from '@readme/core';
+import {
+  ApiAuth, ApiCommonResponses, AppInfo,
+  Consumes, Entity,  JwtAuthGuard, Path, PostIDDTO, PostsFullQueryDTO, Prefix, Property, fillRDOForPost,
+  RPC, User, UserAuthDTO,PostCreateDTO, PostUpdateDTO, PostsQueryDTO, SearchFor
+} from '@readme/core';
+import { BffRpcService } from '../bff-rpc/bff-rpc.service';
 
 
 @ApiTags(Prefix.Posts)
-@Controller(AppName.BFF)export class BffPostsController {
+@Controller(Prefix.Posts)
+export class BffPostsController {
   constructor(
-    private readonly bffService: BffPostsService,
-    private readonly rmqService: RMQService,
+    private readonly bffRpcService: BffRpcService,
   ) {}
 
   @Get(Path.Post)
   @HttpCode(HttpStatus.OK)
   @ApiAuth(Entity.Post)
-  @ApiCommonResponses(Entity.Post, {type: RDOForType, description: `${Entity.Post} ${AppInfo.Found}`})
+  @ApiCommonResponses(Entity.Post, {type: fillRDOForPost, description: `${Entity.Post} ${AppInfo.Found}`})
+  @ApiOkResponse({ description: `${Entity.Post} ${AppInfo.Created}`})
   @ApiConsumes(Consumes.FormData)
   @FormDataRequest()
-  @ApiQuery({ type:PostIDDTO, name: Property.Id})
-  async getPost(
-    @Query() query: PostIDDTO
+  async show(
+    @Query() dto: PostIDDTO
   ) {
-    const post = await this.rmqService.send<PostIDDTO, IPost>(RPC.GetPost, query)
+    const post = await this.bffRpcService.send(RPC.GetPost, dto)
 
-    return fillObject(RDOForType[post.type][post.type], post)
+    return fillRDOForPost(post)
   }
 
   @Get()
-  @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiCommonResponses(Entity.Post, {type: RDOForType, description: `${Entity.Post}${AppInfo.Loaded}`})
-  async queryPosts(
-    @Query() query: PostsQueryDTO,
-    @Query() searchFor: SearchDTO | TagDTO | TypeDTO | AuthorIDDTO | UserIDDTO
-  ) {
-    const posts = await this.rmqService.send<PostsQueryDTO, IPost[]>(RPC.GetPosts, {...query, searchFor})
-
-    return posts.map((post) => fillObject(RDOForType[post.type][post.type], post))
-  }
-
-  @Get()
-  @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiCommonResponses(Entity.Post, {type: RDOForType, description: `${Entity.Post}${AppInfo.Loaded}`})
-  async getPosts(
-    @Query() query: PostsQueryDTO,
-  ) {
-    const posts = await this.rmqService.send<PostsQueryDTO, IPost[]>(RPC.GetPosts, query)
-
-    return posts.map((post) => fillObject(RDOForType[post.type][post.type], post))
-  }
-
-  @Get(`${Path.Posts}/${Path.Search}`)
   @ApiConsumes(Consumes.FormData)
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  async getPostsByTitle(
+  @ApiCommonResponses(Entity.Post, {type: [fillRDOForPost], description: `${Entity.Post}s ${AppInfo.Loaded}`})
+  async searchPosts(
     @Query() query: PostsQueryDTO,
-    @Query() find: SearchDTO
+    @Query() searchFor: SearchFor
   ) {
-    const posts = await this.rmqService.send<PostsQueryDTO, IPost[]>(RPC.PostsSearchFor, {...query, ...find})
+    const posts = await this.bffRpcService.send(RPC.GetPosts, {...query, searchFor})
 
-    return posts.map((post) => fillObject(RDOForType[post.type][post.type], post))
+    return posts.map(fillRDOForPost)
   }
 
-  @Get(`${Path.Posts}/${Path.Feed}`)
-  @ApiBearerAuth()
-  @ApiAuth(Entity.User)
+  @Get(Path.Feed)
+  @ApiAuth(Entity.Post)
   @ApiConsumes(Consumes.FormData)
+  @ApiCommonResponses(Entity.Post, {type: [fillRDOForPost], description: `${Entity.Post}s ${AppInfo.Loaded}`})
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
   async getFeed(
     @Query() query: PostsQueryDTO,
-    @User() dto: UserAuthDTO
+    @User() {userId}: UserAuthDTO
   ) {
-    const posts = await this.rmqService.send<PostsQueryDTO & UserAuthDTO, IPost[]>(RPC.PostsForFeed, {...query, ...dto})
+    const user = await this.bffRpcService.send(RPC.GetUser, userId)
+    const posts = await this.bffRpcService.send(RPC.PostsForFeed, {...query, searchFor: { subs: user.subs, userId }})
 
-    return posts.map((post) => fillObject(RDOForType[post.type][post.type], post))
+    return posts.map(fillRDOForPost)
   }
 
   @Post(`${Path.Posts}/${Path.New}`)
   @ApiAuth(Entity.Post)
   @ApiConsumes(Consumes.FormData)
-  @ApiQuery({ type: TypeDTO, enum: ContentType })
+  @ApiQuery({ type: fillRDOForPost, enum: ContentType })
   async createPost(
     @Body() dto: PostCreateDTO,
     @User() {userId}: UserAuthDTO,
   ) {
-    const post = await this.rmqService.send<UserAuthDTO & PostCreateDTO, IPost>(RPC.AddPost, {...dto, ...{userId}})
+    const post = await this.bffRpcService.send(RPC.AddPost, {...dto, ...{userId}})
 
-    return fillObject(RDOForType[post.type][post.type], post);
+    return fillRDOForPost(post);
   }
 
   @Patch(Path.Update)
   @UseGuards(JwtAuthGuard)
   @ApiConsumes(Consumes.FormData)
   @ApiBearerAuth()
-  @ApiQuery({ type: PostsQueryDTO })
+  @ApiQuery({ type: PostsFullQueryDTO })
   @ApiQuery({ type: PostIDDTO })
   async update(
     @Query() query: PostIDDTO,
     @Body() dto: PostUpdateDTO,
     @User() {userId}: UserAuthDTO
   ) {
-    const post = await this.rmqService.send<PostUpdateDTO & PostIDDTO & {userId: string}, IPost>(RPC.UpdatePost, {...dto, ...query, userId})
+    const post = await this.bffRpcService.send(RPC.UpdatePost, {...dto, ...query, userId})
 
-    return fillObject(RDOForType[post.type], post);
+    return fillRDOForPost(post);
   }
 
   @Delete(Path.Delete)
   @UseGuards(JwtAuthGuard)
   @ApiConsumes(Consumes.FormData)
   @ApiBearerAuth()
-  @ApiQuery({ type: PostsQueryDTO })
+  @ApiQuery({ type: PostsFullQueryDTO })
   @ApiQuery({ type: PostIDDTO })
   async destroy(
     @Query() query: PostIDDTO,
     @User() {userId}: UserAuthDTO,
   ) {
-     await this.rmqService.send<PostUpdateDTO & {userId: string}, IPost>(RPC.UpdatePost, {...query, userId})
+     await this.bffRpcService.send(RPC.UpdatePost, {...query, userId})
   }
 
   @Post(Path.Repost)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiQuery({ type: PostsQueryDTO })
+  @ApiQuery({ type: PostsFullQueryDTO })
   @ApiQuery({ type: PostIDDTO })
   async repost(
     @Query() query: PostIDDTO,
     @User() {userId}: UserAuthDTO,
   ) {
-    const post = await this.rmqService.send<PostIDDTO & {userId: string}, IPost>(RPC.UpdatePost, {...query, userId})
+    const post = await this.bffRpcService.send(RPC.UpdatePost, {...query, userId})
 
-    return fillObject(RDOForType[post.type], post);
+    return fillRDOForPost(post);
   }
 
   @Post(Path.Like)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiQuery({ type: PostsQueryDTO })
+  @ApiQuery({ type: PostsFullQueryDTO })
   @ApiQuery({ type: PostIDDTO })
   async like(
     @Query() query: PostIDDTO,
     @User() {userId}: UserAuthDTO,
   ) {
-    const post = await this.rmqService.send<PostIDDTO & {userId: string}, IPost>(RPC.UpdatePost, {...query, userId})
+    const post = await this.bffRpcService.send(RPC.UpdatePost, {...query, userId})
 
-    return fillObject(RDOForType[post.type], post);
-  }
-
-  @Post(Path.Like)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiQuery({ type: PostsQueryDTO })
-  @ApiQuery({ type: PostIDDTO })
-  async notify(
-    @User() {userId}: UserIDDTO,
-  ) {
-    await this.bffService.notify({userId})
+    return fillRDOForPost(post);
   }
 }

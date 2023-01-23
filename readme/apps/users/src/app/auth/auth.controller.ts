@@ -1,9 +1,9 @@
-import { Body, Controller, HttpCode, HttpStatus, Post} from '@nestjs/common';
-import { ApiCommonResponses, AppInfo, Consumes, Entity, fillObject, Path, Prefix, UserLoggedRDO, UserLoginDTO } from '@readme/core';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-
+import { Controller } from '@nestjs/common';
+import { Prefix, RPC,UserLoginDTO } from '@readme/core';
 import { AuthService } from './auth.service';
-import { FormDataRequest } from 'nestjs-form-data';
+import { ApiTags } from '@nestjs/swagger';
+import { MessagePattern } from '@nestjs/microservices';
+import { UserEntity } from '../user/user.entity';
 
 @ApiTags(Prefix.Auth)
 @Controller(Prefix.Auth)
@@ -11,21 +11,15 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
   ) {}
-
-  @Post(Path.Login)
-  @HttpCode(HttpStatus.OK)
-  @HttpCode(HttpStatus.OK)
-  @ApiCommonResponses(Entity.User, {type: UserLoggedRDO, description: `${AppInfo.Login}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
-  async login(
-    @Body() dto: UserLoginDTO
-  ) {
+  @MessagePattern(RPC.LoginUser)
+  async login(dto: UserLoginDTO) {
+    console.log({dto})
     const user = await this.authService.verifyUser(dto)
-    const token = await this.authService.loginUser(user)
 
-    console.log({token})
+    if (typeof user === typeof UserEntity) {
+      return await this.authService.loginUser(user as UserEntity)
+  }
 
-    return fillObject(UserLoggedRDO, {...user, token})
+    return user
   }
 }

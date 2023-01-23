@@ -1,38 +1,39 @@
-import { Body, Controller, Delete, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ApiAuth, AppName, CommentCreateDTO, CommentIDDTO, CommentRDO, CommentTextDTO, Consumes, Entity, fillObject, JwtAuthGuard, Path, PostIDDTO, Prefix, RPC, User, UserAuthDTO, UserIDDTO} from '@readme/core';
-import { IComment } from '@readme/shared-types';
-import { RMQService } from 'nestjs-rmq';
+import { Body, Controller, Delete, Post, Query } from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiAuth, ApiCommonResponses, AppInfo, CommentIDDTO, CommentRDO, CommentTextDTO, Consumes, Entity, fillObject, Path, Prefix, RPC, User, UserAuthDTO, UserIDDTO} from '@readme/core';
+import { FormDataRequest } from 'nestjs-form-data';
+import { BffRpcService } from '../bff-rpc/bff-rpc.service';
 
 @ApiTags(Prefix.Comments)
-@Controller(AppName.BFF)
+@Controller(Prefix.Comments)
 export class BffCommentsController {
   constructor(
-    private readonly rmqService: RMQService,
+    private readonly bffRpcService: BffRpcService,
   ) {}
 
-  @Post()
+  @Post(Path.New)
   @ApiAuth(Entity.User)
   @ApiBody({ type:  CommentRDO})
+  @ApiCommonResponses(Entity.User, {type: CommentRDO, description: `${Entity.Comment} ${AppInfo.Created}`})
+  @ApiConsumes(Consumes.FormData)
+  @FormDataRequest()
   async create(
-    @User() {userId}: UserAuthDTO,
+    @User() user: UserAuthDTO,
     @Body() dto: CommentTextDTO,
-    @Query() {postId}: PostIDDTO
     ) {
-    const comment = await this.rmqService.send<CommentCreateDTO, IComment>(RPC.AddComment, {...dto, postId, userId})
+    const comment = await this.bffRpcService.send(RPC.AddComment, {user, dto})
 
-    return fillObject(Comment, comment);
+    return fillObject(CommentRDO, comment);
   }
 
-  @Delete(`${Path.Delete}`)
-  @UseGuards(JwtAuthGuard)
+  @Delete(Path.Delete)
   @ApiConsumes(Consumes.FormData)
-  @ApiBearerAuth()
+  @ApiAuth(Entity.User)
   @ApiQuery({ type: CommentIDDTO })
   async delete(
-    @Query() dto: CommentIDDTO,
-    @User() user: UserIDDTO
+    @User() user: UserIDDTO,
+    @Query() comment: CommentIDDTO,
     ) {
-      await this.rmqService.notify<CommentIDDTO & UserIDDTO>(RPC.DeleteComment, {...dto, ...user})
+      await this.bffRpcService.send(RPC.DeleteComment, {user, comment})
   }
 }

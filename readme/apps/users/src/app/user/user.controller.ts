@@ -1,11 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiConsumes, ApiExtraModels, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { RMQRoute } from 'nestjs-rmq';
-import { FormDataRequest } from 'nestjs-form-data';
+import { Body, Controller, Query } from '@nestjs/common';
+import {  ApiExtraModels, ApiTags } from '@nestjs/swagger';
 
-import { fillObject, Path, Prefix, RPC, JwtAuthGuard, UserRDO, User, UserAuthDTO, UserCreateDTO, UserUpdateDTO, SubcribeDTO, UserIDDTO, ApiCommonResponses, Consumes, Entity, AppInfo, ApiAuth } from '@readme/core';
+import { fillObject, Prefix, RPC, UserRDO, User, UserAuthDTO, UserCreateDTO, UserUpdateDTO, SubscribeDTO, UserIDDTO, ApiCommonResponses, Entity, AppInfo } from '@readme/core';
 import { UserService } from './user.service';
-
+import { MessagePattern } from '@nestjs/microservices';
 
 @ApiTags(Prefix.User)
 @Controller(Prefix.User)
@@ -15,24 +13,8 @@ export class UserController {
     private readonly userService: UserService,
   ) {}
 
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  @ApiCommonResponses(Entity.User, {type: [UserRDO], description: `${Entity.User}${AppInfo.Loaded}`})
-  @ApiOkResponse({ type: [UserRDO], description: `${Entity.User} ${AppInfo.Created}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
-  async index() {
-    const users = await this.userService.getUsers()
-
-    return users.map((user) => fillObject(UserRDO, user));
-  }
-
-  @Get(Path.User)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
+  @MessagePattern(RPC.GetUser)
   @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Found}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
   async show(
     @Query() dto: UserIDDTO,
   ) {
@@ -41,12 +23,8 @@ export class UserController {
     return fillObject(UserRDO, user);
   }
 
-  @Post(Path.Register)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
-  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Created}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
+  @MessagePattern(RPC.AddUser)
+  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${AppInfo.Login}`})
   async register(
     @Body() dto: UserCreateDTO,
   ) {
@@ -55,12 +33,7 @@ export class UserController {
     return fillObject(UserRDO, user);
   }
 
-  @Post(Path.Update)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
-  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Updated}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
+  @MessagePattern(RPC.UpdateUser)
   async update(
     @User() user: UserAuthDTO,
     @Body() dto: UserUpdateDTO,
@@ -70,24 +43,15 @@ export class UserController {
     return fillObject(UserRDO, update);
   }
 
-  @Post(Path.Subscribe)
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
-  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Subscribe}`})
-  @ApiConsumes(Consumes.FormData)
-  @FormDataRequest()
-  async subscribe(
-    @User() user: UserAuthDTO,
-    @Body() dto: SubcribeDTO
-  ) {
-    const update = await this.userService.subscribe(user, dto);
+ @MessagePattern(RPC.Subscribe)
+  async subscribe(user: UserAuthDTO, dto: SubscribeDTO) {
+    const update = await this.userService.subscribe(user,dto);
 
     return fillObject(UserRDO, update);
   }
 
-  @RMQRoute(RPC.GetUser)
-  public async getUser(id: string) {
-    return await this.userService.getUser({id})
+  @MessagePattern(RPC.GetUser)
+  public async getUser(dto: Partial<Pick<UserRDO, 'id' | 'email'>>) {
+    return await this.userService.getUser(dto)
   }
 }

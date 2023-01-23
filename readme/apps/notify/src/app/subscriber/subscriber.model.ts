@@ -1,13 +1,17 @@
-import mongoose, { Document, ObjectId } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ISub } from '@readme/shared-types';
-import { Collection } from '@readme/core';
+import { Prefix } from '@readme/core';
+import { Transform } from 'class-transformer';
+import mongoose from 'mongoose';
 
 @Schema({
-  collection: Collection.Subscribers,
+  collection: Prefix.Subscribers,
   timestamps: true,
 })
-export class SubscriberModel extends Document implements ISub {
+export class SubscriberModel extends mongoose.Document implements ISub {
+  @Transform(({value}) => value.toString())
+  _id: string
+
   @Prop({ unique: true })
   public email: string;
 
@@ -17,8 +21,8 @@ export class SubscriberModel extends Document implements ISub {
   @Prop({ default: new Date() })
   public notifiedAt: Date
 
-  @Prop({ type: () => mongoose.Types.ObjectId})
-  public userId: ObjectId
+  @Prop()
+  public userId: string
 }
 
 export const SubscriberSchema = SchemaFactory.createForClass(SubscriberModel);

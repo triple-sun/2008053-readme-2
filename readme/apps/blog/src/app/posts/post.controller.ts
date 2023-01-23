@@ -1,15 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { RMQRoute } from 'nestjs-rmq';
 import { ContentType } from '@prisma/client';
-import { fillObject, Prefix, Path, Property, User, JwtAuthGuard, MongoIDValidationPipe, RPC, Entity, Consumes, UserAuthDTO, AppInfo, ApiCommonResponses, ApiAuth } from '@readme/core';
+import { Prefix, Path, Property, User, JwtAuthGuard, RPC, Consumes, UserAuthDTO, PostIDDTO, fillRDOForPost, SearchDTO, FeedDTO, TagDTO, TypeDTO, AuthorIDDTO, PostsQueryDTO, fillDTOForPost, PostUpdateDTO, PostCreateDTO, QueryType, PostsFullQueryDTO } from '@readme/core';
 
-import { PostsQueryDTO, SearchDTO } from '../../../../../libs/core/src/lib/dto/posts.query.dto';
-import { PostCreateDTO, PostIDDTO, TagDTO, PostUpdateDTO, AuthorIDDTO } from '../../../../../libs/core/src/lib/dto/post/post.dto';
 import { PostService } from './post.service';
 import { FormDataRequest } from 'nestjs-form-data';
-import { ClassForType, PostRDO } from './post.const';
-import { TypeDTO } from '../../../../../libs/core/src/lib/dto/content/type.dto';
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -18,97 +14,78 @@ export class PostController {
     private readonly postService: PostService,
   ) {}
 
-  @Get(Path.Post)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.Post)
-  @ApiCommonResponses(Entity.Post, {type: PostRDO, description: `${Entity.Post} ${AppInfo.Found}`})
-  @ApiOkResponse({ type: PostRDO, description: `${Entity.Post} ${AppInfo.Created}`})
-  @ApiConsumes(Consumes.FormData)
+  @RMQRoute(RPC.GetPost)
   @FormDataRequest()
-  @ApiQuery({ type:PostIDDTO, name: Property.Id})
-  async show(
-    @Query() dto: PostIDDTO
-  ) {
-    const post = await this.postService.getPost(dto);
+  async show( {postId}: PostIDDTO ) {
+    const post = await this.postService.getPost(postId);
 
-    return fillObject(PostRDO, post)
+    return post
   }
 
-  @Get()
-  @ApiConsumes(Consumes.FormData)
-  @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
+  @RMQRoute(RPC.GetPosts)
   async getAllPosts(
-    @Query() query: PostsQueryDTO,
+    @Query() query: PostsQueryDTO
   ) {
     const posts = await this.postService.getPosts(query)
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
-  @Get(Path.Feed)
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiConsumes(Consumes.FormData)
-  @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  async getFeed(
-    @User() dto: UserAuthDTO,
-    @Query() query: PostsQueryDTO,
-  ) {
-    const posts = await this.postService.getFeed(dto, query)
+  @RMQRoute(RPC.GetFeed)
+  async getFeed(dto: PostsFullQueryDTO<FeedDTO>,) {
+    const posts = await this.postService.getPosts<FeedDTO>(dto)
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
   @Get(Path.Tag)
   @ApiConsumes(Consumes.FormData)
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiQuery({ name: Property.Tag, type: TagDTO })
+  @ApiQuery({ type: TagDTO, name: Property.Tag  })
   async getPostsByTag(
-    @Query() dto: TagDTO,
+    @Query() tag: TagDTO,
     @Query() query: PostsQueryDTO,
   ) {
-    const posts = await this.postService.getPostsByTag(dto, query)
+    const posts = await this.postService.getPosts<TagDTO>({...query, searchFor: tag})
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
   @Get(Path.Type)
   @ApiConsumes(Consumes.FormData)
-  @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
+  @ApiQuery({ name: Property.Query, type: PostsQueryDTO })
   @ApiQuery({ name: Property.Type, enum: ContentType, type: TypeDTO })
   async getPostsByType(
-    @Query() dto: TypeDTO,
+    @Query() type: TypeDTO,
     @Query() query: PostsQueryDTO,
   ) {
-    const posts = await this.postService.getPostsByType(dto, query)
+    const posts = await this.postService.getPosts<TypeDTO>({...query, searchFor: type})
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
   @Get(Path.Author)
   @ApiConsumes(Consumes.FormData)
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiQuery({ name: Property.AuthorID, type: UserAuthDTO})
+  @ApiQuery({ type: UserAuthDTO, name: Property.AuthorId })
   async getPostsByAuthor(
-    @Query(Property.AuthorID, MongoIDValidationPipe) dto: AuthorIDDTO,
     @Query() query: PostsQueryDTO,
+    @Query() authorId: AuthorIDDTO,
   ) {
-    const posts = await this.postService.getPostsByAuthor(dto, query)
-
-    return posts.map((post) => fillObject(PostRDO, post))
+    return (
+      await this.postService.getPosts({...query, searchFor: authorId})).map(fillRDOForPost)
   }
 
   @Get(Path.Search)
   @ApiConsumes(Consumes.FormData)
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiQuery({ type: SearchDTO, name: Property.SearchFor })
   async getPostsByTitle(
-    @Query() dto: SearchDTO,
     @Query() query: PostsQueryDTO,
+    @Query() title: SearchDTO,
   ) {
-    const posts = await this.postService.getPostsByTitle(dto, query)
+    const posts = await this.postService.getPosts<SearchDTO>({...query, searchFor: title})
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
   @Get(Path.Drafts)
@@ -119,9 +96,9 @@ export class PostController {
     @User() user: UserAuthDTO,
     @Query() query: PostsQueryDTO,
   ) {
-    const posts = await this.postService.getDrafts(user, query)
+    const posts = await this.postService.getPosts({...query, searchFor: user, isDraft: true})
 
-    return posts.map((post) => fillObject(PostRDO, post))
+    return posts.map(fillRDOForPost)
   }
 
   @Post(Path.New)
@@ -132,11 +109,10 @@ export class PostController {
   async create(
     @User() user: UserAuthDTO,
     @Body() dto: PostCreateDTO,
-    @Query() query: TypeDTO
   ) {
-    const post = await this.postService.createPost(user, query, dto)
+    const post = await this.postService.createPost(user, fillDTOForPost(dto))
 
-    return fillObject(PostRDO, post);
+    return fillRDOForPost(post)
   }
 
   @Patch(Path.Update)
@@ -146,13 +122,13 @@ export class PostController {
   @ApiQuery({ type: PostsQueryDTO })
   @ApiQuery({ type: PostIDDTO })
   async update(
-    @Query() query: PostIDDTO,
+    @Query() id: PostIDDTO,
     @User() user: UserAuthDTO,
-    @Body() dto: PostUpdateDTO,
+    @Body() update: PostUpdateDTO,
   ) {
-    const post = await this.postService.updatePost(query, user, dto);
+    const post = await this.postService.updatePost(id, user, update);
 
-    return fillObject(PostRDO, post);
+    return fillRDOForPost(post)
   }
 
   @Delete(Path.Delete)
@@ -178,9 +154,8 @@ export class PostController {
     @User() user: UserAuthDTO,
   ) {
     const post = await this.postService.repost(query, user);
-    const rdo = ClassForType[post.type]
 
-    return fillObject(rdo, post);
+    return fillRDOForPost(post)
   }
 
   @Post(Path.Like)
@@ -194,14 +169,23 @@ export class PostController {
   ) {
     const post = await this.postService.likePost(query, user);
 
-    return fillObject(PostRDO, post);
+    return fillRDOForPost(post)
   }
 
   @RMQRoute(RPC.GetPosts)
   @ApiOkResponse({type: [Post]})
   async getPostsByUser(
-    @User() user: UserAuthDTO,
+    @User() {userId}: UserAuthDTO,
   ) {
-    return (await this.postService.getPostsByUser(user))
+    return await this.postService.getPosts({type: QueryType.Feed, searchFor: { userId }})
+  }
+
+  @RMQRoute(RPC.GetNewPosts)
+  @ApiOkResponse({type: [Post]})
+  async getNewPosts(
+    @User() {userId}: UserAuthDTO,
+    @Query() since: Date
+  ) {
+    return await this.postService.getPosts({type: QueryType.Feed, searchFor: { userId }, since: since})
   }
 }

@@ -4,7 +4,7 @@ export enum AppInfo {
   Running = 'REST API service is running on:',
   Updated = 'has been successfully updated.',
   Created = 'has been successfully created.',
-  Loaded = '(s) have been successfully loaded.',
+  Loaded = 'have been successfully loaded.',
   Login = 'Logged in successfully.',
   Deleted = 'has been successfully deleted.',
   Reposted = 'has been reposted successfully.',

@@ -1,42 +1,56 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiConsumes } from '@nestjs/swagger';
-import { ApiAuth, ApiCommonResponses, AppInfo, Consumes, Entity, fillObject, JwtAuthGuard, Path, RPC, SubcribeDTO, User, UserAuthDTO, UserCreateDTO, UserIDDTO, UserRDO, UserUpdateDTO } from '@readme/core';
-import { IPost } from '@readme/shared-types';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiForbiddenResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse, } from '@nestjs/swagger';
+import { ApiAuth, ApiCommonResponses, APIExample, AppError, AppInfo, Consumes, Entity, fillObject, JwtAuthGuard, Path, Prefix, Property, RPC, SubscribeDTO, User, UserAuthDTO, UserCreateDTO, UserIDDTO, UserLoggedRDO, UserLoginDTO, UserLoginSchema, UserRDO, UserRegisterSchema, UserUpdateDTO, UserUpdateSchema } from '@readme/core';
 import { FormDataRequest } from 'nestjs-form-data';
-import { RMQService } from 'nestjs-rmq';
-import { BffUsersService } from './bff-users.service';
+import { BffRpcService } from '../bff-rpc/bff-rpc.service';
 
-@Controller()
+@ApiTags(Prefix.Users)
+@Controller(Prefix.Users)
 export class BffUsersController {
   constructor(
-    private readonly bffService: BffUsersService,
-    private readonly rmqService: RMQService,
+    private readonly bffRpcService: BffRpcService
   ) {}
 
-  @Get(Path.User)
+  @Post(Path.Login)
   @HttpCode(HttpStatus.OK)
+  @ApiCommonResponses(Entity.User, {type: UserLoggedRDO, description: `${AppInfo.Login}`})
+  @ApiConsumes(Consumes.FormData)
+  @FormDataRequest()
+  @ApiBody(UserLoginSchema)
+  async login(
+    @Body() dto: UserLoginDTO
+  ) {
+    const user = await this.bffRpcService.send(RPC.LoginUser, dto)
+
+    return fillObject(UserLoggedRDO, user)
+  }
+
+  @Get(Path.User)
   @ApiAuth(Entity.User)
+  @HttpCode(HttpStatus.OK)
   @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Found}`})
   @ApiConsumes(Consumes.FormData)
   @FormDataRequest()
+  @ApiQuery({ name: Property.Id, example: APIExample.UserId })
   async getUser(
-    @Query() dto: UserIDDTO,
+    @User() auth: UserAuthDTO,
+    @Query() {userId}: UserIDDTO,
   ) {
-    const user = await this.rmqService.send<UserIDDTO, IPost>(RPC.GetUser, dto)
+    const user = await this.bffRpcService.send(RPC.GetUser, userId)
 
     return fillObject(UserRDO, user);
   }
 
   @Post(Path.Register)
   @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
   @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Created}`})
   @ApiConsumes(Consumes.FormData)
+  @ApiBody(UserRegisterSchema)
   @FormDataRequest()
   async registerUser(
     @Body() dto: UserCreateDTO,
   ) {
-    const user = await this.rmqService.send<UserCreateDTO, IPost>(RPC.AddUser, dto)
+    const user = await this.bffRpcService.send(RPC.AddUser, {dto})
 
     return fillObject(UserRDO, user);
   }
@@ -47,28 +61,49 @@ export class BffUsersController {
   @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Updated}`})
   @ApiConsumes(Consumes.FormData)
   @FormDataRequest()
+  @ApiBody(UserUpdateSchema)
   async updateUser(
     @User() user: UserAuthDTO,
     @Body() dto: UserUpdateDTO,
   ) {
-    const updated = await this.rmqService.send<UserAuthDTO & UserUpdateDTO, IPost>(RPC.GetUser, {...user, ...dto})
+    const updated = await this.bffRpcService.send(RPC.UpdateUser, {dto, user})
 
     return fillObject(UserRDO, updated);
   }
 
   @Post(Path.Subscribe)
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiAuth(Entity.User)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: AppError.Unauthorized })
+  @ApiForbiddenResponse({ description: `${AppError.Unauthorized} ${Entity.User}`})
   @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Subscribe}`})
   @ApiConsumes(Consumes.FormData)
+  @ApiQuery({ name: Property.SubToID, example: APIExample.UserId})
   @FormDataRequest()
   async subscribe(
     @User() user: UserAuthDTO,
-    @Body() dto: SubcribeDTO
+    @Query() dto: SubscribeDTO
   ) {
-    const userData = await this.rmqService.send<UserAuthDTO & SubcribeDTO, IPost>(RPC.Subscribe, {...dto, ...user})
+    const data = await this.bffRpcService.send(RPC.Subscribe, {user, dto})
 
-    return fillObject(UserRDO, userData);
+    return fillObject(UserRDO, data);
+  }
+
+  @Post(Path.Notify)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: AppError.Unauthorized })
+  @ApiForbiddenResponse({ description: `${AppError.Unauthorized} ${Entity.User}`})
+  @ApiCommonResponses(Entity.User, {type: UserRDO, description: `${Entity.User} ${AppInfo.Subscribe}`})
+  @ApiConsumes(Consumes.FormData)
+  @ApiQuery({ name: Property.SubToID, example: APIExample.UserId})
+  @FormDataRequest()
+  async notify(
+    @User() user: UserAuthDTO,
+    @Query() dto: SubscribeDTO
+  ) {
+    const data = await this.bffRpcService.send(RPC.Subscribe, {user, dto})
+
+    return fillObject(UserRDO, data);
   }
 }

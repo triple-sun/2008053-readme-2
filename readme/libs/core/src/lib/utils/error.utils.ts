@@ -24,16 +24,7 @@ export const getExistsMessage = (
 ({entity, property}: IMessageProps) => ((
     value: string | number,
     args?: IMessageProps
-  ) => (`
-    ${capitalize(
-      entity ?? args.entity ?? ''
-    )}
-    ${property || args.property
-      ? `with ${property ?? args.property}:`
-      : ''
-    }
-    ${value ?? args.value} already exists.
-  `))
+  ) => (`${capitalize(entity ?? args.entity ?? '')} ${property || args.property ? `with ${property ?? args.property}` : ''} ${value ?? args.value} already exists.`))
 )
 
 export const getInvalidMessage = (
@@ -67,10 +58,9 @@ export const getPermissionErrorMessage = (({entity}: IMessageProps) => (({value}
     : `${entity.toString().toLowerCase()}s`}. ${entity} ID: ${value}
 `)))
 
-export const getLengthErrorMessage = ({property, constraints, value}: IMessageProps) => (`
-  ${property} length must be ${
+export const getLengthErrorMessage = ({property, constraints, value}: IMessageProps) => (`${property} length must be ${
     constraints[1]
-      ? `no more than ${constraints[1]}.`
+      ? `no more than ${constraints[1]}`
       : ''
   } ${
     constraints[0] && constraints[1]
@@ -80,5 +70,4 @@ export const getLengthErrorMessage = ({property, constraints, value}: IMessagePr
     constraints[0]
       ? `no less than ${constraints[0]}`
       : ''
-  } symbols. Provided ${property} "${value}" is ${value.length} symbols long.
-`)
+  } symbols. Provided ${property} ${value} is ${value.length} symbols long.`)

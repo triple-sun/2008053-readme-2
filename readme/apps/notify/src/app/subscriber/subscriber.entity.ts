@@ -1,11 +1,10 @@
 import { IEntity, ISub } from "@readme/shared-types";
-import { ObjectId } from "mongoose";
 
 export class SubscriberEntity implements IEntity<SubscriberEntity>, ISub {
-  public id: ObjectId;
+  public id: string;
   public email: string;
   public name: string;
-  public userId: ObjectId;
+  public userId: string;
   public notifiedAt?: Date;
 
   constructor(emailSubscriber: ISub) {

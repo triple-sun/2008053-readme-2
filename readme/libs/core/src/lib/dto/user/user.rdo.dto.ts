@@ -4,6 +4,7 @@ import { IntersectionType, PickType } from '@nestjs/swagger';
 
 import { UserError } from '../../const/error.const';
 import { Property } from '../../enum/property.enum';
+import { UserAuthDTO } from './user.dto';
 
 export class UserRDO {
   @Expose({ name: Property.ObjectID})
@@ -61,7 +62,7 @@ export class UserRDO {
   public subscribersCount: number;
 }
 
-export class TokenDTO extends UserRDO {
+export class TokenDTO extends UserAuthDTO {
   @Expose()
   @IsJWT()
   public token: string;

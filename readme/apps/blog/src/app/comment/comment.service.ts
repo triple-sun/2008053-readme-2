@@ -1,9 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
-import { AppError, CommentError, CommentsDTO, PostError, PostIDDTO, UserIDDTO, UserAuthDTO, CommentCreateDTO, CommentIDDTO } from "@readme/core";
+import { CommentError, CommentsDTO, PostError, PostIDDTO, UserIDDTO, UserAuthDTO, CommentCreateDTO, CommentIDDTO } from "@readme/core";
 import { PostRepository } from "../posts/post.repository";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class CommentService {
@@ -14,8 +13,9 @@ export class CommentService {
 
   async getPost(id: number)  {
     const post = await this.postRepository.findOne(id)
+
     if (!post) {
-      throw new NotFoundException(PostError.NotFound(id))
+      return { error: PostError.NotFound(id)}
     }
   }
   async getCommentsForPost(dto: CommentsDTO) {
@@ -36,11 +36,11 @@ export class CommentService {
     const comment = await this.commentRepository.findOne(commentId);
 
     if (!comment) {
-      throw new NotFoundException(CommentError.NotFound(commentId))
+      return { error: CommentError.NotFound(commentId) }
     }
 
     if (comment.userId !== user.userId.toString()) {
-      throw new ForbiddenException(AppError.Forbidden)
+      return { error: CommentError.Permission}
     }
 
     await this.commentRepository.destroy(commentId)

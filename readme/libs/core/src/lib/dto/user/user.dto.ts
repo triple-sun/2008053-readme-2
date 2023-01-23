@@ -49,13 +49,14 @@ export class UserLoginDTO extends PickType(UserDTO, ['email', 'password'] as con
 export class UserIDDTO {
   @Expose(({ name: Property.Id }))
   @Transform(({obj}) => obj.id)
+  @IsMongoId()
   public userId: string
 }
 
 export class AvatarDTO extends PickType(UserDTO, ['avatar'] as const) {}
 
 export class UserAuthDTO extends IntersectionType(
-  UserIDDTO, PartialType(PickType(UserDTO, ['name', 'email'] as const))
+  UserIDDTO, PartialType(PickType(UserDTO, ['name', 'email', 'id'] as const))
 ) {
   @Expose({ name: Property.Id })
   @Transform(({value, obj}) => value ?? obj.id)
@@ -66,7 +67,7 @@ export class UserUpdateDTO extends PartialType(PickType(UserDTO, ['avatar', 'pas
 
 export class UserIdDTO extends PickType(UserDTO, ['id'] as const) {}
 
-export class SubcribeDTO {
+export class SubscribeDTO {
   @IsDefined()
   @IsMongoId()
   @ApiProperty(UserProperty(Property.SubToID))

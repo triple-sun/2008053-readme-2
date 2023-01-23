@@ -9,7 +9,7 @@ import { FileSystemStoredFile } from 'nestjs-form-data';
 type UserDocument = UserModel & Document
 
 @Schema({
-  collection: Prefix.Users,
+  collection: Prefix.Subscribers,
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -46,12 +46,14 @@ export class UserModel extends mongoose.Document implements IUser {
   avatar: FileSystemStoredFile;
 
   public avatarLink?: string;
-  public subscribersCount?: number
+  public subscribersCount?: number;
+  public userId: string;
 }
 
 const UserSchema = SchemaFactory.createForClass(UserModel)
 
 UserSchema.virtual(Property.AvatarLink).get( function (this: UserDocument ) { return this.avatar ? this.avatar.path : ''})
+UserSchema.virtual(Property.UserId).get( function (this: UserDocument ) { return this._id.toString()})
 UserSchema.virtual(Property.SubscribersCount).get( function(this: UserDocument ) { this.subscribersCount = this.subscribers?.length ?? 0})
 
 export { UserSchema }

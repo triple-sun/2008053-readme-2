@@ -1,10 +1,7 @@
 import { apiEnvSchema, jwtEnvSchema, rmqEnvSchema } from '@readme/core';
 import * as Joi from 'joi';
 
-const blogEnvSchema = {
-  DATABASE_URL: Joi
-    .string()
-    .required(),
+const bffEnvSchema = {
   UPLOAD_DIR: Joi
     .string()
     .required(),
@@ -12,7 +9,7 @@ const blogEnvSchema = {
 
 export default Joi.object({
   ...apiEnvSchema,
-  ...blogEnvSchema,
+  ...bffEnvSchema,
   ...rmqEnvSchema,
   ...jwtEnvSchema
 })

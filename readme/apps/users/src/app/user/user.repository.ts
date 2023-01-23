@@ -4,7 +4,7 @@ import { UserModel } from './user.model';
 import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
-import { UserAuthDTO, SubcribeDTO } from '@readme/core';
+import { UserAuthDTO, SubscribeDTO } from '@readme/core';
 import { Model } from 'mongoose';
 
 @Injectable()
@@ -46,7 +46,7 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .findByIdAndUpdate(id, item.toObject(), {new: true})
   }
 
-  public async subscribe({subToId}: SubcribeDTO, {userId}: UserAuthDTO): Promise<IUser> {
+  public async subscribe({subToId}: SubscribeDTO, {userId}: UserAuthDTO): Promise<IUser> {
     const isSubscribed = await this.userModel.findOne({ _id: userId, subscriptions: { '$in': [subToId] }})
 
     return await this.userModel

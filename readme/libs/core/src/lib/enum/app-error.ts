@@ -32,7 +32,7 @@ export enum EAppError {
   BodyArg = 'This pipe must used only with body!',
   FileType = 'File type is not matching:',
   Auth = 'You are not authorized',
-  SelfRepost = 'You can`t repost your own posts.',
+  TripleRepost = 'You can`t repost your own posts.',
   SelfSubscribe = 'You can`t subscribe to yourself',
   DuplicateRepost = 'You can`t repost the same post twice',
   Published = 'This post is already published',

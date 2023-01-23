@@ -23,7 +23,6 @@ import { PostService } from './post.service';
   ],
   exports: [
     PostRepository,
-    PostService,
     NestjsFormDataModule
   ]
 })
