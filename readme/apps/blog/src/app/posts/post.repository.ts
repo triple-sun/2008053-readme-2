@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Post } from '@prisma/client';
-import { IncludeForPost, Size, SortByType } from '@readme/core';
+import { IncludeForPost, PostsQueryDTO, Size, SortByType } from '@readme/core';
 import { ICRUDRepo } from '@readme/shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { PostEntity } from './post.entity';
-import { PostsQueryDTO } from './query/posts.query.dto';
 
 @Injectable()
 export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
@@ -16,11 +15,16 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
   public async create(item: PostEntity): Promise<Post> {
     const {comments, ...data} = item.toObject()
     console.log({data}, {item})
+
+    const commentsForDB = comments.map((comment) => {where: comment.id, create: {}})
     return await this.prisma.post.create({
       data: {
         ...data,
         comments: {
-          create: comments
+          connectOrCreate: {
+            where
+            create:
+            comments
         }
       },
       include: IncludeForPost
@@ -44,24 +48,24 @@ export class PostRepository implements ICRUDRepo<PostEntity, number, Post> {
   }
 
   public async find({sortBy, since, page, isDraft, searchFor}: PostsQueryDTO) {
-    const {id: userID, authorID, type, tag, title, subs} = searchFor
+    const {userId, authorId, type, tag, title, subs} = searchFor
     const limit = title ? Size.Search.Max : Size.Query.Max
     const sortByType = sortBy ?? SortByType.Date
 
     const query = () => {
       switch(true) {
         case !!subs:
-          return { userID: { in: subs }}
-        case !!authorID:
-          return { authorID: { equals: authorID }}
+          return { userId: {in: subs }}
+        case !!authorId:
+          return { authorId: { equals: authorId.toString() }}
         case !!type:
           return { type }
         case !!tag:
           return { tags: { has: tag }}
         case !!title:
           return { title: { contains: title }}
-        case !!userID:
-          return { userID: { equals: userID }}
+        case !!userId:
+          return { userId: { equals: userId.toString() }}
         default:
           return {}
       }

@@ -1,4 +1,3 @@
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserModel } from './user.model';
@@ -6,6 +5,7 @@ import { ICRUDRepo, IUser } from '@readme/shared-types';
 
 import { UserEntity } from './user.entity';
 import { UserAuthDTO, SubcribeDTO } from '@readme/core';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
@@ -46,10 +46,10 @@ export class UserRepository implements ICRUDRepo<UserEntity, string, IUser> {
       .findByIdAndUpdate(id, item.toObject(), {new: true})
   }
 
-  public async subscribe({subToID}: SubcribeDTO, {id}: UserAuthDTO): Promise<IUser> {
-    const isSubscribed = await this.userModel.findOne({ _id: id, subscriptions: { '$in': [subToID] }})
+  public async subscribe({subToId}: SubcribeDTO, {userId}: UserAuthDTO): Promise<IUser> {
+    const isSubscribed = await this.userModel.findOne({ _id: userId, subscriptions: { '$in': [subToId] }})
 
     return await this.userModel
-      .findByIdAndUpdate(id, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: id }}, { new: true })
+      .findByIdAndUpdate(userId, {[isSubscribed ? '$pull' : '$addToSet']: { subscriptions: subToId }}, { new: true })
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserIDDTO } from '@readme/core';
 import { ICRUDRepo, ISub } from '@readme/shared-types';
 import { Model } from 'mongoose';
 import { SubscriberEntity } from './subscriber.entity';
@@ -32,9 +33,9 @@ export class SubscriberRepository implements ICRUDRepo<SubscriberEntity, string,
       .exec()
   }
 
-  public async findByUserID(userID: string): Promise<ISub | null> {
+  public async findByUserID({userId}: UserIDDTO): Promise<ISub | null> {
     return this.subscriberModel
-      .findOne({ userId: userID })
+      .findOne({ userId })
       .exec()
   }
 }

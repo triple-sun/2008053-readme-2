@@ -1,8 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { fillObject, Prefix, User, Path, JwtAuthGuard, Consumes, Entity, UserAuthDTO, ApiAuth } from '@readme/core';
-import { CommentDTO, CommentIDDTO, CommentRDO, CommentsDTO } from '../posts/dto/comment.dto';
-import { PostIDDTO } from '../posts/dto/post/post.dto';
+import { fillObject, Prefix, User, Path, JwtAuthGuard, Consumes, Entity, UserAuthDTO, ApiAuth, CommentRDO, PostID, CommentsDTO, PostIDDTO, CommentCreateDTO, CommentIDDTO } from '@readme/core';
 
 import { CommentService } from './comment.service';
 
@@ -15,7 +13,7 @@ export class CommentController {
 
   @Get()
   @ApiAuth(Entity.Comment)
-  @ApiQuery({ type: CommentsDTO })
+  @ApiQuery({ type: CommentRDO })
   async getComments(
     @Query() query: CommentsDTO
   ) {
@@ -26,11 +24,11 @@ export class CommentController {
 
   @Post()
   @ApiAuth(Entity.User)
-  @ApiQuery({ type: PostIDDTO })
+  @ApiQuery({ type: PostIDDTO})
   async create(
     @User() user: UserAuthDTO,
     @Query() query: PostIDDTO,
-    @Body() dto: CommentDTO
+    @Body() dto: CommentCreateDTO
     ) {
     const comment = await this.commentService.createComment(user, query, dto);
 
@@ -44,8 +42,8 @@ export class CommentController {
   @ApiQuery({ type: PostIDDTO })
   async delete(
     @Query() dto: CommentIDDTO,
-    @User() userID: string
+    @User() user: UserAuthDTO
     ) {
-    await this.commentService.deleteComment(dto, userID);
+    await this.commentService.deleteComment(dto, user);
   }
 }

@@ -20,9 +20,9 @@ export interface IPost {
   commentCount?: number;
   isRepost?: boolean;
   isDraft?: boolean;
-  userID?: string;
-  originID?: number;
-  authorID?: string;
+  userId?: string;
+  originId?: number;
+  authorId?: string;
   publishAt?: Date;
   createdAt?: Date;
 }

@@ -6,6 +6,7 @@ export class SubscriberEntity implements IEntity<SubscriberEntity>, ISub {
   public email: string;
   public name: string;
   public userId: ObjectId;
+  public notifiedAt?: Date;
 
   constructor(emailSubscriber: ISub) {
     this.fillEntity(emailSubscriber);
@@ -16,6 +17,7 @@ export class SubscriberEntity implements IEntity<SubscriberEntity>, ISub {
     this.id = entity.id;
     this.name = entity.name;
     this.userId = entity.userId
+    this.notifiedAt = entity.notifiedAt
   }
 
   public toObject(): SubscriberEntity {

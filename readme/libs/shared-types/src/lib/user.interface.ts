@@ -1,16 +1,13 @@
-import { ObjectId } from "mongoose";
 import { FileSystemStoredFile } from "nestjs-form-data";
 
 export interface IUser {
-  _id?: ObjectId;
-  id?: ObjectId;
+  _id?: string;
+  id?: string;
   email: string;
   name: string;
   avatar?: FileSystemStoredFile;
   avatarLink?: string;
-  subscriptions?: ObjectId[];
-  subscribers?: ObjectId[];
-  subs?: ObjectId[];
+  subscriptions?: string[];
+  subscribers?: string[];
   passwordHash?: string;
-  notifiedAt?: Date;
 }

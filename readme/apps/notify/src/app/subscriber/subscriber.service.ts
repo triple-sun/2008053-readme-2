@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Post } from '@prisma/client';
-import { RPC, SubscriberCreateDTO, UserIDDTO } from '@readme/core';
+import { NotifyDTO, RPC, SubscriberCreateDTO, UserIDDTO } from '@readme/core';
 import { ObjectId } from 'mongoose';
 import { MailService } from '../mail/mail.service';
 import { SubscriberEntity } from './subscriber.entity';
@@ -21,11 +21,7 @@ export class SubscriberService {
     return sub
   }
 
-  public async notify(dto: UserIDDTO) {
-    const subscriber = await this.subscriberRepository.findByUserID(dto.id);
-    const posts = await this.rmqService.send<ObjectId, Post[]>(RPC.GetPosts, subscriber.userId)
-
-
-    return await this.mailService.sendNotifyNewPosts(subscriber, posts)
+  public async notify(dto: NotifyDTO) {
+    return await this.mailService.sendNotifyNewPosts(dto)
   }
 }

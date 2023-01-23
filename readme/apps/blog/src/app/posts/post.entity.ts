@@ -22,9 +22,9 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
   public isDraft?: boolean;
   public isRepost?: boolean;
 
-  public userID: string;
-  public authorID?: string;
-  public originID?: number;
+  public userId: string;
+  public authorId?: string;
+  public originId?: number;
 
   public publishAt?: Date;
   public createdAt?: Date;
@@ -44,15 +44,15 @@ export class PostEntity implements IEntity<PostEntity>, IPost {
     this.publishAt = entity.publishAt ?? new Date();
     this.createdAt = !entity.createdAt || entity.isRepost ? new Date() : entity.createdAt;
 
-    this.originID = entity.id
+    this.originId = entity.id
     this.type = entity.type;
 
     this.tags = [...entity.tags]
     this.likes = [...entity.likes]
     this.comments = entity.comments
 
-    this.userID = entity.userID;
-    this.authorID = entity.authorID ?? entity.userID
+    this.userId = entity.userId;
+    this.authorId = entity.authorId ?? entity.userId
 
     this.webLink = entity.webLink
     this.desc = entity.desc

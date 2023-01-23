@@ -1,15 +1,11 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ContentType } from '@prisma/client';
-import { AppError, PostError, RPC, toggleArrElement, UserError, UserIDDTO} from '@readme/core';
+import { AppError, AuthorIDDTO, PostError, PostsQueryDTO, RPC, toggleArrElement, UserError, UserIDDTO} from '@readme/core';
 import { IPost, IUser } from '@readme/shared-types';
 
 import { PostEntity } from './post.entity';
 import { PostRepository } from './post.repository';
 import { RMQService } from 'nestjs-rmq';
-import { PostsQueryDTO } from './query/posts.query.dto';
-import { AuthorIDDTO, PostCreateDTO, PostIDDTO, PostUpdateDTO, TagDTO } from './dto/post/post.dto';
-import { TitleDTO } from './dto/content/title.dto';
-import { TypeDTO } from './dto/content/type.dto';
 
 @Injectable()
 export class PostService {
@@ -84,7 +80,7 @@ export class PostService {
     const {publishAt, tags} = dto
     const post = await this.getPost(postIdDto);
 
-    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     const update = {
       ...post,
@@ -104,7 +100,7 @@ export class PostService {
   async deletePost(postIdDto: PostIDDTO, {id: userID}: UserIDDTO) {
     const post = await this.getPost(postIdDto);
 
-    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     await this.postRepository.destroy(postIdDto.id)
   }
@@ -112,8 +108,8 @@ export class PostService {
   async repost(param: PostIDDTO, {id: userID}: UserIDDTO): Promise<IPost> {
     const origin = await this.getPost(param);
 
-    if (origin.authorID === userID) { throw new ConflictException(AppError.SelfRepost)}
-    if (origin.userID === userID) { throw new ConflictException(AppError.DuplicateRepost)}
+    if (origin.authorId === userID) { throw new ConflictException(AppError.SelfRepost)}
+    if (origin.userId === userID) { throw new ConflictException(AppError.DuplicateRepost)}
 
     const repostEntity = new PostEntity({...origin, id: origin.id, isRepost: true})
 
@@ -131,7 +127,7 @@ export class PostService {
   async publishPost(param: PostIDDTO, {id: userID}: UserIDDTO, publishAt?: Date): Promise<IPost> {
     const post = await this.getPost(param);
 
-    if (post.userID !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
+    if (post.userId !== userID) { throw new ForbiddenException(UserError.Id.Permission)}
 
     return await this.postRepository.publish(param.id, publishAt ?? new Date())
   }

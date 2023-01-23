@@ -8,14 +8,10 @@ export enum AppName {
   FormData = 'FormData',
   Notify = 'Notify',
   Users = 'Users',
-  Mongo = 'Mongo'
-}
-
-export enum Collection {
-  Users = 'users',
-  Posts = 'posts',
-  Comments = 'comments',
-  Subscribers = 'subscribers'
+  Mongo = 'Mongo',
+  Post = 'Post',
+  Comment = 'Comment',
+  Auth = 'Auth'
 }
 
 export enum Entity {
@@ -42,16 +38,20 @@ export enum PortDefault {
   Blog = 3333,
   Notify = 3334,
   Users = 3335,
+  BFF = 3332
 }
 
 export enum Prefix {
   Global = 'api',
   Auth = 'auth',
   Blog = 'blog',
-  Comments = 'comments',
   Mail = 'mail',
+  User = 'users',
+  Users = 'users',
   Posts = 'posts',
-  User = 'users'
+  Comments = 'comments',
+  Subscribers = 'subscribers',
+  Service = 'service'
 }
 
 export enum RPC {
@@ -62,9 +62,11 @@ export enum RPC {
   AddPost = 'rpc-posts-new',
   DeleteComment = 'rpc-comments-delete',
   DeletePost = 'rpc-posts-delete',
-  GetUser = 'rpc-user-xget',
+  GetFeed = 'rpc-posts-feed',
+  GetUser = 'rpc-user-get',
   GetPosts = 'rpc-post-list',
   GetPost = 'rpc-post',
+  GetSub = 'rpc-subs-get',
   PostsSearchFor = 'rpc-search',
   PostsByUser = 'rpc-posts-user',
   PostsForFeed = 'rpc-posts-feed',

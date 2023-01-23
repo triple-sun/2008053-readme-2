@@ -1,5 +1,5 @@
 import { IsDefined, IsEmail, IsMongoId, IsOptional, IsString, ValidateIf } from 'class-validator';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional, IntersectionType, PartialType, PickType } from "@nestjs/swagger";
 
 import { Property } from '../../enum/property.enum';
@@ -8,12 +8,12 @@ import { ValidateLength } from "../../decorator/validate-length.decorator";
 import { UserProperty } from "../../utils/api.utils";
 import { Size } from '../../utils/size.utils';
 import { FileSystemStoredFile, HasMimeType, IsFile, MaxFileSize } from 'nestjs-form-data';
-import mongoose, { ObjectId } from 'mongoose';
 
 export class UserDTO {
   @Expose()
   @IsMongoId()
-  @ApiProperty(UserProperty(Property.UserID))
+  @Transform(({obj}) => obj._id)
+  @ApiProperty(UserProperty(Property.UserId))
   public id: string;
 
   @Expose()
@@ -46,27 +46,29 @@ export class UserCreateDTO extends PickType(UserDTO, ['email', 'name', 'password
 
 export class UserLoginDTO extends PickType(UserDTO, ['email', 'password'] as const) {}
 
-export class UserIDDTO extends PartialType(PickType(UserDTO, ['id'] as const)) {
-  @Expose(( {name: Property.Id }))
-  @Transform(({obj}) => obj.userId = obj.id)
-  @Type(() => mongoose.SchemaTypes.ObjectId)
-  public userId: ObjectId
-
-  @Exclude()
-  public id?: string
+export class UserIDDTO {
+  @Expose(({ name: Property.Id }))
+  @Transform(({obj}) => obj.id)
+  public userId: string
 }
 
 export class AvatarDTO extends PickType(UserDTO, ['avatar'] as const) {}
 
 export class UserAuthDTO extends IntersectionType(
-  PickType(UserIDDTO, ['id'] as const), PartialType(PickType(UserDTO, ['name', 'email'] as const))
-) {}
+  UserIDDTO, PartialType(PickType(UserDTO, ['name', 'email'] as const))
+) {
+  @Expose({ name: Property.Id })
+  @Transform(({value, obj}) => value ?? obj.id)
+  public userId: string
+}
 
 export class UserUpdateDTO extends PartialType(PickType(UserDTO, ['avatar', 'password'] as const)) {}
+
+export class UserIdDTO extends PickType(UserDTO, ['id'] as const) {}
 
 export class SubcribeDTO {
   @IsDefined()
   @IsMongoId()
   @ApiProperty(UserProperty(Property.SubToID))
-  public subToID: string
+  public subToId: string
 }

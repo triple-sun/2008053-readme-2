@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { ApiAuth, Entity, RPC, SubscriberCreateDTO, User, UserIDDTO } from '@readme/core';
+import { Body, Controller } from '@nestjs/common';
+import { ApiAuth, Entity, NotifyDTO, RPC, SubscriberCreateDTO, User, UserIDDTO } from '@readme/core';
 import { SubscriberService } from './subscriber.service';
 import { RMQRoute } from 'nestjs-rmq';
 
@@ -17,8 +17,8 @@ export class SubscriberController {
   @RMQRoute(RPC.Notify)
   @ApiAuth(Entity.Subscriber)
   async notify(
-    @User() user: UserIDDTO
+    @Body() dto: NotifyDTO
   ) {
-    return this.subscriberService.notify(user)
+    return this.subscriberService.notify(dto)
   }
 }

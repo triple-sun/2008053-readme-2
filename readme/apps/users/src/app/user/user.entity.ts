@@ -1,18 +1,17 @@
 import { UsersConfig } from '@readme/core';
 import { IUser } from '@readme/shared-types';
 import { genSalt, hash, compare } from 'bcrypt';
-import { ObjectId } from 'mongoose';
 import { FileSystemStoredFile } from 'nestjs-form-data';
 
 export class UserEntity implements IUser {
-  public _id: ObjectId;
-  public id: ObjectId;
+  public _id: string;
+  public id: string;
   public avatar?: FileSystemStoredFile;
   public avatarLink?: string;
   public email: string;
   public name: string;
-  public subscriptions?: ObjectId[];
-  public subscribers?: ObjectId[];
+  public subscriptions?: string[];
+  public subscribers?: string[];
   public passwordHash: string;
   public notifiedAt?: Date;
 
@@ -43,6 +42,5 @@ export class UserEntity implements IUser {
     this.avatar = user.avatar
     this.subscriptions = user.subscriptions;
     this.passwordHash = user.passwordHash;
-    this.notifiedAt = user.notifiedAt;
   }
 }

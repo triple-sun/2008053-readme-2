@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IComment, ICRUDRepo } from '@readme/shared-types';
-
 import { CommentEntity } from './comment.entity';
-import { Size } from '@readme/core';
-import { CommentsDTO } from '../posts/dto/comment.dto';
+import { CommentsDTO, Size } from '@readme/core';
 
 @Injectable()
 export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComment> {
@@ -23,12 +21,12 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
         }
       }
     });
-  }
+  }w
 
-  async findAllByPostID({id, page}: CommentsDTO): Promise<IComment[]> {
+  async findAllByPostID({postId, page}: CommentsDTO): Promise<IComment[]> {
     const comments = this.prisma.comment.findMany({
       where: {
-        postID: id
+        postId
       },
       select: {
         id: true,
@@ -36,8 +34,8 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
         post: {
           select: {id: true}
         },
-        userID: true,
-        postID: true,
+        userId: true,
+        postId: true,
         createdAt: true
       },
       take: Size.Comments.Max,
@@ -49,16 +47,16 @@ export class CommentRepository implements ICRUDRepo<CommentEntity, number, IComm
 
   public async create(item: CommentEntity): Promise<IComment> {
     const entityData = item.toObject();
-    const {postID, userID, comment} = entityData;
+    const {postId, userId, comment} = entityData;
 
-    return this.prisma.comment.create(
+    return await this.prisma.comment.create(
       {
         data: {
           comment,
-          userID,
+          userId,
           post: {
             connect: {
-              id: postID
+              id: postId
             }
           }
         },

@@ -4,12 +4,12 @@ import { RMQRoute } from 'nestjs-rmq';
 import { ContentType } from '@prisma/client';
 import { fillObject, Prefix, Path, Property, User, JwtAuthGuard, MongoIDValidationPipe, RPC, Entity, Consumes, UserAuthDTO, AppInfo, ApiCommonResponses, ApiAuth } from '@readme/core';
 
-import { PostsQueryDTO, SearchDTO } from './query/posts.query.dto';
-import { PostCreateDTO, PostIDDTO, TagDTO, PostUpdateDTO, AuthorIDDTO } from './dto/post/post.dto';
+import { PostsQueryDTO, SearchDTO } from '../../../../../libs/core/src/lib/dto/posts.query.dto';
+import { PostCreateDTO, PostIDDTO, TagDTO, PostUpdateDTO, AuthorIDDTO } from '../../../../../libs/core/src/lib/dto/post/post.dto';
 import { PostService } from './post.service';
 import { FormDataRequest } from 'nestjs-form-data';
 import { ClassForType, PostRDO } from './post.const';
-import { TypeDTO } from './dto/content/type.dto';
+import { TypeDTO } from '../../../../../libs/core/src/lib/dto/content/type.dto';
 
 @ApiTags(Prefix.Posts)
 @Controller(Prefix.Posts)
@@ -101,7 +101,7 @@ export class PostController {
   @Get(Path.Search)
   @ApiConsumes(Consumes.FormData)
   @ApiQuery({ type: PostsQueryDTO, name: Property.Query })
-  @ApiQuery({ type: SearchDTO, name: Property.Search })
+  @ApiQuery({ type: SearchDTO, name: Property.SearchFor })
   async getPostsByTitle(
     @Query() dto: SearchDTO,
     @Query() query: PostsQueryDTO,

@@ -38,9 +38,9 @@ model Post {
   isRepost  Boolean?     @default(false)
   createdAt DateTime    @default(now())
   publishAt DateTime    @default(now())
-  userID    String
-  authorID  String?
-  originID  Int?
+  userId    String
+  authorId  String?
+  originId  Int?
   comments  Comment[]
 }
 
@@ -48,7 +48,7 @@ model Comment {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   comment   String
-  userID    String
-  post      Post     @relation(fields: [postID], references: [id], onDelete: Cascade)
-  postID    Int
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
 }

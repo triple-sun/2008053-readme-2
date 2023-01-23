@@ -4,7 +4,6 @@ import { IntersectionType, PickType } from '@nestjs/swagger';
 
 import { UserError } from '../../const/error.const';
 import { Property } from '../../enum/property.enum';
-import { ObjectId } from 'mongoose';
 
 export class UserRDO {
   @Expose({ name: Property.ObjectID})
@@ -46,12 +45,12 @@ export class UserRDO {
   @Expose()
   @ValidateIf(o => o.subscribers.length > 0)
   @IsMongoId({each: true})
-  public subscribers: ObjectId[];
+  public subscribers: string[];
 
   @Expose()
   @ValidateIf(o => o.subscriptions.length > 0)
   @IsMongoId({each: true})
-  public subscriptions: ObjectId[];
+  public subscriptions: string[];
 
   @Expose()
   @IsInt()

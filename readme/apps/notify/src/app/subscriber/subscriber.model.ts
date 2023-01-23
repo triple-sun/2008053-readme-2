@@ -8,15 +8,16 @@ import { Collection } from '@readme/core';
   timestamps: true,
 })
 export class SubscriberModel extends Document implements ISub {
-  @Prop({
-    unique: true
-  })
+  @Prop({ unique: true })
   public email: string;
 
   @Prop()
   public name: string;
 
-  @Prop({ type: mongoose.SchemaTypes.ObjectId})
+  @Prop({ default: new Date() })
+  public notifiedAt: Date
+
+  @Prop({ type: () => mongoose.Types.ObjectId})
   public userId: ObjectId
 }
 

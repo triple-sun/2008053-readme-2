@@ -2,9 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 
 import { CommentEntity } from "./comment.entity";
 import { CommentRepository } from "./comment.repository";
-import { AppError, CommentError, PostError, UserIDDTO } from "@readme/core";
-import { CommentDTO, CommentIDDTO, CommentsDTO } from "../posts/dto/comment.dto";
-import { PostIDDTO } from "../posts/dto/post/post.dto";
+import { AppError, CommentError, CommentsDTO, PostError, PostIDDTO, UserIDDTO, UserAuthDTO, CommentCreateDTO, CommentIDDTO } from "@readme/core";
 import { PostRepository } from "../posts/post.repository";
 
 @Injectable()
@@ -21,30 +19,30 @@ export class CommentService {
     }
   }
   async getCommentsForPost(dto: CommentsDTO) {
-    await this.getPost(dto.id)
+    await this.getPost(dto.postId)
 
     return await this.commentRepository.findAllByPostID(dto)
   }
 
-  async createComment({id: userID}: UserIDDTO, {id}: PostIDDTO, dto: CommentDTO) {
-    await this.getPost(id)
+  async createComment({userId}: UserIDDTO, {postId}: PostIDDTO, dto: CommentCreateDTO) {
+    await this.getPost(postId)
 
-    const newComment = new CommentEntity({userID,  postID: id, ...dto,})
+    const newComment = new CommentEntity({userId,  postId, ...dto,})
 
-    return await this.commentRepository.create(newComment);
+    return await this.commentRepository.create(newComment)
   }
 
-  async deleteComment({commentID}: CommentIDDTO, userID: string) {
-    const comment = await this.commentRepository.findOne(commentID);
+  async deleteComment({commentId}: CommentIDDTO, user: UserAuthDTO ) {
+    const comment = await this.commentRepository.findOne(commentId);
 
     if (!comment) {
-      throw new NotFoundException(CommentError.NotFound(commentID))
+      throw new NotFoundException(CommentError.NotFound(commentId))
     }
 
-    if (comment.userID !== userID) {
+    if (comment.userId !== user.userId.toString()) {
       throw new ForbiddenException(AppError.Forbidden)
     }
 
-    await this.commentRepository.destroy(commentID)
+    await this.commentRepository.destroy(commentId)
   }
 }

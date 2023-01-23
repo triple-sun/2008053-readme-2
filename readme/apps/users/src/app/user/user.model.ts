@@ -1,15 +1,15 @@
-import mongoose, { ObjectId } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Collection, Property } from '@readme/core';
+import { Prefix, Property } from '@readme/core';
 import { IUser } from '@readme/shared-types';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
+import mongoose from 'mongoose';
 import { FileSystemStoredFile } from 'nestjs-form-data';
 
 type UserDocument = UserModel & Document
 
 @Schema({
-  collection: Collection.Users,
+  collection: Prefix.Users,
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -18,7 +18,7 @@ type UserDocument = UserModel & Document
 })
 export class UserModel extends mongoose.Document implements IUser {
   @Transform(({value}) => value.toString())
-  _id: ObjectId
+  _id: string
 
   @Prop({ required: true, unique: true })
   public email: string;
@@ -29,23 +29,16 @@ export class UserModel extends mongoose.Document implements IUser {
   @Prop({ required: true })
   public passwordHash: string;
 
-  @Prop({ default: new Date() })
-  public notifiedAt: Date
-
   @Prop()
   public createdAt: Date
 
   @Prop({
-    type: mongoose.SchemaTypes.ObjectId
     })
-  @Type(() => mongoose.SchemaTypes.ObjectId)
-  public subscriptions: ObjectId[]
+  public subscriptions: string[]
 
   @Prop({
-    type: mongoose.SchemaTypes.ObjectId
   })
-  @Type(() => mongoose.SchemaTypes.ObjectId)
-  public subscribers: ObjectId[]
+  public subscribers: string[]
 
   @Prop({
     type: () => FileSystemStoredFile
